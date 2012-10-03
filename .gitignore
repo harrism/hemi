@@ -16,3 +16,10 @@
 
 # visual studio files
 *.suo
+*.pdb
+*.opensdf
+*.sdf
+*.vcxproj.user
+Debug/
+ipch/
+Release/
