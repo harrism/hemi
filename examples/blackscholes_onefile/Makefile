@@ -9,4 +9,5 @@ bs_host_nvcc:
 bs_host_g++:
 	g++ blackscholes.cpp -I../ -I../../ -o bs_host_g++
 
-
+clean:
+	rm -rf bs_host_device bs_host_nvcc bs_host_g++

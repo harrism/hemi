@@ -129,7 +129,7 @@ int main(int argc, char **argv)
            ((double)(5 * OPT_N * sizeof(float)) * 1E-9) / (ms * 1E-3),
            ((double)(2 * OPT_N) * 1E-9) / (ms * 1E-3));
 
-#ifdef __CUDACC__
+#ifdef HEMI_CUDA_COMPILER 
     float *d_callResult, *d_putResult;
     float *d_stockPrice, *d_optionStrike, *d_optionYears;
     cudaMalloc((void**)&d_callResult, OPT_SZ);
@@ -155,7 +155,7 @@ int main(int argc, char **argv)
         int blockDim = 128;
         int gridDim  = props.multiProcessorCount * 16;
 
-        HEMI_KERNEL_NAME(BlackScholes)<<<gridDim, blockDim>>>
+        HEMI_KERNEL_LAUNCH(BlackScholes, gridDim, blockDim)
             (d_callResult, d_putResult, d_stockPrice, d_optionStrike, 
              d_optionYears, RISKFREE, VOLATILITY, OPT_N);
     }
@@ -175,7 +175,7 @@ int main(int argc, char **argv)
     cudaFree(d_stockPrice);
     cudaFree(d_optionStrike);
     cudaFree(d_optionYears);
-#endif // __CUDACC__
+#endif // HEMI_CUDA_COMPILER
            
     delete [] callResult;
     delete [] putResult;
