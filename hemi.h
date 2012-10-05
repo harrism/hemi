@@ -45,8 +45,8 @@
     #define HEMI_DEV_CODE                 // just for detecting device compilation
   #endif
   
-  #define HEMI_KERNEL(name, body)         void name ## body \
-                                          __global__ void name ## _kernel ## body
+  #define HEMI_KERNEL(name, body)         void name body \
+                                          __global__ void name ## _kernel body
   #define HEMI_KERNEL_NAME(name)          name ## _kernel
   #define HEMI_DEV_CALLABLE               __host__ __device__
   #define HEMI_DEV_CALLABLE_INLINE        __host__ __device__ __forceinline__
@@ -57,7 +57,7 @@
 
   #define HEMI_DEV_ALIGN(n) __align__(n)
 #else             // host compiler
-  #define HEMI_KERNEL(name, body)         void name ## body
+  #define HEMI_KERNEL(name, body)         void name body
   #define HEMI_KERNEL_NAME(name)          name
   #define HEMI_DEV_CALLABLE               
   #define HEMI_DEV_CALLABLE_INLINE        static inline
