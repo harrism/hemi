@@ -75,7 +75,13 @@
 
   #define HEMI_DEV_CONSTANT               static const
 
-  #define HEMI_DEV_ALIGN(n) 
+  #if defined(__GNUC__)
+    #define HEMI_DEV_ALIGN(n) __attribute__((aligned(n)))
+  #elif defined(_MSC_VER)
+    #define HEMI_DEV_ALIGN(n) __declspec(align(n))
+  #else
+    #error "Please provide a definition for HEMI_DEV_ALIGN macro for your host compiler!"
+  #endif
 #endif
 
 // Note: the following two functions demonstrate using the same code to process
