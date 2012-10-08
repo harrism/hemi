@@ -47,8 +47,7 @@
     #define HEMI_DEV_CODE                 // to detect device compilation
   #endif
   
-  #define HEMI_KERNEL(name, body)         void name body \
-                                          __global__ void name ## _kernel body
+  #define HEMI_KERNEL(name)               __global__ void name ## _kernel
   #define HEMI_KERNEL_NAME(name)          name ## _kernel
   #define HEMI_KERNEL_LAUNCH(name, gridDim, blockDim) \
     name ## _kernel<<< (gridDim) , (blockDim) >>>
@@ -64,7 +63,7 @@
 #else             // host compiler
   #define HEMI_HOST_COMPILER              // to detect non-CUDACC compilation
 
-  #define HEMI_KERNEL(name, body)         void name body
+  #define HEMI_KERNEL(name)               void name
   #define HEMI_KERNEL_NAME(name)          name
   #define HEMI_KERNEL_LAUNCH(name, gridDim, blockDim) name
 

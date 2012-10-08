@@ -52,9 +52,10 @@ float CND(float d)
 ///////////////////////////////////////////////////////////////////////////////
 // Black-Scholes formula for both call and put
 ///////////////////////////////////////////////////////////////////////////////
-HEMI_KERNEL(BlackScholes, (float *callResult, float *putResult, float *stockPrice,
-                           float *optionStrike, float *optionYears, float Riskfree,
-                           float Volatility, int optN)
+HEMI_KERNEL(BlackScholes)
+    (float *callResult, float *putResult, float *stockPrice,
+     float *optionStrike, float *optionYears, float Riskfree,
+     float Volatility, int optN)
 {
     int offset = hemiGetElementOffset();
     int stride = hemiGetElementStride();
@@ -79,7 +80,6 @@ HEMI_KERNEL(BlackScholes, (float *callResult, float *putResult, float *stockPric
         putResult[opt]  = X * expRT * (1.0f - CNDD2) - S * (1.0f - CNDD1);
     }
 }
-)
 
 float RandFloat(float low, float high){
     float t = (float)rand() / (float)RAND_MAX;
@@ -90,10 +90,7 @@ int main(int argc, char **argv)
 {
     int OPT_N  = 4000000;
     int OPT_SZ = OPT_N * sizeof(float);
-    
-    int iterations = 1;
-    if (argc >= 2) iterations = atoi(argv[1]);
-           
+
     printf("Initializing data...\n");
     
     float *callResult   = new float[OPT_SZ];
@@ -111,16 +108,55 @@ int main(int argc, char **argv)
         optionStrike[i]  = RandFloat(1.0f, 100.0f);
         optionYears[i]   = RandFloat(0.25f, 10.0f);
     }
+        
+#ifdef HEMI_CUDA_COMPILER 
+    float *d_callResult, *d_putResult;
+    float *d_stockPrice, *d_optionStrike, *d_optionYears;
 
-    printf("Running CPU Version %d iterations...\n", iterations);
+    cudaMalloc((void**)&d_callResult, OPT_SZ);
+    cudaMalloc((void**)&d_putResult, OPT_SZ);
+    cudaMalloc((void**)&d_stockPrice, OPT_SZ);
+    cudaMalloc((void**)&d_optionStrike, OPT_SZ);
+    cudaMalloc((void**)&d_optionYears, OPT_SZ);
+
+    // Note: this code currently does no checking of CUDA errors
+    // This is a bad idea in real code. Omitted here for brevity.
+    cudaDeviceProp props;
+    cudaGetDeviceProperties(&props, 0);
+
+    printf("Running GPU Version...\n");
+    
+    StartTimer();
+    cudaMemcpy(d_stockPrice, stockPrice, OPT_SZ, cudaMemcpyHostToDevice);
+    cudaMemcpy(d_optionStrike, optionStrike, OPT_SZ, cudaMemcpyHostToDevice);
+    cudaMemcpy(d_optionYears, optionYears, OPT_SZ, cudaMemcpyHostToDevice);
+
+    int blockDim = 128;
+    int gridDim  = props.multiProcessorCount * 16;
+    
+#else
+    int blockDim = 0;
+    int gridDim = 0;
+
+    float *d_callResult = callResult, *d_putResult = putResult;
+    float *d_stockPrice = stockPrice, *d_optionStrike = optionStrike, 
+          *d_optionYears = optionYears;
+
+    printf("Running CPU Version...\n");
 
     StartTimer();
-    for (int i = 0; i < iterations; i++)
-    {
-        BlackScholes(callResult, putResult, stockPrice, optionStrike,
-                     optionYears, RISKFREE, VOLATILITY, OPT_N);
-    }
-    double ms = GetTimer() / iterations;
+#endif
+
+    HEMI_KERNEL_LAUNCH(BlackScholes, gridDim, blockDim)
+        (d_callResult, d_putResult, d_stockPrice, d_optionStrike, 
+         d_optionYears, RISKFREE, VOLATILITY, OPT_N);
+       
+#ifdef HEMI_CUDA_COMPILER 
+    cudaMemcpy(callResult, d_callResult, OPT_SZ, cudaMemcpyDeviceToHost);
+    cudaMemcpy(putResult, d_putResult, OPT_SZ, cudaMemcpyDeviceToHost);
+#endif
+
+    double ms = GetTimer();
 
     //Both call and put is calculated
     printf("Options count             : %i     \n", 2 * OPT_N);
@@ -130,48 +166,6 @@ int main(int argc, char **argv)
            ((double)(2 * OPT_N) * 1E-9) / (ms * 1E-3));
 
 #ifdef HEMI_CUDA_COMPILER 
-    float *d_callResult, *d_putResult;
-    float *d_stockPrice, *d_optionStrike, *d_optionYears;
-    cudaMalloc((void**)&d_callResult, OPT_SZ);
-    cudaMalloc((void**)&d_putResult, OPT_SZ);
-    cudaMalloc((void**)&d_stockPrice, OPT_SZ);
-    cudaMalloc((void**)&d_optionStrike, OPT_SZ);
-    cudaMalloc((void**)&d_optionYears, OPT_SZ);
-
-    printf("Running GPU Version %d iterations...\n", iterations);
-
-    // Note: this code currently does no checking of CUDA errors
-    // This is a bad idea in real code. Omitted here for brevity.
-    cudaDeviceProp props;
-    cudaGetDeviceProperties(&props, 0);
-    
-    StartTimer();
-    cudaMemcpy(d_stockPrice, stockPrice, OPT_SZ, cudaMemcpyHostToDevice);
-    cudaMemcpy(d_optionStrike, optionStrike, OPT_SZ, cudaMemcpyHostToDevice);
-    cudaMemcpy(d_optionYears, optionYears, OPT_SZ, cudaMemcpyHostToDevice);
-
-    for (int i = 0; i < iterations; i++)
-    {
-        int blockDim = 128;
-        int gridDim  = props.multiProcessorCount * 16;
-
-        HEMI_KERNEL_LAUNCH(BlackScholes, gridDim, blockDim)
-            (d_callResult, d_putResult, d_stockPrice, d_optionStrike, 
-             d_optionYears, RISKFREE, VOLATILITY, OPT_N);
-    }
-   
-    cudaMemcpy(callResult, d_callResult, OPT_SZ, cudaMemcpyDeviceToHost);
-    cudaMemcpy(putResult, d_putResult, OPT_SZ, cudaMemcpyDeviceToHost);
-
-    ms = GetTimer() / iterations;
-
-    //Both call and put is calculated
-    printf("Options count             : %i     \n", 2 * OPT_N);
-    printf("\tBlackScholes() time    : %f msec\n", ms);
-    printf("\t%f GB/s, %f GOptions/s\n", 
-           ((double)(5 * OPT_N * sizeof(float)) * 1E-9) / (ms * 1E-3),
-           ((double)(2 * OPT_N) * 1E-9) / (ms * 1E-3));
-
     cudaFree(d_stockPrice);
     cudaFree(d_optionStrike);
     cudaFree(d_optionYears);
