@@ -13,8 +13,8 @@
 #include <cuda_runtime_api.h>
 
 #include "timer.h"
-#include "hemi.h"
-#include "array.h"
+#include "hemi/hemi.h"
+#include "hemi/array.h"
 
 const float      RISKFREE = 0.02f;
 const float    VOLATILITY = 0.30f;

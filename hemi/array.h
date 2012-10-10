@@ -1,4 +1,4 @@
-#include "hemi/hemi.h"
+#include "hemi.h"
 
 #ifndef HEMI_ARRAY_DEFAULT_LOCATION
   #ifdef HEMI_CUDA_COMPILER

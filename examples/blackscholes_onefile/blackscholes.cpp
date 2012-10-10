@@ -12,7 +12,7 @@
 #include <algorithm>
 
 #include "timer.h"
-#include "hemi.h"
+#include "hemi/hemi.h"
 
 const float      RISKFREE = 0.02f;
 const float    VOLATILITY = 0.30f;
