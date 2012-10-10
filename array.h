@@ -1,24 +1,21 @@
-#include <assert.h>
-#include <cuda_runtime_api.h>
-#include <iostream>
+#include "hemi.h"
+
+#ifndef HEMI_ARRAY_DEFAULT_LOCATION
+  #ifdef HEMI_CUDA_COMPILER
+    #define HEMI_ARRAY_DEFAULT_LOCATION hemi::device
+  #else
+    #define HEMI_ARRAY_DEFAULT_LOCATION hemi::host
+  #endif
+#endif
 
 namespace hemi {
 
     template <typename T> class Array; // forward decl
 
     enum Location {
-        host =   0,
-        device = 0
+        host   = 0,
+        device = 1
     };
-
-#ifndef HEMI_ARRAY_DEFAULT_LOCATION
-  #ifdef HEMI_CUDA_COMPILER
-    #define HEMI_ARRAY_DEFAULT_LOCATION device
-  #else
-    #define HEMI_ARRAY_DEFAULT_LOCATION host
-  #endif
-#endif
-
 
     template <typename T>
     class Array 
@@ -45,13 +42,13 @@ namespace hemi {
 
         // read/write pointer access
 
-        T* getPtr(Location loc = HEMI_ARRAY_DEFAULT_LOCATION) 
+        T* ptr(Location loc = HEMI_ARRAY_DEFAULT_LOCATION) 
         { 
-            if (loc == host) return getHostPtr();
-            else return getDevicePtr();
+            if (loc == host) return hostPtr();
+            else return devicePtr();
         }
 
-        T* getHostPtr()
+        T* hostPtr()
         {
             assert(isHostAlloced);
             if (isDeviceValid && !isHostValid) copyDeviceToHost();
@@ -60,7 +57,7 @@ namespace hemi {
             return hPtr;
         }
 
-        T* getDevicePtr()
+        T* devicePtr()
         {
             if (!isDeviceValid && isHostValid) copyHostToDevice();
             else assert(isDeviceValid);
@@ -70,20 +67,20 @@ namespace hemi {
 
         // read-only pointer access
 
-        const T* getReadOnlyPtr(Location loc = HEMI_ARRAY_DEFAULT_LOCATION) const
+        const T* readOnlyPtr(Location loc = HEMI_ARRAY_DEFAULT_LOCATION) const
         {
-            if (loc == host) return getReadOnlyHostPtr();
-            else return getReadOnlyDevicePtr();
+            if (loc == host) return readOnlyHostPtr();
+            else return readOnlyDevicePtr();
         }
 
-        const T* getReadOnlyHostPtr() const
+        const T* readOnlyHostPtr() const
         {
             if (isDeviceValid && !isHostValid) copyDeviceToHost();
             else assert(isHostValid);
             return hPtr;
         }
 
-        const T* getReadOnlyDevicePtr() const
+        const T* readOnlyDevicePtr() const
         {
             if (!isDeviceValid && isHostValid) copyHostToDevice();
             else assert(isDeviceValid);
@@ -92,13 +89,13 @@ namespace hemi {
 
         // write-only pointer access -- ignore validity of existing data
 
-        T* getWriteOnlyPtr(Location loc = HEMI_ARRAY_DEFAULT_LOCATION) 
+        T* writeOnlyPtr(Location loc = HEMI_ARRAY_DEFAULT_LOCATION) 
         {
-            if (loc == host) return getWriteOnlyHostPtr();
-            else return getWriteOnlyDevicePtr();
+            if (loc == host) return writeOnlyHostPtr();
+            else return writeOnlyDevicePtr();
         }
 
-        T* getWriteOnlyHostPtr()
+        T* writeOnlyHostPtr()
         {
             assert(isHostAlloced);
             isDeviceValid = false;
@@ -106,7 +103,7 @@ namespace hemi {
             return hPtr;
         }
 
-        T* getWriteOnlyDevicePtr()
+        T* writeOnlyDevicePtr()
         {
             assert(isHostAlloced);
             if (!isDeviceAlloced) allocateDevice();
@@ -130,18 +127,6 @@ namespace hemi {
         mutable bool    isDeviceValid;
 
     protected:
-        inline
-        cudaError_t checkCuda(cudaError_t result) const {
-#if defined(DEBUG) || defined(_DEBUG)
-            if (result != cudaSuccess) {
-                std::cerr << "CUDA Error" 
-                          << cudaGetErrorString(result) << std::endl;
-            }
-            assert(result == cudaSuccess);
-#endif
-            return result;
-        }
-
         void allocateHost() const
         {
             assert(!isHostAlloced);

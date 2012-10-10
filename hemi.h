@@ -41,6 +41,39 @@
 #define __HEMI_H__
 
 #include <stdio.h>
+#include <assert.h>
+#include <cuda_runtime_api.h>
+
+// Convenience function for checking CUDA runtime API results
+// can be wrapped around any runtime API call. No-op in release builds.
+inline
+cudaError_t checkCuda(cudaError_t result)
+{
+#if defined(DEBUG) || defined(_DEBUG)
+  if (result != cudaSuccess) {
+    fprintf(stderr, "CUDA Runtime Error: %s\n" cudaGetErrorString(result));
+    assert(result == cudaSuccess);
+  }
+#endif
+  return result;
+}
+
+// Convenience function for checking CUDA error state including 
+// errors caused by asynchronous calls (like kernel launches). Note that
+// this causes device synchronization, but is a no-op in release builds.
+inline
+cudaError_t checkCudaErrors()
+{
+  cudaError_t result = cudaSuccess;
+#if defined(DEBUG) || defined(_DEBUG)
+  result = cudaDeviceSynchronize(); // async kernel launch errors
+  if (result != cudaSuccess)
+    fprintf(stderr, "CUDA Launch Error: %s\n", cudaGetErrorString(err));
+  
+  checkCuda(result = cudaGetLastError()); // runtime API errors
+#endif
+  return result;
+}
 
 #ifdef __CUDACC__ // CUDA compiler
   #define HEMI_CUDA_COMPILER              // to detect CUDACC compilation
@@ -57,12 +90,7 @@
     #define HEMI_KERNEL_LAUNCH(name, gridDim, blockDim, ...)                   \
       do {                                                                     \
         name ## _kernel<<< (gridDim) , (blockDim) >>>(__VA_ARGS__);            \
-        cudaError_t err = cudaDeviceSynchronize();                             \
-        if (err != cudaSuccess)                                                \
-          fprintf(stderr, "CUDA Launch Error: %s\n", cudaGetErrorString(err)); \
-        err = cudaGetLastError();                                              \
-        if (err != cudaSuccess)                                                \
-          fprintf(stderr, "CUDA Runtime Error: %s\n", cudaGetErrorString(err));\
+        checkCudaErrors();                                                     \
       } while(0)
   #else
     #define HEMI_KERNEL_LAUNCH(name, gridDim, blockDim, ...)                   \
