@@ -44,6 +44,7 @@
 
 #ifdef __CUDACC__ // CUDA compiler
   #define HEMI_CUDA_COMPILER              // to detect CUDACC compilation
+  #define HEMI_LOC_STRING "Device"
 
   #ifdef __CUDA_ARCH__
     #define HEMI_DEV_CODE                 // to detect device compilation
@@ -78,6 +79,7 @@
   #define HEMI_DEV_ALIGN(n) __align__(n)
 #else             // host compiler
   #define HEMI_HOST_COMPILER              // to detect non-CUDACC compilation
+  #define HEMI_LOC_STRING "Host"
 
   #define HEMI_KERNEL(name)               void name
   #define HEMI_KERNEL_NAME(name)          name

@@ -1,11 +1,10 @@
 ///////////////////////////////////////////////////////////////////////////////
 // This is a simple example that performs a Black-Scholes options pricing
-// calculation using code that is almost entirely shared between host (CPU)
+// calculation using code that is entirely shared between host (CPU)
 // code compiled with any C/C++ compiler (including NVCC) and device code
-// that is compiled with the NVIDIA CUDA compiler, NVCC. Note there are only
-// 25 lines of code in the single .cu file in this example. The majority of 
-// the computational code, which is in black_scholes_shared.h, is shared 
-// between host and device compilers.
+// that is compiled with the NVIDIA CUDA compiler, NVCC.
+// When compiled with "nvcc -x cu" (to force CUDA compilation on the .cpp file),
+// this runs on the GPU. When compiled with "nvcc" or "g++" it runs on the host.
 ///////////////////////////////////////////////////////////////////////////////
 #include <math.h>
 #include <stdlib.h>
@@ -21,9 +20,7 @@
 const float      RISKFREE = 0.02f;
 const float    VOLATILITY = 0.30f;
 
-///////////////////////////////////////////////////////////////////////////////
 // Polynomial approximation of cumulative normal distribution function
-///////////////////////////////////////////////////////////////////////////////
 HEMI_DEV_CALLABLE_INLINE
 float CND(float d)
 {
@@ -107,25 +104,17 @@ int main(int argc, char **argv)
         optionYears.getWriteOnlyHostPtr()[i]   = RandFloat(0.25f, 10.0f);
     }
     
-    int blockDim = 128; // ignored by host code
+    int blockDim = 128; // blockDim, gridDim ignored by host code
     int gridDim  = std::min(1024, (OPT_SZ + blockDim - 1) / blockDim);
 
-#ifdef HEMI_CUDA_COMPILER 
-    printf("Running GPU Version...\n");
-#else
-    printf("Running CPU Version...\n");
-#endif
+    printf("Running %s Version...\n", HEMI_LOC_STRING);
 
     StartTimer();
-    float *d_callResult         = callResult.getWriteOnlyPtr();
-    float *d_putResult          = putResult.getWriteOnlyPtr();
-    const float *d_stockPrice   = stockPrice.getReadOnlyPtr();
-    const float *d_optionStrike = optionStrike.getReadOnlyPtr();
-    const float *d_optionYears  = optionYears.getReadOnlyPtr();        
 
     HEMI_KERNEL_LAUNCH(BlackScholes, gridDim, blockDim,
-                       d_callResult, d_putResult, d_stockPrice, d_optionStrike, 
-                       d_optionYears, RISKFREE, VOLATILITY, OPT_N);
+                       callResult.getWriteOnlyPtr(), putResult.getWriteOnlyPtr(), 
+                       stockPrice.getReadOnlyPtr(), optionStrike.getReadOnlyPtr(), 
+                       optionYears.getReadOnlyPtr(), RISKFREE, VOLATILITY, OPT_N);
 
     // force copy back to host if needed and print a sanity check
     printf("Option 0 call: %f\n", callResult.getReadOnlyPtr(hemi::host)[0]); 
