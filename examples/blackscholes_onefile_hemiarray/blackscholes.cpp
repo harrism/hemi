@@ -9,7 +9,6 @@
 #include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <math.h>
 #include <algorithm>
 #include <cuda_runtime_api.h>
 
@@ -44,9 +43,7 @@ float CND(float d)
     return cnd;
 }
 
-///////////////////////////////////////////////////////////////////////////////
 // Black-Scholes formula for both call and put
-///////////////////////////////////////////////////////////////////////////////
 HEMI_KERNEL(BlackScholes)
     (float *callResult, float *putResult, const float *stockPrice,
      const float *optionStrike, const float *optionYears, float Riskfree,
@@ -76,49 +73,57 @@ HEMI_KERNEL(BlackScholes)
     }
 }
 
-float RandFloat(float low, float high){
+float RandFloat(float low, float high)
+{
     float t = (float)rand() / (float)RAND_MAX;
     return (1.0f - t) * low + t * high;
+}
+
+void initOptions(int n, float *price, float *strike, float *years)
+{
+   srand(5347);
+    //Generate options set
+    for (int i = 0; i < n; i++) {
+        price[i]  = RandFloat(5.0f, 30.0f);
+        strike[i] = RandFloat(1.0f, 100.0f);
+        years[i]  = RandFloat(0.25f, 10.0f);
+    }
 }
 
 int main(int argc, char **argv)
 {
     int OPT_N  = 4000000;
-    int OPT_SZ = OPT_N * sizeof(float);
 
     printf("Initializing data...\n");
 
-    hemi::Array<float> callResult(OPT_SZ, true);
-    hemi::Array<float> putResult(OPT_SZ, true);
-    hemi::Array<float> stockPrice(OPT_SZ, true);
-    hemi::Array<float> optionStrike(OPT_SZ, true);
-    hemi::Array<float> optionYears(OPT_SZ, true);
-        
-    srand(5347);
-    //Generate options set
-    for (int i = 0; i < OPT_N; i++) {
-        callResult.getWriteOnlyHostPtr()[i]    = 0.0f;
-        putResult.getWriteOnlyHostPtr()[i]     = -1.0f;
-        stockPrice.getWriteOnlyHostPtr()[i]    = RandFloat(5.0f, 30.0f);
-        optionStrike.getWriteOnlyHostPtr()[i]  = RandFloat(1.0f, 100.0f);
-        optionYears.getWriteOnlyHostPtr()[i]   = RandFloat(0.25f, 10.0f);
-    }
-    
+    hemi::Array<float> callResult(  OPT_N, true);
+    hemi::Array<float> putResult(   OPT_N, true);
+    hemi::Array<float> stockPrice(  OPT_N, true);
+    hemi::Array<float> optionStrike(OPT_N, true);
+    hemi::Array<float> optionYears( OPT_N, true);
+
+    initOptions(OPT_N, stockPrice.writeOnlyHostPtr(),
+                optionStrike.writeOnlyHostPtr(),
+                optionYears.writeOnlyHostPtr());
+            
     int blockDim = 128; // blockDim, gridDim ignored by host code
-    int gridDim  = std::min(1024, (OPT_SZ + blockDim - 1) / blockDim);
+    int gridDim  = std::min(1024, (OPT_N + blockDim - 1) / blockDim);
 
     printf("Running %s Version...\n", HEMI_LOC_STRING);
 
     StartTimer();
 
     HEMI_KERNEL_LAUNCH(BlackScholes, gridDim, blockDim,
-                       callResult.getWriteOnlyPtr(), putResult.getWriteOnlyPtr(), 
-                       stockPrice.getReadOnlyPtr(), optionStrike.getReadOnlyPtr(), 
-                       optionYears.getReadOnlyPtr(), RISKFREE, VOLATILITY, OPT_N);
+                       callResult.writeOnlyPtr(), 
+                       putResult.writeOnlyPtr(), 
+                       stockPrice.readOnlyPtr(), 
+                       optionStrike.readOnlyPtr(), 
+                       optionYears.readOnlyPtr(), 
+                       RISKFREE, VOLATILITY, OPT_N);
 
     // force copy back to host if needed and print a sanity check
-    printf("Option 0 call: %f\n", callResult.getReadOnlyPtr(hemi::host)[0]); 
-    printf("Option 0 put:  %f\n", putResult.getReadOnlyPtr(hemi::host)[0]);
+    printf("Option 0 call: %f\n", callResult.readOnlyPtr(hemi::host)[0]); 
+    printf("Option 0 put:  %f\n", putResult.readOnlyPtr(hemi::host)[0]);
 
     double ms = GetTimer();
 
