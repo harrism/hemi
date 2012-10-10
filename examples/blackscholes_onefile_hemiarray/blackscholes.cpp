@@ -112,18 +112,16 @@ int main(int argc, char **argv)
 
 #ifdef HEMI_CUDA_COMPILER 
     printf("Running GPU Version...\n");
-    hemi::Location loc = hemi::device;
 #else
     printf("Running CPU Version...\n");
-    hemi::Location loc = hemi::host;
 #endif
 
     StartTimer();
-    float *d_callResult         = callResult.getWriteOnlyPtr(loc);
-    float *d_putResult          = putResult.getWriteOnlyPtr(loc);
-    const float *d_stockPrice   = stockPrice.getReadOnlyPtr(loc);
-    const float *d_optionStrike = optionStrike.getReadOnlyPtr(loc);
-    const float *d_optionYears  = optionYears.getReadOnlyPtr(loc);        
+    float *d_callResult         = callResult.getWriteOnlyPtr();
+    float *d_putResult          = putResult.getWriteOnlyPtr();
+    const float *d_stockPrice   = stockPrice.getReadOnlyPtr();
+    const float *d_optionStrike = optionStrike.getReadOnlyPtr();
+    const float *d_optionYears  = optionYears.getReadOnlyPtr();        
 
     HEMI_KERNEL_LAUNCH(BlackScholes, gridDim, blockDim,
                        d_callResult, d_putResult, d_stockPrice, d_optionStrike, 

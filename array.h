@@ -4,17 +4,26 @@
 
 namespace hemi {
 
+    template <typename T> class Array; // forward decl
+
     enum Location {
         host =   0,
         device = 0
     };
+
+#ifndef HEMI_ARRAY_DEFAULT_LOCATION
+  #ifdef HEMI_CUDA_COMPILER
+    #define HEMI_ARRAY_DEFAULT_LOCATION device
+  #else
+    #define HEMI_ARRAY_DEFAULT_LOCATION host
+  #endif
+#endif
 
 
     template <typename T>
     class Array 
     {
     public:
-
         Array(size_t n, bool usePinned) : 
           nSize(n), 
           hPtr(0),
@@ -36,7 +45,7 @@ namespace hemi {
 
         // read/write pointer access
 
-        T* getPtr(Location loc) 
+        T* getPtr(Location loc = HEMI_ARRAY_DEFAULT_LOCATION) 
         { 
             if (loc == host) return getHostPtr();
             else return getDevicePtr();
@@ -61,7 +70,7 @@ namespace hemi {
 
         // read-only pointer access
 
-        const T* getReadOnlyPtr(Location loc) const
+        const T* getReadOnlyPtr(Location loc = HEMI_ARRAY_DEFAULT_LOCATION) const
         {
             if (loc == host) return getReadOnlyHostPtr();
             else return getReadOnlyDevicePtr();
@@ -83,7 +92,7 @@ namespace hemi {
 
         // write-only pointer access -- ignore validity of existing data
 
-        T* getWriteOnlyPtr(Location loc) 
+        T* getWriteOnlyPtr(Location loc = HEMI_ARRAY_DEFAULT_LOCATION) 
         {
             if (loc == host) return getWriteOnlyHostPtr();
             else return getWriteOnlyDevicePtr();
