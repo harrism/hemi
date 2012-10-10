@@ -40,6 +40,8 @@
 #ifndef __HEMI_H__
 #define __HEMI_H__
 
+#include <stdio.h>
+
 #ifdef __CUDACC__ // CUDA compiler
   #define HEMI_CUDA_COMPILER              // to detect CUDACC compilation
 
@@ -49,8 +51,22 @@
   
   #define HEMI_KERNEL(name)               __global__ void name ## _kernel
   #define HEMI_KERNEL_NAME(name)          name ## _kernel
-  #define HEMI_KERNEL_LAUNCH(name, gridDim, blockDim) \
-    name ## _kernel<<< (gridDim) , (blockDim) >>>
+  
+  #if defined(DEBUG) || defined(_DEBUG)
+    #define HEMI_KERNEL_LAUNCH(name, gridDim, blockDim, ...)                   \
+      do {                                                                     \
+        name ## _kernel<<< (gridDim) , (blockDim) >>>(__VA_ARGS__);            \
+        cudaError_t err = cudaDeviceSynchronize();                             \
+        if (err != cudaSuccess)                                                \
+          fprintf(stderr, "CUDA Launch Error: %s\n", cudaGetErrorString(err)); \
+        err = cudaGetLastError();                                              \
+        if (err != cudaSuccess)                                                \
+          fprintf(stderr, "CUDA Runtime Error: %s\n", cudaGetErrorString(err));\
+      } while(0)
+  #else
+    #define HEMI_KERNEL_LAUNCH(name, gridDim, blockDim, ...)                   \
+      name ## _kernel<<< (gridDim) , (blockDim) >>>(__VA_ARGS__)
+  #endif
 
   #define HEMI_DEV_CALLABLE               __host__ __device__
   #define HEMI_DEV_CALLABLE_INLINE        __host__ __device__ __forceinline__
@@ -65,7 +81,7 @@
 
   #define HEMI_KERNEL(name)               void name
   #define HEMI_KERNEL_NAME(name)          name
-  #define HEMI_KERNEL_LAUNCH(name, gridDim, blockDim) name
+  #define HEMI_KERNEL_LAUNCH(name, gridDim, blockDim, ...) name(__VA_ARGS__)
 
   #define HEMI_DEV_CALLABLE               
   #define HEMI_DEV_CALLABLE_INLINE        static inline
