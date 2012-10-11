@@ -1,25 +1,15 @@
 #include "blackscholes_shared.h"
-
-// Process an array of optN options on the device
-__global__
-void BlackScholesKernel(float *callResult, float *putResult, float *stockPrice,
-                        float *optionStrike, float *optionYears, float Riskfree,
-                        float Volatility, int optN)
-{
-    BlackScholes(callResult, putResult, stockPrice, optionStrike, optionYears, 
-                 Riskfree, Volatility, optN);
-}
+#include <algorithm>
 
 // Wrapper function that launches the device kernel
 void BlackScholesCuda(float *callResult, float *putResult, float *stockPrice,
-                      float *optionStrike, float *optionYears, float Riskfree,
-                      float Volatility, int optN, cudaDeviceProp props)
+                      float *optionStrike, float *optionYears, float riskFree,
+                      float volatility, int optN)
 {
     int blockDim = 128;
-    int gridDim  = props.multiProcessorCount * 16;
-
-    BlackScholesKernel<<<gridDim, blockDim>>>(callResult, putResult, 
-                                              stockPrice, optionStrike, 
-                                              optionYears, Riskfree, 
-                                              Volatility, optN);
+    int gridDim  = std::min<int>(1024, (optN + blockDim - 1) / blockDim);
+    
+    HEMI_KERNEL_LAUNCH(BlackScholes, gridDim, blockDim, 
+                       callResult, putResult, stockPrice, optionStrike, 
+                       optionYears, riskFree, volatility, optN);
 }

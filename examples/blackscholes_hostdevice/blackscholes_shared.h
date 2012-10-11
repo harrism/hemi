@@ -1,11 +1,8 @@
 #ifndef __BS_SHARED_H__
 #define __BS_SHARED_H__
 
-#include "hemi.h"
-
-#ifndef __CUDACC__
+#include "hemi/hemi.h"
 #include <math.h>
-#endif
 
 ///////////////////////////////////////////////////////////////////////////////
 // Polynomial approximation of cumulative normal distribution function
@@ -36,10 +33,10 @@ float CND(float d)
 ///////////////////////////////////////////////////////////////////////////////
 // Black-Scholes formula for both call and put
 ///////////////////////////////////////////////////////////////////////////////
-HEMI_DEV_CALLABLE_INLINE
-void BlackScholes(float *callResult, float *putResult, float *stockPrice,
-                  float *optionStrike, float *optionYears, float Riskfree,
-                  float Volatility, int optN)
+HEMI_KERNEL(BlackScholes)
+    (float *callResult, float *putResult, float *stockPrice,
+     float *optionStrike, float *optionYears, float riskFree,
+     float volatility, int optN)
 {
     int offset = hemiGetElementOffset();
     int stride = hemiGetElementStride();
@@ -49,8 +46,8 @@ void BlackScholes(float *callResult, float *putResult, float *stockPrice,
         float S = stockPrice[opt];
         float X = optionStrike[opt];
         float T = optionYears[opt]; 
-        float R = Riskfree;
-        float V = Volatility;
+        float R = riskFree;
+        float V = volatility;
 
         float sqrtT = sqrtf(T);
         float    d1 = (logf(S / X) + (R + 0.5f * V * V) * T) / (V * sqrtT);
