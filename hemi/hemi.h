@@ -51,7 +51,7 @@ cudaError_t checkCuda(cudaError_t result)
 {
 #if defined(DEBUG) || defined(_DEBUG)
   if (result != cudaSuccess) {
-    fprintf(stderr, "CUDA Runtime Error: %s\n" cudaGetErrorString(result));
+    fprintf(stderr, "CUDA Runtime Error: %s\n", cudaGetErrorString(result));
     assert(result == cudaSuccess);
   }
 #endif
@@ -68,7 +68,7 @@ cudaError_t checkCudaErrors()
 #if defined(DEBUG) || defined(_DEBUG)
   result = cudaDeviceSynchronize(); // async kernel launch errors
   if (result != cudaSuccess)
-    fprintf(stderr, "CUDA Launch Error: %s\n", cudaGetErrorString(err));
+    fprintf(stderr, "CUDA Launch Error: %s\n", cudaGetErrorString(result));
   
   checkCuda(result = cudaGetLastError()); // runtime API errors
 #endif
