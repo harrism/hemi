@@ -29,8 +29,7 @@ Vec4f accumulateForce(const Vec4f &target, const Vec4f *bodies, int N)
 }
 
 // Simple CUDA kernel that computes all-pairs n-body gravitational forces.
-__global__
-void allPairsForcesKernel(Vec4f *forceVectors, const Vec4f *bodies, int N)
+HEMI_KERNEL(allPairsForces)(Vec4f *forceVectors, const Vec4f *bodies, int N)
 {
   int idx = blockDim.x * blockIdx.x + threadIdx.x;
   forceVectors[idx] = accumulateForce(bodies[idx], bodies, N);
@@ -38,8 +37,8 @@ void allPairsForcesKernel(Vec4f *forceVectors, const Vec4f *bodies, int N)
 
 // CUDA kernel that computes all-pairs n-body gravitational forces. Optimized
 // version of allPairsForcesKernel that uses shared memory for data reuse.
-__global__
-void allPairsForcesKernelShared(Vec4f *forceVectors, const Vec4f *bodies, int N)
+HEMI_KERNEL(allPairsForcesShared)
+  (Vec4f *forceVectors, const Vec4f *bodies, int N)
 {
   int idx = blockDim.x * blockIdx.x + threadIdx.x;
   
@@ -75,9 +74,11 @@ void allPairsForcesCuda(Vec4f *forceVectors,
                      &ss, sizeof(float), 0, cudaMemcpyHostToDevice);
 
   if (useShared)
-    allPairsForcesKernelShared<<<gridDim, blockDim>>>(forceVectors, bodies, N);
+    HEMI_KERNEL_LAUNCH(allPairsForcesShared, gridDim, blockDim, 
+                       forceVectors, bodies, N);
   else
-    allPairsForcesKernel<<<gridDim, blockDim>>>(forceVectors, bodies, N);
+    HEMI_KERNEL_LAUNCH(allPairsForces, gridDim, blockDim, 
+                       forceVectors, bodies, N);
 }
 
 // Example of using a host/device class from host code in a .cu file

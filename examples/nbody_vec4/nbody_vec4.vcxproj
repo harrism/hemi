@@ -13,7 +13,8 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{3C440FE4-9F11-4FBD-8818-ABF2DA54FF28}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>vec4_test</RootNamespace>
+    <RootNamespace>nbody_vec4</RootNamespace>
+    <ProjectName>nbody_vec4</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -60,6 +61,7 @@
     </Link>
     <CudaCompile>
       <CodeGeneration>compute_20,sm_20;%(CodeGeneration)</CodeGeneration>
+      <GPUDebugInfo>false</GPUDebugInfo>
     </CudaCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -86,14 +88,15 @@
     </CudaCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="vec4_test.cpp" />
+    <ClCompile Include="nbody_vec4.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <CudaCompile Include="vec4_test.cu">
+    <CudaCompile Include="nbody_vec4.cu">
       <CodeGeneration Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">compute_20,sm_20;</CodeGeneration>
       <CodeGeneration Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">compute_20,sm_20;%(CodeGeneration)</CodeGeneration>
       <PtxAsOptionV Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</PtxAsOptionV>
       <FastMath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</FastMath>
+      <GPUDebugInfo Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</GPUDebugInfo>
     </CudaCompile>
   </ItemGroup>
   <ItemGroup>
