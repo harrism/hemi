@@ -12,7 +12,7 @@
 #include <cuda_runtime_api.h>
 
 #include "vec4f.h"
-#include "nbody.inl"
+#include "nbody.h"
 #include "timer.h"
 
 extern Vec4f centerOfMass(const Vec4f *bodies, int N);

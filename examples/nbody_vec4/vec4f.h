@@ -5,7 +5,7 @@
 #ifndef __VEC4F_H__
 #define __VEC4F_H__
 
-#include "hemi.h"
+#include "hemi/hemi.h"
 
 HEMI_DEV_ALIGN(16)
 struct Vec4f

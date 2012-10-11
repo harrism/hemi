@@ -97,10 +97,7 @@
     </CudaCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="nbody.inl" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="..\..\hemi.h" />
+    <ClInclude Include="..\..\hemi\hemi.h" />
     <ClInclude Include="vec4f.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

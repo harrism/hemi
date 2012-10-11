@@ -1,6 +1,32 @@
 #include "vec4f.h"
-#include "nbody.inl"
+#include "nbody.h"
 #include <stdio.h>
+
+// Compute gravitational force between two bodies.
+// Body mass is stored in w component of the Vec4f.
+HEMI_DEV_CALLABLE
+Vec4f gravitation(const Vec4f &i, const Vec4f &j)
+{
+  Vec4f ij = j - i;
+  ij.w = 0;
+
+  float invDist = ij.inverseLength(HEMI_CONSTANT(softeningSquared));
+  
+  return ij * (j.w * invDist * invDist * invDist);
+}
+
+// Compute the gravitational force induced on "target" body by all 
+// masses in the bodies array.
+HEMI_DEV_CALLABLE
+Vec4f accumulateForce(const Vec4f &target, const Vec4f *bodies, int N) 
+{
+  Vec4f force(0, 0, 0, 0);
+  for (int j = 0; j < N; j++) {
+    force += gravitation(target, bodies[j]);
+  }
+
+  return force * target.w;
+}
 
 // Simple CUDA kernel that computes all-pairs n-body gravitational forces.
 __global__
@@ -37,13 +63,16 @@ void allPairsForcesKernelShared(Vec4f *forceVectors, const Vec4f *bodies, int N)
 }
 
 // Host wrapper function that launches the CUDA kernels
-void allPairsForcesCuda(Vec4f *forceVectors, const Vec4f *bodies, int N, bool useShared)
+void allPairsForcesCuda(Vec4f *forceVectors, 
+                        const Vec4f *bodies, 
+                        int N, bool useShared)
 {
   int blockDim = 256;
   int gridDim = (N + blockDim - 1) / blockDim;
 
   float ss = 0.01f;
-  cudaMemcpyToSymbol(softeningSquared, &ss, sizeof(float), 0, cudaMemcpyHostToDevice);
+  cudaMemcpyToSymbol(HEMI_DEV_CONSTANT(softeningSquared), 
+                     &ss, sizeof(float), 0, cudaMemcpyHostToDevice);
 
   if (useShared)
     allPairsForcesKernelShared<<<gridDim, blockDim>>>(forceVectors, bodies, N);

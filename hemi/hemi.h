@@ -101,8 +101,14 @@ cudaError_t checkCudaErrors()
   #define HEMI_DEV_CALLABLE_INLINE        __host__ __device__ __forceinline__
   #define HEMI_DEV_CALLABLE_MEMBER        __host__ __device__
   #define HEMI_DEV_CALLABLE_INLINE_MEMBER __host__ __device__ __forceinline__
-  
-  #define HEMI_DEV_CONSTANT               __constant__
+
+  #define HEMI_DEFINE_CONSTANT(def, value) __constant__ def ## _devconst = value; const def ## _hostconst = value;
+  #define HEMI_DEV_CONSTANT(name) name ## _devconst
+  #ifdef HEMI_DEV_CODE
+    #define HEMI_CONSTANT(name) name ## _devconst
+  #else
+    #define HEMI_CONSTANT(name) name ## _hostconst
+  #endif
 
   #define HEMI_DEV_ALIGN(n) __align__(n)
 #else             // host compiler
@@ -118,8 +124,9 @@ cudaError_t checkCudaErrors()
   #define HEMI_DEV_CALLABLE_MEMBER
   #define HEMI_DEV_CALLABLE_INLINE_MEMBER inline
 
-  #define HEMI_DEV_CONSTANT               static const
-
+  #define HEMI_CONSTANT(name) name ## _hostconst
+  #define HEMI_DEFINE_CONSTANT(def, value) static const def ## _hostconst = value
+  
   #if defined(__GNUC__)
     #define HEMI_DEV_ALIGN(n) __attribute__((aligned(n)))
   #elif defined(_MSC_VER)
