@@ -71,9 +71,21 @@ HEMI_KERNEL(BlackScholes)
     }
 }
 
-float RandFloat(float low, float high){
+float RandFloat(float low, float high)
+{
     float t = (float)rand() / (float)RAND_MAX;
     return (1.0f - t) * low + t * high;
+}
+
+void initOptions(int n, float *price, float *strike, float *years)
+{
+   srand(5347);
+    //Generate options set
+    for (int i = 0; i < n; i++) {
+        price[i]  = RandFloat(5.0f, 30.0f);
+        strike[i] = RandFloat(1.0f, 100.0f);
+        years[i]  = RandFloat(0.25f, 10.0f);
+    }
 }
 
 int main(int argc, char **argv)
@@ -106,15 +118,7 @@ int main(int argc, char **argv)
     optionYears  = (float*)malloc(OPT_SZ);
 #endif
 
-    srand(5347);
-    //Generate options set
-    for(int i = 0; i < OPT_N; i++){
-        callResult[i] = 0.0f;
-        putResult[i]  = -1.0f;
-        stockPrice[i]    = RandFloat(5.0f, 30.0f);
-        optionStrike[i]  = RandFloat(1.0f, 100.0f);
-        optionYears[i]   = RandFloat(0.25f, 10.0f);
-    }
+    initOptions(OPT_N, stockPrice, optionStrike, optionYears);
         
     int blockDim = 128; // blockDim, gridDim ignored by host code
     int gridDim  = std::min(1024, (OPT_N + blockDim - 1) / blockDim);
