@@ -100,6 +100,7 @@
     </CudaCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\hemi\array.h" />
     <ClInclude Include="..\..\hemi\hemi.h" />
     <ClInclude Include="vec4f.h" />
   </ItemGroup>

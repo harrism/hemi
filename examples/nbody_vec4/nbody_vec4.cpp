@@ -1,10 +1,15 @@
 ///////////////////////////////////////////////////////////////////////////////
 // This example implements a simple all-pairs n-body gravitational force
-// calculation using a 4-vector class called Vec4f. Vec4f uses the HEMI 
-// Portable CUDA C/C++ Macros to enable all of the code for the class, as well
-// as the bulk of the n-body functionality, to be shared between host code
-// compiled by the host compiler and device code compiled with the NVIDIA CUDA
-// C/C++ compiler, NVCC.
+// calculation using a 4D vector class called Vec4f. Vec4f uses the HEMI 
+// Portable CUDA C/C++ Macros to enable all of the code for the class to be 
+// shared between host code compiled by the host compiler and device or host 
+// code compiled with the NVIDIA CUDA C/C++ compiler, NVCC. The example
+// also shares most of the all-pairs gravitationl force calculation code 
+// between device and host, while demonstrating how optimized device 
+// implementations can be substituted as needed.
+//
+// This sample also uses hemi::Array to simplify host/device memory allocation
+// and host-device data transfers.
 ///////////////////////////////////////////////////////////////////////////////
 #include <math.h>
 #include <stdio.h>
@@ -14,6 +19,7 @@
 #include "vec4f.h"
 #include "nbody.h"
 #include "timer.h"
+#include "hemi/array.h"
 
 extern Vec4f centerOfMass(const Vec4f *bodies, int N);
 extern void allPairsForcesCuda(Vec4f *forceVectors, const Vec4f *bodies, int N, bool useShared);
@@ -45,14 +51,13 @@ int main(void)
 {
   int N = 16384;
   Vec4f targetBody(0.5f, 0.5f, 0.5f, 10.0f);
-  Vec4f *bodies = new Vec4f[N];
-  Vec4f *forceVectors = new Vec4f[N];
-
-  randomizeBodies(bodies, N);
+  hemi::Array<Vec4f> bodies(N, true), forceVectors(N, true);
+  
+  randomizeBodies(bodies.writeOnlyHostPtr(), N);
 
   // Call a host function defined in a .cu compilation unit
   // that uses host/device shared class member functions
-  Vec4f com = centerOfMass(bodies, N);
+  Vec4f com = centerOfMass(bodies.readOnlyHostPtr(), N);
   printf("Center of mass is (%f, %f, %f)\n", com.x, com.y, com.z);
 
   // Call host function defined in a .cpp compilation unit
@@ -60,57 +65,51 @@ int main(void)
   printf("CPU: Computing all-pairs gravitational forces on %d bodies\n", N);
 
   StartTimer();
-  allPairsForcesHost(forceVectors, bodies, N);
+  allPairsForcesHost(forceVectors.writeOnlyHostPtr(), bodies.readOnlyHostPtr(), N);
+  
+  printf("CPU: Force vector 0: (%0.3f, %0.3f, %0.3f)\n", 
+         forceVectors.readOnlyHostPtr()[0].x, 
+         forceVectors.readOnlyHostPtr()[0].y, 
+         forceVectors.readOnlyHostPtr()[0].z);
+
   double ms = GetTimer();
 
-  printf("CPU: Force vector 0: (%0.3f, %0.3f, %0.3f)\n", 
-         forceVectors[0].x, forceVectors[0].y, forceVectors[0].z);
   printf("CPU: %f ms\n", ms);
 
-  Vec4f *d_bodies, *d_forceVectors;
-  cudaMalloc((void**)&d_bodies, N * sizeof(Vec4f));
-  cudaMalloc((void**)&d_forceVectors, N * sizeof(Vec4f));
-
   StartTimer();
-  cudaMemcpy(d_bodies, bodies, N * sizeof(Vec4f), cudaMemcpyHostToDevice);
 
   // Call device function defined in a .cu compilation unit
   // that uses host/device shared functions and class member functions
   printf("GPU: Computing all-pairs gravitational forces on %d bodies\n", N);
     
-  allPairsForcesCuda(d_forceVectors, d_bodies, N, false);
+  allPairsForcesCuda(forceVectors.writeOnlyDevicePtr(), bodies.readOnlyDevicePtr(), N, false);
     
-  cudaMemcpy(forceVectors, d_forceVectors, N * sizeof(Vec4f), cudaMemcpyDeviceToHost);
-  ms = GetTimer();
-
   printf("GPU: Force vector 0: (%0.3f, %0.3f, %0.3f)\n", 
-         forceVectors[0].x, forceVectors[0].y, forceVectors[0].z);
+         forceVectors.readOnlyHostPtr()[0].x, 
+         forceVectors.readOnlyHostPtr()[0].y, 
+         forceVectors.readOnlyHostPtr()[0].z);
+  
+  ms = GetTimer();
 
   printf("GPU: %f ms\n", ms);
   
-  cudaError_t err = cudaGetLastError();
-  if (err != cudaSuccess) printf("%s\n", cudaGetErrorString(err));
-
   StartTimer();
-  cudaMemcpy(d_bodies, bodies, N * sizeof(Vec4f), cudaMemcpyHostToDevice);
-
+  
   // Call a different device function defined in a .cu compilation unit
   // that uses the same host/device shared functions and class member functions 
   // as above
   printf("GPU: Computing optimized all-pairs gravitational forces on %d bodies\n", N);
     
-  allPairsForcesCuda(d_forceVectors, d_bodies, N, true);
+  allPairsForcesCuda(forceVectors.writeOnlyDevicePtr(), bodies.readOnlyDevicePtr(), N, true);
     
-  cudaMemcpy(forceVectors, d_forceVectors, N * sizeof(Vec4f), cudaMemcpyDeviceToHost);
+  printf("GPU: Force vector 0: (%0.3f, %0.3f, %0.3f)\n", 
+         forceVectors.readOnlyHostPtr()[0].x, 
+         forceVectors.readOnlyHostPtr()[0].y, 
+         forceVectors.readOnlyHostPtr()[0].z);
+  
   ms = GetTimer();
   
-  printf("GPU: Force vector 0: (%0.3f, %0.3f, %0.3f)\n", 
-         forceVectors[0].x, forceVectors[0].y, forceVectors[0].z);
-
   printf("GPU+shared: %f ms\n", ms);
-
-  err = cudaGetLastError();
-  if (err != cudaSuccess) printf("%s\n", cudaGetErrorString(err));
-    
+  
   return 0;
 }
