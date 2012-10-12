@@ -44,6 +44,13 @@
 #include <assert.h>
 #include <cuda_runtime_api.h>
 
+/* HEMI_VERSION encodes the version number of the HEMI utilities.
+ *
+ *   HEMI_VERSION / 100000 is the major version.
+ *   HEMI_VERSION / 100 % 1000 is the minor version.
+ */
+#define HEMI_VERSION 000100
+
 // Convenience function for checking CUDA runtime API results
 // can be wrapped around any runtime API call. No-op in release builds.
 inline
