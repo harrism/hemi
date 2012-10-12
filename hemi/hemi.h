@@ -94,14 +94,15 @@ cudaError_t checkCudaErrors()
   #define HEMI_KERNEL_NAME(name)          name ## _kernel
   
   #if defined(DEBUG) || defined(_DEBUG)
-    #define HEMI_KERNEL_LAUNCH(name, gridDim, blockDim, ...)                   \
+    #define HEMI_KERNEL_LAUNCH(name, gridDim, blockDim, sharedBytes, streamId, ...) \
       do {                                                                     \
-        name ## _kernel<<< (gridDim) , (blockDim) >>>(__VA_ARGS__);            \
+        name ## _kernel<<< (gridDim), (blockDim), (sharedBytes), (streamId) >>>\
+            (__VA_ARGS__);                                                     \
         checkCudaErrors();                                                     \
       } while(0)
   #else
-    #define HEMI_KERNEL_LAUNCH(name, gridDim, blockDim, ...)                   \
-      name ## _kernel<<< (gridDim) , (blockDim) >>>(__VA_ARGS__)
+    #define HEMI_KERNEL_LAUNCH(name, gridDim, blockDim, sharedBytes, streamId, ...) \
+      name ## _kernel<<< (gridDim) , (blockDim), (sharedBytes), (streamId) >>>(__VA_ARGS__)
   #endif
 
   #define HEMI_DEV_CALLABLE               __host__ __device__
@@ -124,7 +125,7 @@ cudaError_t checkCudaErrors()
 
   #define HEMI_KERNEL(name)               void name
   #define HEMI_KERNEL_NAME(name)          name
-  #define HEMI_KERNEL_LAUNCH(name, gridDim, blockDim, ...) name(__VA_ARGS__)
+  #define HEMI_KERNEL_LAUNCH(name, gridDim, blockDim, sharedBytes, streamId, ...) name(__VA_ARGS__)
 
   #define HEMI_DEV_CALLABLE               
   #define HEMI_DEV_CALLABLE_INLINE        static inline

@@ -113,7 +113,7 @@ int main(int argc, char **argv)
 
     StartTimer();
 
-    HEMI_KERNEL_LAUNCH(BlackScholes, gridDim, blockDim,
+    HEMI_KERNEL_LAUNCH(BlackScholes, gridDim, blockDim, 0, 0,
                        callResult.writeOnlyPtr(), 
                        putResult.writeOnlyPtr(), 
                        stockPrice.readOnlyPtr(), 

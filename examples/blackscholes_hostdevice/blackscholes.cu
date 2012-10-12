@@ -9,7 +9,7 @@ void BlackScholesCuda(float *callResult, float *putResult, float *stockPrice,
     int blockDim = 128;
     int gridDim  = std::min<int>(1024, (optN + blockDim - 1) / blockDim);
     
-    HEMI_KERNEL_LAUNCH(BlackScholes, gridDim, blockDim, 
+    HEMI_KERNEL_LAUNCH(BlackScholes, gridDim, blockDim, 0, 0,
                        callResult, putResult, stockPrice, optionStrike, 
                        optionYears, riskFree, volatility, optN);
 }

@@ -139,7 +139,7 @@ int main(int argc, char **argv)
     d_optionYears  = optionYears;
 #endif
 
-    HEMI_KERNEL_LAUNCH(BlackScholes, gridDim, blockDim,
+    HEMI_KERNEL_LAUNCH(BlackScholes, gridDim, blockDim, 0, 0,
                        d_callResult, d_putResult, d_stockPrice, d_optionStrike, 
                        d_optionYears, RISKFREE, VOLATILITY, OPT_N);
        

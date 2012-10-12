@@ -74,10 +74,10 @@ void allPairsForcesCuda(Vec4f *forceVectors,
                      &ss, sizeof(float), 0, cudaMemcpyHostToDevice);
 
   if (useShared)
-    HEMI_KERNEL_LAUNCH(allPairsForcesShared, gridDim, blockDim, 
+    HEMI_KERNEL_LAUNCH(allPairsForcesShared, gridDim, blockDim, 0, 0,
                        forceVectors, bodies, N);
   else
-    HEMI_KERNEL_LAUNCH(allPairsForces, gridDim, blockDim, 
+    HEMI_KERNEL_LAUNCH(allPairsForces, gridDim, blockDim, 0, 0,
                        forceVectors, bodies, N);
 }
 
