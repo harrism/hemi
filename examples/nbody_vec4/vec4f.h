@@ -7,8 +7,8 @@
 
 #include "hemi/hemi.h"
 
-HEMI_DEV_ALIGN(16)
-struct Vec4f
+
+struct HEMI_DEV_ALIGN(16) Vec4f
 {
   float x, y, z, w;
 
