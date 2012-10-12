@@ -71,7 +71,7 @@ For example use, see the `CND()` function in the "blackscholes" example, as well
 Portable classes
 ----------------
 
-The HEMI_DEV_CALLABLE_MEMBER and HEMI_DEV_CALLABLE_MEMBER_INLINE macros can be used to create classes that are reuseable between host and device code, by decorating any member function prototype that will be used by both device and host code. Here is an example excerpt of a portable class (a 4D vector type used in the "nbody_vec4" example).
+The HEMI_DEV_CALLABLE_MEMBER and HEMI_DEV_CALLABLE_INLINE_MEMBER macros can be used to create classes that are reuseable between host and device code, by decorating any member function prototype that will be used by both device and host code. Here is an example excerpt of a portable class (a 4D vector type used in the "nbody_vec4" example).
 
     struct HEMI_DEV_ALIGN(16) Vec4f
     {
@@ -129,7 +129,9 @@ For example, here is an excerpt from the "blackscholes" example.
 Note: Non-inline functions and methods
 --------------------------------------
 
-There are non-inline versions of the macros (`HEMI_DEV_CALLABLE` and `HEMI_DEV_CALLABLE_MEMBER`. Care needs to be taken to avoid multiple definition linker errors due to using these in headers that are included into multiple compilation units.
+There are non-inline versions of the macros (`HEMI_DEV_CALLABLE` and `HEMI_DEV_CALLABLE_MEMBER`. Care needs to be taken to avoid multiple definition linker errors due to using these in headers that are included into multiple compilation units. The best way to use `HEMI_DEV_CALLABLE` is to declare functions using this macro in a header, and define their implementation in a .cu file, and compile it with NVCC. This will generate code for both host and device. The host code will be linked into your library or application and callable from other host code compilation units (.c and .cpp files).  
+
+Likewise, for `HEMI_DEV_CALLABLE_MEMBER`, put the class and function declaration in a header, and the member function implementations in a .cu file, compiled by NVCC.
 
 Note: Device-specific code
 -----------------------------
