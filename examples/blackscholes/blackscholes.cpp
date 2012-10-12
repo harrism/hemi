@@ -121,7 +121,7 @@ int main(int argc, char **argv)
     initOptions(OPT_N, stockPrice, optionStrike, optionYears);
         
     int blockDim = 128; // blockDim, gridDim ignored by host code
-    int gridDim  = std::min(1024, (OPT_N + blockDim - 1) / blockDim);
+    int gridDim  = std::min<int>(1024, (OPT_N + blockDim - 1) / blockDim);
 
     printf("Running %s Version...\n", HEMI_LOC_STRING);
 
