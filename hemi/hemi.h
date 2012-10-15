@@ -133,7 +133,7 @@ cudaError_t checkCudaErrors()
   #define HEMI_KERNEL_LAUNCH(name, gridDim, blockDim, sharedBytes, streamId, ...) name(__VA_ARGS__)
 
   #define HEMI_DEV_CALLABLE               
-  #define HEMI_DEV_CALLABLE_INLINE        static inline
+  #define HEMI_DEV_CALLABLE_INLINE        inline
   #define HEMI_DEV_CALLABLE_MEMBER
   #define HEMI_DEV_CALLABLE_INLINE_MEMBER inline
 
