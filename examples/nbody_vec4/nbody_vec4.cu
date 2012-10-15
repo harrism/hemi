@@ -70,8 +70,8 @@ void allPairsForcesCuda(Vec4f *forceVectors,
   int gridDim = (N + blockDim - 1) / blockDim;
 
   float ss = 0.01f;
-  cudaMemcpyToSymbol(HEMI_DEV_CONSTANT(softeningSquared), 
-                     &ss, sizeof(float), 0, cudaMemcpyHostToDevice);
+  checkCuda( cudaMemcpyToSymbol(HEMI_DEV_CONSTANT(softeningSquared), 
+                                &ss, sizeof(float), 0, cudaMemcpyHostToDevice) );
 
   if (useShared)
     HEMI_KERNEL_LAUNCH(allPairsForcesShared, gridDim, blockDim, 0, 0,

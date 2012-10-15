@@ -10,7 +10,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <algorithm>
-#include <cuda_runtime_api.h>
+#include "cuda_runtime_api.h"
 
 #include "timer.h"
 #include "hemi/hemi.h"

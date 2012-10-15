@@ -14,7 +14,7 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <cuda_runtime_api.h>
+#include "cuda_runtime_api.h"
 
 #include "vec4f.h"
 #include "nbody.h"

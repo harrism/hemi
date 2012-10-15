@@ -42,7 +42,7 @@
 
 #include <stdio.h>
 #include <assert.h>
-#include <cuda_runtime_api.h>
+#include "cuda_runtime_api.h"
 
 /* HEMI_VERSION encodes the version number of the HEMI utilities.
  *
