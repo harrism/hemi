@@ -110,7 +110,9 @@ cudaError_t checkCudaErrors()
   #define HEMI_DEV_CALLABLE_MEMBER        __host__ __device__
   #define HEMI_DEV_CALLABLE_INLINE_MEMBER __host__ __device__ __forceinline__
 
-  #define HEMI_DEFINE_CONSTANT(def, value) __constant__ def ## _devconst = value; static def ## _hostconst = value;
+  #define HEMI_DEFINE_CONSTANT(def, value) \
+      static __constant__ def ## _devconst = value; \
+      static def ## _hostconst = value;
   #define HEMI_DEV_CONSTANT(name) name ## _devconst
   #ifdef HEMI_DEV_CODE
     #define HEMI_CONSTANT(name) name ## _devconst
@@ -118,7 +120,10 @@ cudaError_t checkCudaErrors()
     #define HEMI_CONSTANT(name) name ## _hostconst
   #endif
 
-  #define HEMI_DEV_ALIGN(n) __align__(n)
+  #if !defined(HEMI_ALIGN)
+    #define HEMI_ALIGN(n) __align__(n)
+  #endif
+
 #else             // host compiler
   #define HEMI_HOST_COMPILER              // to detect non-CUDACC compilation
   #define HEMI_LOC_STRING "Host"
@@ -135,13 +140,18 @@ cudaError_t checkCudaErrors()
   #define HEMI_CONSTANT(name) name ## _hostconst
   #define HEMI_DEFINE_CONSTANT(def, value) static def ## _hostconst = value
   
-  #if defined(__GNUC__)
-    #define HEMI_DEV_ALIGN(n) __attribute__((aligned(n)))
-  #elif defined(_MSC_VER)
-    #define HEMI_DEV_ALIGN(n) __declspec(align(n))
-  #else
-    #error "Please provide a definition for HEMI_DEV_ALIGN macro for your host compiler!"
+  #if !defined(HEMI_ALIGN)
+
+    #if defined(__GNUC__)
+      #define HEMI_ALIGN(n) __attribute__((aligned(n)))
+    #elif defined(_MSC_VER)
+      #define HEMI_ALIGN(n) __declspec(align(n))
+    #else
+      #error "Please provide a definition of HEMI_ALIGN for your host compiler!"
+    #endif
+  
   #endif
+
 #endif
 
 // Note: the following two functions demonstrate using the same code to process
