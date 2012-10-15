@@ -73,7 +73,7 @@ Portable classes
 
 The HEMI_DEV_CALLABLE_MEMBER and HEMI_DEV_CALLABLE_INLINE_MEMBER macros can be used to create classes that are reuseable between host and device code, by decorating any member function prototype that will be used by both device and host code. Here is an example excerpt of a portable class (a 4D vector type used in the "nbody_vec4" example).
 
-    struct HEMI_DEV_ALIGN(16) Vec4f
+    struct HEMI_ALIGN(16) Vec4f
     {
       float x, y, z, w;
     
@@ -84,20 +84,20 @@ The HEMI_DEV_CALLABLE_MEMBER and HEMI_DEV_CALLABLE_INLINE_MEMBER macros can be u
       Vec4f(float xx, float yy, float zz, float ww) : x(xx), y(yy), z(zz), w(ww) {}
     
       HEMI_DEV_CALLABLE_INLINE_MEMBER
-	  Vec4f(const Vec4f& v) : x(v.x), y(v.y), z(v.z), w(v.w) {}
+      Vec4f(const Vec4f& v) : x(v.x), y(v.y), z(v.z), w(v.w) {}
 
-	  HEMI_DEV_CALLABLE_INLINE_MEMBER
-	  Vec4f& operator=(const Vec4f& v) { 
-	    x = v.x; y = v.y; z = v.z; w = v.w; 
-	    return *this;
-	  }
+      HEMI_DEV_CALLABLE_INLINE_MEMBER
+      Vec4f& operator=(const Vec4f& v) {
+        x = v.x; y = v.y; z = v.z; w = v.w;
+        return *this;
+      }
 
-	  HEMI_DEV_CALLABLE_INLINE_MEMBER
-	  Vec4f operator+(const Vec4f& v) const { 
-	    return Vec4f(x+v.x, y+v.y, z+v.z, w+v.w); 
-	  }
-	  ...
-	};
+      HEMI_DEV_CALLABLE_INLINE_MEMBER
+      Vec4f operator+(const Vec4f& v) const {
+        return Vec4f(x+v.x, y+v.y, z+v.z, w+v.w);
+      }
+      ...
+    };
 
 The `HEMI_DEV_ALIGN` macro is used on types that will be passed in arrays or pointers as arguments to CUDA device kernel functions, to ensure proper alignment. `HEMI_DEV_ALIGN` generates correct alignment specifiers for the host compilers, too. For details on alignment, see the NVIDIA CUDA C Programming Guide (Section 5.3 in v5.0).
 
