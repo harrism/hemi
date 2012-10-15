@@ -106,9 +106,9 @@ cudaError_t checkCudaErrors()
   #endif
 
   #define HEMI_DEV_CALLABLE               __host__ __device__
-  #define HEMI_DEV_CALLABLE_INLINE        __host__ __device__ __forceinline__
+  #define HEMI_DEV_CALLABLE_INLINE        __host__ __device__ inline
   #define HEMI_DEV_CALLABLE_MEMBER        __host__ __device__
-  #define HEMI_DEV_CALLABLE_INLINE_MEMBER __host__ __device__ __forceinline__
+  #define HEMI_DEV_CALLABLE_INLINE_MEMBER __host__ __device__ inline
 
   #define HEMI_DEFINE_CONSTANT(def, value) \
       static __constant__ def ## _devconst = value; \
