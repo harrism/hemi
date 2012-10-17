@@ -27,3 +27,7 @@ Release/
 
 # vim
 *.swp
+
+# sublime
+*.sublime-project
+*.sublime-workspace

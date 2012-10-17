@@ -126,6 +126,20 @@ For example, here is an excerpt from the "blackscholes" example.
 
 `HEMI_KERNEL_LAUNCH` requires grid and block dimensions to be passed to it, but these parameters are ignored when compiled for the host. When`DEBUG` is defined, `HEMI_KERNEL_LAUNCH` checks for CUDA launch and runtime errors.
 
+Portable Constants
+------------------
+
+Global constant values can be defined using the `HEMI_DEFINE_CONSTANT` macro, which takes a name and an initial value. When compiled with NVCC as CUDA code, this declares two versions of the constant, one `__constant__` variable for the device, and one normal host variable. When compiled with a host compiler, only the host variable is defined.
+
+For static or external linkage, use the `HEMI_DEFINE_STATIC_CONSTANT` and `HEMI_DEFINE_EXTERN_CONSTANT` versions of the macro, respectively.
+
+To access variables defined using `HEMI_DEFINE_*_CONSTANT` macros, use the `HEMI_CONSTANT` macro which automatically resolves to either the device or host constant depending on whether it is called from device or host code. This means that the proper variable will chosen when the constant is accessed within functions declared with `HEMI_DEV_CALLABLE_*` and `HEMI_KERNEL` macros.
+
+To explicitly access the device version of a constant, use `HEMI_DEV_CONSTANT`. This is useful when the constant is an argument to a CUDA API function such as `cudaMemcpyToSymbol`, as shown in the following code from the "nbody_vec4" example.
+
+    cudaMemcpyToSymbol(HEMI_DEV_CONSTANT(softeningSquared), 
+                       &ss, sizeof(float), 0, cudaMemcpyHostToDevice)
+
 Note: Non-inline functions and methods
 --------------------------------------
 
@@ -140,7 +154,7 @@ Note: Code in functions like this must be portable. In other words it must be ab
 
     HEMI_DEV_CALLABLE_INLINE_MEMBER
     float inverseLength(float softening = 0.0f) const {
-    #ifdef __CUDACC__
+    #ifdef HEMI_DEV_CODE
       return rsqrtf(lengthSqr() + softening); // use fast GPU intrinsic
     #else
       return 1.0f / sqrtf(lengthSqr() + softening);

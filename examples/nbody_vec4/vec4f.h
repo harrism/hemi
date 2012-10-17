@@ -105,7 +105,7 @@ struct HEMI_ALIGN(16) Vec4f
 
   HEMI_DEV_CALLABLE_INLINE_MEMBER
   float inverseLength(float softening = 0.0f) const {
-#ifdef __CUDACC__
+#ifdef HEMI_DEV_CODE
     return rsqrtf(lengthSqr() + softening);
 #else
     return 1.0f / sqrtf(lengthSqr() + softening);
