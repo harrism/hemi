@@ -47,12 +47,11 @@ inline
 cudaError_t checkCudaErrors()
 {
   cudaError_t result = cudaSuccess;
+  checkCuda(result = cudaGetLastError()); // runtime API errors
 #if defined(DEBUG) || defined(_DEBUG)
   result = cudaDeviceSynchronize(); // async kernel launch errors
   if (result != cudaSuccess)
-    fprintf(stderr, "CUDA Launch Error: %s\n", cudaGetErrorString(result));
-  
-  checkCuda(result = cudaGetLastError()); // runtime API errors
+    fprintf(stderr, "CUDA Launch Error: %s\n", cudaGetErrorString(result));  
 #endif
   return result;
 }
@@ -90,13 +89,13 @@ cudaError_t checkCudaErrors()
   // linkage as required.
   #define HEMI_DEFINE_CONSTANT(def, value) \
       __constant__ def ## _devconst = value; \
-      def ## _hostconst = value;
+      def ## _hostconst = value
   #define HEMI_DEFINE_STATIC_CONSTANT(def, value) \
       static __constant__ def ## _devconst = value; \
-      static def ## _hostconst = value;
-  #define HEMI_DEFINE_EXTERN_CONSTANT(def, value) \
-      extern __constant__ def ## _devconst = value; \
-      extern def ## _hostconst = value;
+      static def ## _hostconst = value
+  #define HEMI_DEFINE_EXTERN_CONSTANT(def) \
+      extern __constant__ def ## _devconst; \
+      extern def ## _hostconst
 
   // use to access device constant explicitly
   #define HEMI_DEV_CONSTANT(name) name ## _devconst
@@ -128,9 +127,9 @@ cudaError_t checkCudaErrors()
 
   #define HEMI_DEFINE_CONSTANT(def, value) def ## _hostconst = value
   #define HEMI_DEFINE_STATIC_CONSTANT(def, value) static def ## _hostconst = value
-  #define HEMI_DEFINE_EXTERN_CONSTANT(def, value) extern def ## _hostconst = value
+  #define HEMI_DEFINE_EXTERN_CONSTANT(def) extern def ## _hostconst
 
-  #define HEMI_DEV_CONSTANT(name) #error "HEMI_DEV_CONSTANT requires CUDA compiler"
+  #undef HEMI_DEV_CONSTANT // requires NVCC, so undefined here!
   #define HEMI_CONSTANT(name) name ## _hostconst      
   
   #if !defined(HEMI_ALIGN)
