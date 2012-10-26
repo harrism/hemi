@@ -97,11 +97,13 @@
       <PtxAsOptionV Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</PtxAsOptionV>
       <FastMath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</FastMath>
       <GPUDebugInfo Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</GPUDebugInfo>
+      <GenerateRelocatableDeviceCode Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</GenerateRelocatableDeviceCode>
     </CudaCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\hemi\array.h" />
     <ClInclude Include="..\..\hemi\hemi.h" />
+    <ClInclude Include="nbody.h" />
     <ClInclude Include="vec4f.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
