@@ -221,3 +221,5 @@ License and Copyright
 Copyright 2012, NVIDIA Corporation
 
 Licensed under the Apache License, v2.0.  Please see the LICENSE file included with the HEMI source code.
+
+[![githalytics.com alpha](https://cruel-carlota.pagodabox.com/06d00d410f9df2a26a2c2a4e81d7c1eb "githalytics.com")](http://githalytics.com/harrism/hemi)
