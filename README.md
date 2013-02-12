@@ -99,7 +99,7 @@ The `HEMI_DEV_CALLABLE_MEMBER` and `HEMI_DEV_CALLABLE_INLINE_MEMBER` macros can 
       ...
     };
 
-The `HEMI_DEV_ALIGN` macro is used on types that will be passed in arrays or pointers as arguments to CUDA device kernel functions, to ensure proper alignment. `HEMI_DEV_ALIGN` generates correct alignment specifiers for the host compilers, too. For details on alignment, see the NVIDIA CUDA C Programming Guide (Section 5.3 in v5.0).
+The `HEMI_ALIGN` macro is used on types that will be passed in arrays or pointers as arguments to CUDA device kernel functions, to ensure proper alignment. `HEMI_ALIGN` generates correct alignment specifiers for the host compilers, too. For details on alignment, see the NVIDIA CUDA C Programming Guide (Section 5.3 in v5.0).
 
 Portable kernels
 ----------------
