@@ -1,17 +1,17 @@
-HEMI: CUDA Portable C/C++ Utilities
+Hemi: CUDA Portable C/C++ Utilities
 ===================================
 
-CUDA C/C++ and the NVIDIA NVCC compiler toolchain support a number of features designed to make it easier to write portable code, including language integration of host and device code and data, declaration specifiers (e.g. `__host__` and `__device__`) and preprocessor definitions (`__CUDACC__`). These features combine to enable developers to write code that can be compiled and run on either the host, the device, or both. Other compilers don't recognize these features, however, so to really write portable code, we need preprocessor macros. This is where HEMI comes in.
+CUDA C/C++ and the NVIDIA NVCC compiler toolchain support a number of features designed to make it easier to write portable code, including language integration of host and device code and data, declaration specifiers (e.g. `__host__` and `__device__`) and preprocessor definitions (`__CUDACC__`). These features combine to enable developers to write code that can be compiled and run on either the host, the device, or both. Other compilers don't recognize these features, however, so to really write portable code, we need preprocessor macros. This is where Hemi comes in.
 
 Current Version
 ---------------
 
 This is version: 0.1 (HEMI_VERSION == 000100)
 
-HEMI on github
+Hemi on github
 --------------
 
-The home for HEMI is https://github.com/harrism/hemi, where you can find the latest changes and information.
+The home for Hemi is https://github.com/harrism/hemi, where you can find the latest changes and information.
 
 hemi/hemi.h
 -----------
