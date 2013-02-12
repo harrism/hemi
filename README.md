@@ -71,7 +71,7 @@ For example use, see the `CND()` function in the "blackscholes" example, as well
 Portable classes
 ----------------
 
-The `HEMI_DEV_CALLABLE_MEMBER` and `HEMI_DEV_CALLABLE_INLINE_MEMBER` macros can be used to create classes that are reuseable between host and device code, by decorating any member function prototype that will be used by both device and host code. Here is an example excerpt of a portable class (a 4D vector type used in the "nbody_vec4" example).
+The `HEMI_DEV_CALLABLE_MEMBER` and `HEMI_DEV_CALLABLE_INLINE_MEMBER` macros can be used to create classes that are reusable between host and device code, by decorating any member function prototype that will be used by both device and host code. Here is an example excerpt of a portable class (a 4D vector type used in the "nbody_vec4" example).
 
     struct HEMI_ALIGN(16) Vec4f
     {
