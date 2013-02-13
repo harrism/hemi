@@ -1,17 +1,17 @@
-HEMI: CUDA Portable C/C++ Utilities
+Hemi: CUDA Portable C/C++ Utilities
 ===================================
 
-CUDA C/C++ and the NVIDIA NVCC compiler toolchain support a number of features designed to make it easier to write portable code, including language integration of host and device code and data, declaration specifiers (e.g. `__host__` and `__device__`) and preprocessor definitions (`__CUDACC__`). These features combine to enable developers to write code that can be compiled and run on either the host, the device, or both. Other compilers don't recognize these features, however, so to really write portable code, we need preprocessor macros. This is where HEMI comes in.
+CUDA C/C++ and the NVIDIA NVCC compiler toolchain support a number of features designed to make it easier to write portable code, including language integration of host and device code and data, declaration specifiers (e.g. `__host__` and `__device__`) and preprocessor definitions (`__CUDACC__`). These features combine to enable developers to write code that can be compiled and run on either the host, the device, or both. Other compilers don't recognize these features, however, so to really write portable code, we need preprocessor macros. This is where Hemi comes in.
 
 Current Version
 ---------------
 
 This is version: 0.1 (HEMI_VERSION == 000100)
 
-HEMI on github
+Hemi on github
 --------------
 
-The home for HEMI is https://github.com/harrism/hemi, where you can find the latest changes and information.
+The home for Hemi is https://github.com/harrism/hemi, where you can find the latest changes and information.
 
 hemi/hemi.h
 -----------
@@ -71,7 +71,7 @@ For example use, see the `CND()` function in the "blackscholes" example, as well
 Portable classes
 ----------------
 
-The HEMI_DEV_CALLABLE_MEMBER and HEMI_DEV_CALLABLE_INLINE_MEMBER macros can be used to create classes that are reuseable between host and device code, by decorating any member function prototype that will be used by both device and host code. Here is an example excerpt of a portable class (a 4D vector type used in the "nbody_vec4" example).
+The `HEMI_DEV_CALLABLE_MEMBER` and `HEMI_DEV_CALLABLE_INLINE_MEMBER` macros can be used to create classes that are reusable between host and device code, by decorating any member function prototype that will be used by both device and host code. Here is an example excerpt of a portable class (a 4D vector type used in the "nbody_vec4" example).
 
     struct HEMI_ALIGN(16) Vec4f
     {
@@ -99,7 +99,7 @@ The HEMI_DEV_CALLABLE_MEMBER and HEMI_DEV_CALLABLE_INLINE_MEMBER macros can be u
       ...
     };
 
-The `HEMI_DEV_ALIGN` macro is used on types that will be passed in arrays or pointers as arguments to CUDA device kernel functions, to ensure proper alignment. `HEMI_DEV_ALIGN` generates correct alignment specifiers for the host compilers, too. For details on alignment, see the NVIDIA CUDA C Programming Guide (Section 5.3 in v5.0).
+The `HEMI_ALIGN` macro is used on types that will be passed in arrays or pointers as arguments to CUDA device kernel functions, to ensure proper alignment. `HEMI_ALIGN` generates correct alignment specifiers for the host compilers, too. For details on alignment, see the NVIDIA CUDA C Programming Guide (Section 5.3 in v5.0).
 
 Portable kernels
 ----------------
@@ -221,3 +221,5 @@ License and Copyright
 Copyright 2012, NVIDIA Corporation
 
 Licensed under the Apache License, v2.0.  Please see the LICENSE file included with the HEMI source code.
+
+[![githalytics.com alpha](https://cruel-carlota.pagodabox.com/06d00d410f9df2a26a2c2a4e81d7c1eb "githalytics.com")](http://githalytics.com/harrism/hemi)
