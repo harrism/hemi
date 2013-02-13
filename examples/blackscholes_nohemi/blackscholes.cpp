@@ -217,5 +217,5 @@ int main(int argc, char **argv)
     free(stockPrice);
     free(optionStrike);
     free(optionYears);
-#endif // HEMI_CUDA_COMPILER
+#endif 
 }
