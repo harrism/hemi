@@ -158,28 +158,79 @@ cudaError_t checkCudaErrors()
 //    processElement(elementsOut, elementsIn, idx, anotherArgument);
 //
 
-// Returns the offset of the current thread's element within the grid for device
-// code compiled with NVCC, or 0 for sequential host code.
-HEMI_DEV_CALLABLE_INLINE
-int hemiGetElementOffset() 
-{
-#ifdef HEMI_DEV_CODE
-  return blockIdx.x * blockDim.x + threadIdx.x;
+#ifdef __INTEL_COMPILER
+  // Intel OpenMP compiler is not happy with functions in omp parallel for loops, so 
+  // use macros
+  #define hemiGetElementOffset() 0
+  #define hemiGetElementXOffset() 0
+  #define hemiGetElementYOffset() 0
+  #define hemiGetElementStride() 1
+  #define hemiGetElementXStride() 1
+  #define hemiGetElementYStride() 1
 #else
-  return 0;
-#endif
-}
+  // Returns the offset of the current thread's element within the grid for device
+  // code compiled with NVCC, or 0 for sequential host code.
+  HEMI_DEV_CALLABLE_INLINE
+  int hemiGetElementOffset() 
+  {
+  #ifdef HEMI_DEV_CODE
+    return blockIdx.x * blockDim.x + threadIdx.x;
+  #else
+    return 0;
+  #endif
+  }
 
-// Returns the stride of the current grid (blockDim.x * gridDim.x) for device 
-// code compiled with NVCC, or 1 for sequential host code.
-HEMI_DEV_CALLABLE_INLINE
-int hemiGetElementStride() 
-{
-#ifdef HEMI_DEV_CODE
-  return blockDim.x * gridDim.x;
-#else
-  return 1;
+  // Returns the offset of the current thread's X element within the grid for device
+  // code compiled with NVCC, or 0 for sequential host code.
+  HEMI_DEV_CALLABLE_INLINE
+  int hemiGetElementXOffset() 
+  {
+    return hemiGetElementOffset();
+  }
+
+  // Returns the offset of the current thread's Y element within the grid for device
+  // code compiled with NVCC, or 0 for sequential host code.
+  HEMI_DEV_CALLABLE_INLINE
+  int hemiGetElementYOffset() 
+  {
+  #ifdef HEMI_DEV_CODE
+    return blockIdx.y * blockDim.y + threadIdx.y;
+  #else
+    return 0;
+  #endif
+  }
+
+  // Returns the stride of the current grid (blockDim.x * gridDim.x) for device 
+  // code compiled with NVCC, or 1 for sequential host code.
+  HEMI_DEV_CALLABLE_INLINE
+  int hemiGetElementStride() 
+  {
+  #ifdef HEMI_DEV_CODE
+    return blockDim.x * gridDim.x;
+  #else
+    return 1;
+  #endif
+  }
+
+  // Returns the stride of the current grid (blockDim.x * gridDim.x) for device 
+  // code compiled with NVCC, or 1 for sequential host code.
+  HEMI_DEV_CALLABLE_INLINE
+  int hemiGetElementXStride() 
+  {
+    return hemiGetElementStride();
+  }
+
+  // Returns the stride of the current grid (blockDim.x * gridDim.x) for device 
+  // code compiled with NVCC, or 1 for sequential host code.
+  HEMI_DEV_CALLABLE_INLINE
+  int hemiGetElementYStride() 
+  {
+  #ifdef HEMI_DEV_CODE
+    return blockDim.y * gridDim.y;
+  #else
+    return 1;
+  #endif
+  }
 #endif
-}
 
 #endif // __HEMI_H__
