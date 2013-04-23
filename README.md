@@ -210,7 +210,9 @@ From the "blackscholes" example:
 
 This code can be compiled and run as a sequential function on the host or as a CUDA kernel for the device.
 
-Note: the `hemiGetElement*()` functions are specialized to simple (but common), 1D element-wise parallelism. As such, they may not be useful for multidimensional grids, arbitrary strides, or other more complex parallelism arrangements, but they may serve as examples for creating your own.
+Hemi also provides explicit 1D and 2D versions of the `hemiGetElement*()` functions, e.g. `hemiGetElementXOffset()`, `hemiGetElementYOffset()`, `hemiGetElementXStride()`, `hemiGetElementYStride()`.
+
+Note: the `hemiGetElement*()` functions are specialized to simple (but common) element-wise parallelism. As such, they may not be useful for arbitrary strides, data sharing, or other more complex parallelism arrangements, but they may serve as examples for creating your own.
 
 Mix and Match
 =============
