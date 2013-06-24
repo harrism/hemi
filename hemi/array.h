@@ -24,10 +24,10 @@ namespace hemi {
     public:
         Array(size_t n, bool usePinned) : 
           nSize(n), 
-          hPtr(0),
-          dPtr(0),
           isForeignHostPtr(false),
           isPinned(usePinned),
+          hPtr(0),
+          dPtr(0),
           isHostAlloced(false),
           isDeviceAlloced(false),
           isHostValid(false),
@@ -39,10 +39,10 @@ namespace hemi {
         // Use a pre-allocated host pointer (use carefully!)
         Array(T *hostMem, size_t n) : 
           nSize(n), 
-          hPtr(hostMem),
-          dPtr(0),
           isForeignHostPtr(true),
           isPinned(false),
+          hPtr(hostMem),
+          dPtr(0),
           isHostAlloced(true),
           isDeviceAlloced(false),
           isHostValid(true),
