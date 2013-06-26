@@ -1,7 +1,9 @@
 Hemi: CUDA Portable C/C++ Utilities
 ===================================
 
-[<img align="right" src="https://raw.github.com/harrism/hemi/master/hemi-logo.png" width="210" height="176"/>](https://raw.github.com/harrism/hemi/master/hemi-logo.png)
+Read about Hemi on the [NVIDIA Parallel Forall Blog](https://developer.nvidia.com/content/developing-portable-cuda-cc-code-hemi).
+
+[<img align="right" src="https://raw.github.com/harrism/hemi/master/hemi-logo-transparent.png" width="272" height="152"/>](https://raw.github.com/harrism/hemi/master/hemi-logo.png)
 CUDA C/C++ and the NVIDIA NVCC compiler toolchain support a number of features designed to make it easier to write portable code, including language integration of host and device code and data, declaration specifiers (e.g. `__host__` and `__device__`) and preprocessor definitions (`__CUDACC__`). These features combine to enable developers to write code that can be compiled and run on either the host, the device, or both. Other compilers don't recognize these features, however, so to really write portable code, we need preprocessor macros. This is where Hemi comes in.
 
 Hemi simplifies writing portable CUDA C/C++ code. In the screenshot below, the code shown on the left is a simple black scholes code written to be compilable with either NVCC or a standard C++ host compiler, and also runnable on either the CPU or GPU. The right column is the same code written using Hemi's macros and smart heterogeneous Array container class, `hemi::Array`. Using Hemi, the length of this code is reduced by half.
@@ -208,7 +210,9 @@ From the "blackscholes" example:
 
 This code can be compiled and run as a sequential function on the host or as a CUDA kernel for the device.
 
-Note: the `hemiGetElement*()` functions are specialized to simple (but common), 1D element-wise parallelism. As such, they may not be useful for multidimensional grids, arbitrary strides, or other more complex parallelism arrangements, but they may serve as examples for creating your own.
+Hemi also provides explicit 1D and 2D versions of the `hemiGetElement*()` functions, e.g. `hemiGetElementXOffset()`, `hemiGetElementYOffset()`, `hemiGetElementXStride()`, `hemiGetElementYStride()`.
+
+Note: the `hemiGetElement*()` functions are specialized to simple (but common) element-wise parallelism. As such, they may not be useful for arbitrary strides, data sharing, or other more complex parallelism arrangements, but they may serve as examples for creating your own.
 
 Mix and Match
 =============
