@@ -176,12 +176,12 @@ namespace hemi {
     private:
         size_t          nSize;
 
-        bool            isForeignHostPtr;
-        bool            isPinned;
-        
         mutable T       *hPtr;
         mutable T       *dPtr;
 
+        bool            isForeignHostPtr;
+        bool            isPinned;
+        
         mutable bool    isHostAlloced;
         mutable bool    isDeviceAlloced;        
 
