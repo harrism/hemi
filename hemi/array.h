@@ -1,3 +1,6 @@
+#ifndef __HEMI_ARRAY_H__
+#define __HEMI_ARRAY_H__
+
 #include "hemi/hemi.h"
 #include <cstring>
 
@@ -266,3 +269,6 @@ namespace hemi {
         
     };
 } 
+
+#endif // __HEMI_ARRAY_H__
+
