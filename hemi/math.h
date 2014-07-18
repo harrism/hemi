@@ -30,8 +30,12 @@ namespace hemi {
 		#ifdef HEMI_DEV_CODE
 			return __sad(x,0,0);
 		#else
-			return std::abs(x);
+			return ((x < 0) ? x * -1 : x);
 		#endif
+	}	
+	template <>
+	HEMI_DEV_CALLABLE_INLINE unsigned int abs<unsigned int>(unsigned int x) {
+		return x;
 	}
 	template <>
 	HEMI_DEV_CALLABLE_INLINE float abs<float>(float x) {
