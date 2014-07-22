@@ -436,29 +436,6 @@ namespace hemi {
 			return count;
 		#endif
 	}
-
-// misc
-	//
-	template<class T, class S, class R>
-	HEMI_DEV_CALLABLE_INLINE double fma(T x, S y, R z) {
-		#ifdef HEMI_DEV_CODE
-			return fma((double)x, (double)y, (double) z);
-		#else
-			// this can have issues if fma doesn't exist in <cmath>
-			return fma(x,y,z);
-
-		#endif 
-	}
-
-	HEMI_DEV_CALLABLE_INLINE float fma(float x, float y, float z) {
-		#ifdef HEMI_DEV_CODE
-			return fmaf(x,y,z);
-		#else
-			// this can have issues if fma doesn't exist in <cmath>
-			return fma(x,y,z);
-
-		#endif 
-	}
 }
 
 #endif // HEMI_MATH_H

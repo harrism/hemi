@@ -5,8 +5,7 @@ CXX=g++
 
 CC_FLAGS := -I../ -I${CUDA_PATH}/include
 
-NVCC_FLAGS := ${CC_FLAGS} -arch=sm_21
-
+NVCC_FLAGS := ${CC_FLAGS} -arch=sm_21 
 ARCH := $(shell getconf LONG_BIT)
 
 LIB_FLAGS_32 := -L$(CUDA_PATH)/lib
@@ -14,7 +13,7 @@ LIB_FLAGS_64 := -L$(CUDA_PATH)/lib64
 
 LIB_FLAGS := $(LIB_FLAGS_$(ARCH)) -lcudart
 
-.PHONY: math
+.PHONY: math clean
 all: math
 
 math: math_host_g++ math_host_nvcc math_device 
