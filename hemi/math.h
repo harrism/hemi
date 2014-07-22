@@ -264,7 +264,35 @@ namespace hemi {
 			return std::ceil(x);
 		#endif
 	}
+	HEMI_DEV_CALLABLE_INLINE double round(double x) {
+		#ifdef HEMI_DEV_CODE
+			return round(x);
+		#else
+			return std::round(x);
+		#endif
+	}
 
+	HEMI_DEV_CALLABLE_INLINE float round(float x) {
+		#ifdef HEMI_DEV_CODE
+			return roundf(x);
+		#else
+			return std::round(x);
+		#endif
+	}
+	HEMI_DEV_CALLABLE_INLINE long int lround(double x) {
+		#ifdef HEMI_DEV_CODE
+			return lround(x);
+		#else
+			return std::lround(x);
+		#endif
+	}
+	HEMI_DEV_CALLABLE_INLINE long int lround(float x) {
+		#ifdef HEMI_DEV_CODE
+			return lroundf(x);
+		#else
+			return std::lround(x);
+		#endif
+	}
 // Exponential/log functions
 	template <class T>
 	HEMI_DEV_CALLABLE_INLINE double exp(T x) {
