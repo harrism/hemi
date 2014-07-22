@@ -347,7 +347,6 @@ namespace hemi {
 		#ifdef HEMI_DEV_CODE
 			return __brev(x);
 		#else
-			const unsigned int CHAR_BIT=8;
 			unsigned int s = sizeof(x) * CHAR_BIT; // bit size; must be power of 2 
 			unsigned int mask = ~0;         
 			while ((s >>= 1) > 0) 
@@ -363,7 +362,6 @@ namespace hemi {
 		#ifdef HEMI_DEV_CODE
 			return __brevll(x);
 		#else
-			const unsigned int CHAR_BIT=8; // number of bits in a byte
 			unsigned int s = sizeof(x) * CHAR_BIT; // bit size; must be power of 2 
 			unsigned int mask = ~0;         
 			while ((s >>= 1) > 0) 
@@ -379,28 +377,26 @@ namespace hemi {
 		#ifdef HEMI_DEV_CODE
 			return __popc(x);
 		#else
-			const unsigned int CHAR_BIT=8;
-			unsigned int s = sizeof(v) * CHAR_BIT; // bit size; must be power of 2 
+			unsigned int s = sizeof(x) * CHAR_BIT; // bit size; must be power of 2 
 			unsigned int count = 0;
-			for (s = sizeof(v) * CHAR_BIT; s > 0; s--)
+			for (s = sizeof(x) * CHAR_BIT; s > 0; s--)
 			{
-				count += (v & 1) > 0;
-				v >>= 1;
+				count += (x & 1) > 0;
+				x >>= 1;
 			}
 			return count;
 		#endif
 	}
-	HEMI_DEV_CALLABLE_INLINE unsigned long long int brev(unsigned long long int x) {
+	HEMI_DEV_CALLABLE_INLINE unsigned long long int popc(unsigned long long int x) {
 		#ifdef HEMI_DEV_CODE
 			return __popcll(x);
 		#else
-			const unsigned int CHAR_BIT=8;
-			unsigned int s = sizeof(v) * CHAR_BIT; // bit size; must be power of 2 
+			unsigned int s = sizeof(x) * CHAR_BIT; // bit size; must be power of 2 
 			unsigned int count = 0;
-			for (s = sizeof(v) * CHAR_BIT; s > 0; s--)
+			for (s = sizeof(x) * CHAR_BIT; s > 0; s--)
 			{
-				count += (v & 1) > 0;
-				v >>= 1;
+				count += (x & 1) > 0;
+				x >>= 1;
 			}
 			return count;
 		#endif
