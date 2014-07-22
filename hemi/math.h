@@ -11,15 +11,14 @@ namespace hemi {
 	// templated POW function. For a CUDA device, it casts the arguments to double.
 	// For a host, it defaults to std::pow in <cmath>
 	template <class T>
-		HEMI_DEV_CALLABLE_INLINE T pow(T x, T y) {
+		HEMI_DEV_CALLABLE_INLINE double pow(T x, T y) {
 		#ifdef HEMI_DEV_CODE
-			return (T)pow((double)x,(double)y);
+			return pow((double)x,(double)y);
 		#else
 			return std::pow(x, y);
 		#endif
 	}
-	template <>
-		HEMI_DEV_CALLABLE_INLINE float pow<float>(float x, float y) {
+		HEMI_DEV_CALLABLE_INLINE float pow(float x, float y) {
 		#ifdef HEMI_DEV_CODE
 			return powf(x,y);
 		#else
@@ -268,7 +267,15 @@ namespace hemi {
 		#ifdef HEMI_DEV_CODE
 			return round(x);
 		#else
-			return std::round(x);
+			return (std::floor(x + 0.5) == std::ceil(x) ? std::ceil(x) : std::floor(x));
+		#endif
+	}
+	template <class T>
+	HEMI_DEV_CALLABLE_INLINE double round(T x) {
+		#ifdef HEMI_DEV_CODE
+			return round((double)x);
+		#else
+			return (std::floor((double)x + 0.5) == std::ceil(x) ? std::ceil(x) : std::floor(x));
 		#endif
 	}
 
@@ -276,21 +283,21 @@ namespace hemi {
 		#ifdef HEMI_DEV_CODE
 			return roundf(x);
 		#else
-			return std::round(x);
+			return (std::floor(x + 0.5f) == std::ceil(x) ? std::ceil(x) : std::floor(x));
 		#endif
 	}
 	HEMI_DEV_CALLABLE_INLINE long int lround(double x) {
 		#ifdef HEMI_DEV_CODE
 			return lround(x);
 		#else
-			return std::lround(x);
+			return (std::floor(x + 0.5) == std::ceil(x) ? (long int)std::ceil(x) : (long int)std::floor(x));
 		#endif
 	}
 	HEMI_DEV_CALLABLE_INLINE long int lround(float x) {
 		#ifdef HEMI_DEV_CODE
 			return lroundf(x);
 		#else
-			return std::lround(x);
+			return (std::floor(x + 0.5f) == std::ceil(x) ? (long int)std::ceil(x) : (long int)std::floor(x));
 		#endif
 	}
 // Exponential/log functions
