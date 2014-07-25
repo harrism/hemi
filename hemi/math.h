@@ -5,7 +5,8 @@
 #include <cmath>
 
 
-namespace hemi {
+namespace hemi 
+{
   // Power functions
 
   // templated POW function. For a CUDA device, it casts the arguments to double.
@@ -94,7 +95,7 @@ namespace hemi {
     #endif
   }
 
-  HEMI_DEV_CALLABLE_INLINE int abs(int x)
+  template <> HEMI_DEV_CALLABLE_INLINE int abs<int>(int x)
   {
     #ifdef HEMI_DEV_CODE
       return __sad(x,0,0);
@@ -103,7 +104,7 @@ namespace hemi {
     #endif
   }
 
-  HEMI_DEV_CALLABLE_INLINE unsigned int abs(unsigned int x)
+  template <> HEMI_DEV_CALLABLE_INLINE unsigned int abs<unsigned int>(unsigned int x)
   {
     return x;
   }
@@ -496,5 +497,5 @@ namespace hemi {
       return count;
     #endif
   }
-
+}
 #endif // HEMI_MATH_H
