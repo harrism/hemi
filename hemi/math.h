@@ -64,7 +64,7 @@ namespace hemi {
       return std::pow(x,(1.0f/3.0f));
     #endif
   }
-  
+
   template <class T, class S> HEMI_DEV_CALLABLE_INLINE double hypot (T x, S y)
   {
     #ifdef HEMI_DEV_CODE
@@ -126,7 +126,7 @@ namespace hemi {
     #endif
   }
 
-// Trig functions
+  // Trig functions
   // templated to catch int, long, etc. The device branch casts it to double first. 
   template <class T> HEMI_DEV_CALLABLE_INLINE double acos (T x)
   {
@@ -200,14 +200,14 @@ namespace hemi {
     #endif
   }
 
-// Hyperbolic functions
+  // Hyperbolic functions
   template <class T> HEMI_DEV_CALLABLE_INLINE double acosh (T x)
   {
     #ifdef HEMI_DEV_CODE
       return acosh((double)x);
     #else
-    // since hyperbolic arccosine support isn't widespread, using defintion from Wolfram Alpha
-    // which is either acosh(z) = ln(z+sqrt(z+1)*sqrt(z-1)) or acosh(z) = (sqrt(z-1))/sqrt(1-z))*acos(z)
+      // since hyperbolic arccosine support isn't widespread, using defintion from Wolfram Alpha
+      // which is either acosh(z) = ln(z+sqrt(z+1)*sqrt(z-1)) or acosh(z) = (sqrt(z-1))/sqrt(1-z))*acos(z)
       return std::log(x + std::sqrt(x+1) * std::sqrt(x-1));
     #endif
   }
@@ -217,8 +217,8 @@ namespace hemi {
     #ifdef HEMI_DEV_CODE
       return acoshf(x);
     #else
-    // since hyperbolic arccosine support isn't widespread, using defintion from Wolfram Alpha
-    // which is either acosh(z) = ln(z+sqrt(z+1)*sqrt(z-1)) or acosh(z) = (sqrt(z-1))/sqrt(1-z))*acos(z)
+      // since hyperbolic arccosine support isn't widespread, using defintion from Wolfram Alpha
+      // which is either acosh(z) = ln(z+sqrt(z+1)*sqrt(z-1)) or acosh(z) = (sqrt(z-1))/sqrt(1-z))*acos(z)
       return std::log(x + std::sqrt(x+1) * std::sqrt(x-1));
     #endif
   }
@@ -241,7 +241,7 @@ namespace hemi {
     #endif
   }
 
-// Rounding/remainder functions
+  // Rounding/remainder functions
   HEMI_DEV_CALLABLE_INLINE float fmod(float x, float y)
   {
     #ifdef HEMI_DEV_CODE
@@ -341,9 +341,8 @@ namespace hemi {
     #endif
   }
 
-// Exponential/log functions
-  template <class T>
-  HEMI_DEV_CALLABLE_INLINE double exp(T x)
+  // Exponential/log functions
+  template <class T> HEMI_DEV_CALLABLE_INLINE double exp(T x)
   {
     #ifdef HEMI_DEV_CODE
       return exp((double)x);
@@ -433,7 +432,7 @@ namespace hemi {
     #endif
   }
 
-// integer functions
+  // integer functions
   HEMI_DEV_CALLABLE_INLINE unsigned int brev(unsigned int x)
   {
     #ifdef HEMI_DEV_CODE
@@ -455,14 +454,14 @@ namespace hemi {
     #ifdef HEMI_DEV_CODE
       return __brevll(x);
     #else
-      unsigned int s = sizeof(x) * CHAR_BIT; // bit size; must be power of 2 
-      unsigned int mask = ~0;         
-      while ((s >>= 1) > 0) 
-      {
-        mask ^= (mask << s);
-        x = ((x >> s) & mask) | ((x << s) & ~mask);
-      }
-      return x;
+        unsigned int s = sizeof(x) * CHAR_BIT; // bit size; must be power of 2 
+        unsigned int mask = ~0;         
+        while ((s >>= 1) > 0) 
+        {
+          mask ^= (mask << s);
+          x = ((x >> s) & mask) | ((x << s) & ~mask);
+        }
+        return x;
     #endif 
   }
 
@@ -497,30 +496,5 @@ namespace hemi {
       return count;
     #endif
   }
-
-// misc
-  //
-  template<class T, class S, class R> HEMI_DEV_CALLABLE_INLINE double fma(T x, S y, R z)
-  {
-    #ifdef HEMI_DEV_CODE
-      return fma((double)x, (double)y, (double) z);
-    #else
-      // this can have issues if fma doesn't exist in <cmath>
-      return std::fma(x,y,z);
-
-    #endif 
-  }
-
-  HEMI_DEV_CALLABLE_INLINE float fma(float x, float y, float z)
-  {
-    #ifdef HEMI_DEV_CODE
-      return fmaf(x,y,z);
-    #else
-      // this can have issues if fma doesn't exist in <cmath>
-      return std::fma(x,y,z);
-
-    #endif 
-  }
-}
 
 #endif // HEMI_MATH_H
