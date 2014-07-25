@@ -21,11 +21,11 @@ math: math_host_g++ math_host_nvcc math_device
 		./$$prog; \
 	done
 
-math_device: math.cc
+math_device: math.cpp
 	${NVCC} ${LIB_FLAGS} -x cu ${CC_FLAGS} ${NVCC_FLAGS} $< -o $@
 
-math_host_g++: math.cc
+math_host_g++: math.cpp
 	${CXX} ${LIB_FLAGS} ${CC_FLAGS} $< -o $@
 
-math_host_nvcc: math.cc
+math_host_nvcc: math.cpp
 	${NVCC} ${LIB_FLAGS} ${CC_FLAGS} ${NVCC_FLAGS} $< -o $@
