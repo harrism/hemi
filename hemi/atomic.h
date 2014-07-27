@@ -161,6 +161,46 @@ namespace hemi
     #endif // HEMI_DEV_CODE
   }
 
+  HEMI_DEV_CALLABLE_INLINE int atomicExch(int* address, int val) 
+  {
+    #ifdef HEMI_DEV_CODE
+      return atomicExch(address,val);
+    #else
+      int old = *address;
+      *address = val;
+      return old;
+    #endif // HEMI_DEV_CODE
+  }
+  HEMI_DEV_CALLABLE_INLINE unsigned int atomicExch(unsigned int* address, unsigned int val) 
+  {
+    #ifdef HEMI_DEV_CODE
+      return atomicExch(address,val);
+    #else
+      unsigned int old = *address;
+      *address = val;
+      return old;
+    #endif // HEMI_DEV_CODE
+  }
+  HEMI_DEV_CALLABLE_INLINE unsigned long long int atomicExch(unsigned long long int* address, unsigned long long int val) 
+  {
+    #ifdef HEMI_DEV_CODE
+      return atomicExch(address,val);
+    #else
+      unsigned long long int old = *address;
+      *address = val;
+      return old;
+    #endif // HEMI_DEV_CODE
+  }
+  HEMI_DEV_CALLABLE_INLINE float atomicExch(float* address, float val) 
+  {
+    #ifdef HEMI_DEV_CODE
+      return atomicExch(address,val);
+    #else
+      float old = *address;
+      *address = val;
+      return old;
+    #endif // HEMI_DEV_CODE
+  }
 }
 
 #endif
