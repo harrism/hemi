@@ -34,7 +34,7 @@ namespace hemi
   HEMI_DEV_CALLABLE_INLINE int atomicAdd(int* address, int val)
   {
     #ifdef HEMI_DEV_CODE
-      return atomicAdd(address, val);
+      return ::atomicAdd(address, val);
     #else
       float old = *address;
       *address = old + val;
@@ -45,7 +45,7 @@ namespace hemi
   HEMI_DEV_CALLABLE_INLINE unsigned int atomicAdd(unsigned int* address, unsigned int val)
   {   
     #ifdef HEMI_DEV_CODE
-      return atomicAdd(address, val);
+      return ::atomicAdd(address, val);
     #else
       unsigned int old = *address;
       *address = old + val;
@@ -55,7 +55,7 @@ namespace hemi
   HEMI_DEV_CALLABLE_INLINE unsigned long long int atomicAdd(unsigned long long int* address, unsigned long long int val)
   {   
     #ifdef HEMI_DEV_CODE
-      return atomicAdd(address, val);
+      return ::atomicAdd(address, val);
     #else
       unsigned long long int old = *address;
       *address = old + val;
@@ -66,7 +66,7 @@ namespace hemi
   HEMI_DEV_CALLABLE_INLINE float atomicAdd(float* address, float val)
   {   
     #ifdef HEMI_DEV_CODE
-      return atomicAdd(address, val);
+      return ::atomicAdd(address, val);
     #else
       float old = *address;
       *address = old + val;
@@ -77,7 +77,7 @@ namespace hemi
   HEMI_DEV_CALLABLE_INLINE int atomicCAS(int* address, int compare, int val) 
   {
     #ifdef HEMI_DEV_CODE
-      return atomicCAS(address, compare, val);
+      return ::atomicCAS(address, compare, val);
     #else
       int old = *address;
       *address = (old == compare ? val : old);
@@ -87,7 +87,7 @@ namespace hemi
   HEMI_DEV_CALLABLE_INLINE unsigned int atomicCAS(unsigned int* address, unsigned int compare, unsigned int val)
   {
     #ifdef HEMI_DEV_CODE
-      return atomicCAS(address, compare, val);
+      return ::atomicCAS(address, compare, val);
     #else
       unsigned int old = *address;
       *address = (old == compare ? val : old);
@@ -97,7 +97,7 @@ namespace hemi
   HEMI_DEV_CALLABLE_INLINE unsigned long long int atomicCAS(unsigned long long int* address, unsigned long long int compare, unsigned long long int val)
   {
     #ifdef HEMI_DEV_CODE
-      return atomicCAS(address, compare, val);
+      return ::atomicCAS(address, compare, val);
     #else
       unsigned long long int old = *address;
       *address = (old == compare ? val : old);
@@ -116,7 +116,7 @@ namespace hemi
   HEMI_DEV_CALLABLE_INLINE int atomicCAS(int* address, int compare, int val, omp_lock_t* lock) 
   {
     #ifdef HEMI_DEV_CODE
-      return atomicCAS(address, compare, val);
+      return ::atomicCAS(address, compare, val);
     #else
       #ifdef _OPENMP
         omp_set_lock(lock);
@@ -132,7 +132,7 @@ namespace hemi
   HEMI_DEV_CALLABLE_INLINE unsigned int atomicCAS(unsigned int* address, unsigned int compare, unsigned int val, omp_lock_t* lock) 
   {
     #ifdef HEMI_DEV_CODE
-      return atomicCAS(address, compare, val);
+      return ::atomicCAS(address, compare, val);
     #else
       #ifdef _OPENMP
         omp_set_lock(lock);
@@ -148,7 +148,7 @@ namespace hemi
   HEMI_DEV_CALLABLE_INLINE unsigned long long int atomicCAS(unsigned long long int* address, unsigned long long int compare, unsigned long long int val, omp_lock_t* lock) 
   {
     #ifdef HEMI_DEV_CODE
-      return atomicCAS(address, compare, val);
+      return ::atomicCAS(address, compare, val);
     #else
       #ifdef _OPENMP
         omp_set_lock(lock);
@@ -164,7 +164,7 @@ namespace hemi
   HEMI_DEV_CALLABLE_INLINE int atomicExch(int* address, int val) 
   {
     #ifdef HEMI_DEV_CODE
-      return atomicExch(address,val);
+      return ::atomicExch(address,val);
     #else
       int old = *address;
       *address = val;
@@ -174,7 +174,7 @@ namespace hemi
   HEMI_DEV_CALLABLE_INLINE unsigned int atomicExch(unsigned int* address, unsigned int val) 
   {
     #ifdef HEMI_DEV_CODE
-      return atomicExch(address,val);
+      return ::atomicExch(address,val);
     #else
       unsigned int old = *address;
       *address = val;
@@ -184,7 +184,7 @@ namespace hemi
   HEMI_DEV_CALLABLE_INLINE unsigned long long int atomicExch(unsigned long long int* address, unsigned long long int val) 
   {
     #ifdef HEMI_DEV_CODE
-      return atomicExch(address,val);
+      return ::atomicExch(address,val);
     #else
       unsigned long long int old = *address;
       *address = val;
@@ -194,7 +194,7 @@ namespace hemi
   HEMI_DEV_CALLABLE_INLINE float atomicExch(float* address, float val) 
   {
     #ifdef HEMI_DEV_CODE
-      return atomicExch(address,val);
+      return ::atomicExch(address,val);
     #else
       float old = *address;
       *address = val;
