@@ -14,7 +14,7 @@ namespace hemi
   template <class T> HEMI_DEV_CALLABLE_INLINE double pow(T x, T y)
   {
     #ifdef HEMI_DEV_CODE
-      return pow((double)x,(double)y);
+      return ::pow((double)x,(double)y);
     #else
       return std::pow(x, y);
     #endif
@@ -33,7 +33,7 @@ namespace hemi
   template <class T> HEMI_DEV_CALLABLE_INLINE double sqrt (T x)
   {
     #ifdef HEMI_DEV_CODE
-      return sqrt((double)x);
+      return ::sqrt((double)x);
     #else
       return std::sqrt(x);
     #endif
@@ -51,7 +51,7 @@ namespace hemi
   template <class T> HEMI_DEV_CALLABLE_INLINE double cbrt (T x)
   {
     #ifdef HEMI_DEV_CODE
-      return cbrt((double)x);
+      return ::cbrt((double)x);
     #else
       return std::pow(x,(1.0f/3.0f));
     #endif
@@ -69,7 +69,7 @@ namespace hemi
   template <class T, class S> HEMI_DEV_CALLABLE_INLINE double hypot (T x, S y)
   {
     #ifdef HEMI_DEV_CODE
-      return hypot((double)x, (double)y);
+      return ::hypot((double)x, (double)y);
     #else
       return std::sqrt(std::pow(x,2) + std::pow(y,2));
     #endif
@@ -89,7 +89,7 @@ namespace hemi
   template <class T> HEMI_DEV_CALLABLE_INLINE T abs (T x)
   {
     #ifdef HEMI_DEV_CODE
-      return (T)abs((double)x);
+      return (T)::abs((double)x);
     #else
       return std::abs(x);
     #endif
@@ -132,7 +132,7 @@ namespace hemi
   template <class T> HEMI_DEV_CALLABLE_INLINE double acos (T x)
   {
     #ifdef HEMI_DEV_CODE
-      return acos((double)x);
+      return ::acos((double)x);
     #else
       return std::acos(x);
     #endif
@@ -150,7 +150,7 @@ namespace hemi
   template <class T> HEMI_DEV_CALLABLE_INLINE double asin (T x)
   {
     #ifdef HEMI_DEV_CODE
-      return asin((double)x);
+      return ::asin((double)x);
     #else
       return std::asin(x);
     #endif
@@ -169,7 +169,7 @@ namespace hemi
   template <class T> HEMI_DEV_CALLABLE_INLINE double atan (T x)
   {
     #ifdef HEMI_DEV_CODE
-      return atan((double)x);
+      return ::atan((double)x);
     #else
       return std::atan(x);
     #endif
@@ -187,7 +187,7 @@ namespace hemi
   template <class T> HEMI_DEV_CALLABLE_INLINE double atan2 (T x, T y)
   {
     #ifdef HEMI_DEV_CODE
-      return atan2((double)x, (double) y);
+      return ::atan2((double)x, (double) y);
     #else
       return std::atan2(x,y);
     #endif
@@ -205,7 +205,7 @@ namespace hemi
   template <class T> HEMI_DEV_CALLABLE_INLINE double acosh (T x)
   {
     #ifdef HEMI_DEV_CODE
-      return acosh((double)x);
+      return ::acosh((double)x);
     #else
       // since hyperbolic arccosine support isn't widespread, using defintion from Wolfram Alpha
       // which is either acosh(z) = ln(z+sqrt(z+1)*sqrt(z-1)) or acosh(z) = (sqrt(z-1))/sqrt(1-z))*acos(z)
@@ -227,7 +227,7 @@ namespace hemi
   template <class T> HEMI_DEV_CALLABLE_INLINE double asinh (T x)
   {
     #ifdef HEMI_DEV_CODE
-      return asinh((double)x);
+      return ::asinh((double)x);
     #else
       return std::log(x+sqrt(1+std::pow(x,2)));
     #endif
@@ -255,7 +255,7 @@ namespace hemi
   HEMI_DEV_CALLABLE_INLINE double fmod(double x, double y)
   {
     #ifdef HEMI_DEV_CODE
-      return fmod(x,y);
+      return ::fmod(x,y);
     #else
       return std::fmod(x,y);
     #endif
@@ -273,7 +273,7 @@ namespace hemi
   HEMI_DEV_CALLABLE_INLINE double floor(double x)
   {
     #ifdef HEMI_DEV_CODE
-      return floor(x);
+      return ::floor(x);
     #else
       return std::floor(x);
     #endif
@@ -291,7 +291,7 @@ namespace hemi
   HEMI_DEV_CALLABLE_INLINE double ceil(double x)
   {
     #ifdef HEMI_DEV_CODE
-      return ceil(x);
+      return ::ceil(x);
     #else
       return std::ceil(x);
     #endif
@@ -300,7 +300,7 @@ namespace hemi
   HEMI_DEV_CALLABLE_INLINE double round(double x)
   {
     #ifdef HEMI_DEV_CODE
-      return round(x);
+      return ::round(x);
     #else
       return (std::floor(x + 0.5) == std::ceil(x) ? std::ceil(x) : std::floor(x));
     #endif
@@ -309,7 +309,7 @@ namespace hemi
   template <class T>   HEMI_DEV_CALLABLE_INLINE double round(T x)
   {
     #ifdef HEMI_DEV_CODE
-      return round((double)x);
+      return ::round((double)x);
     #else
       return (std::floor((double)x + 0.5) == std::ceil(x) ? std::ceil(x) : std::floor(x));
     #endif
@@ -327,7 +327,7 @@ namespace hemi
   HEMI_DEV_CALLABLE_INLINE long int lround(double x)
   {
     #ifdef HEMI_DEV_CODE
-      return lround(x);
+      return ::lround(x);
     #else
       return (std::floor(x + 0.5) == std::ceil(x) ? (long int)std::ceil(x) : (long int)std::floor(x));
     #endif
@@ -346,7 +346,7 @@ namespace hemi
   template <class T> HEMI_DEV_CALLABLE_INLINE double exp(T x)
   {
     #ifdef HEMI_DEV_CODE
-      return exp((double)x);
+      return ::exp((double)x);
     #else
       return std::exp(x);
     #endif
@@ -364,7 +364,7 @@ namespace hemi
   template <class T> HEMI_DEV_CALLABLE_INLINE double log(T x)
   {
     #ifdef HEMI_DEV_CODE
-      return log((double)x);
+      return ::log((double)x);
     #else
       return std::log(x);
     #endif
@@ -382,7 +382,7 @@ namespace hemi
   template <class T> HEMI_DEV_CALLABLE_INLINE double log10(T x)
   {
     #ifdef HEMI_DEV_CODE
-      return log10((double)x);
+      return ::log10((double)x);
     #else
       return std::log10(x);
     #endif
@@ -400,7 +400,7 @@ namespace hemi
   template <class T> HEMI_DEV_CALLABLE_INLINE double frexp(T x, int* ntpr)
   {
     #ifdef HEMI_DEV_CODE
-      return frexp((double)x, ntpr);
+      return ::frexp((double)x, ntpr);
     #else
       return std::frexp(x, ntpr);
     #endif
@@ -418,7 +418,7 @@ namespace hemi
   template <class T> HEMI_DEV_CALLABLE_INLINE double ldexp(T x, int ntpr)
   {
     #ifdef HEMI_DEV_CODE
-      return ldexp((double)x, ntpr);
+      return ::ldexp((double)x, ntpr);
     #else
       return std::ldexp(x, ntpr);
     #endif
