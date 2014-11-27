@@ -2,7 +2,7 @@
 // 
 // "HEMI" CUDA Portable C/C++ Utilities
 // 
-// Copyright 2012 NVIDIA Corporation
+// Copyright 2012-2014 NVIDIA Corporation
 //
 // License: Apache License, v2.0 http://www.apache.org/licenses/LICENSE-2.0.html
 //
@@ -24,7 +24,7 @@
  *   HEMI_VERSION / 100000 is the major version.
  *   HEMI_VERSION / 100 % 1000 is the minor version.
  */
-#define HEMI_VERSION 000100
+#define HEMI_VERSION 100000
 
 // Convenience function for checking CUDA runtime API results
 // can be wrapped around any runtime API call. No-op in release builds.

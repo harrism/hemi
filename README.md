@@ -13,7 +13,7 @@ Hemi simplifies writing portable CUDA C/C++ code. In the screenshot below, the c
 Current Version
 ---------------
 
-This is version: 0.1 (HEMI_VERSION == 000100)
+This is version: 1.0 (HEMI_VERSION == 100000)
 
 Hemi on github
 --------------
@@ -227,7 +227,7 @@ https://github.com/harrism/hemi
 License and Copyright
 =====================
 
-Copyright 2012, NVIDIA Corporation
+Copyright 2012-2014, NVIDIA Corporation
 
 Licensed under the Apache License, v2.0.  Please see the LICENSE file included with the HEMI source code.
 
