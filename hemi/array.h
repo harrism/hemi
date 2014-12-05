@@ -1,12 +1,12 @@
 ///////////////////////////////////////////////////////////////////////////////
 // 
-// "HEMI" CUDA Portable C/C++ Utilities
+// "Hemi" CUDA Portable C/C++ Utilities
 // 
 // Copyright 2012-2014 NVIDIA Corporation
 //
-// License: Apache License, v2.0 http://www.apache.org/licenses/LICENSE-2.0.html
+// License: BSD License, see LICENSE file in Hemi home directory
 //
-// The home for HEMI is https://github.com/harrism/hemi
+// The home for Hemi is https://github.com/harrism/hemi
 //
 ///////////////////////////////////////////////////////////////////////////////
 // Please see the file README.md (https://github.com/harrism/hemi/README.md) 
