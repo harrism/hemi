@@ -79,6 +79,7 @@ cudaError_t checkCudaErrors()
       name ## _kernel<<< (gridDim) , (blockDim), (sharedBytes), (streamId) >>>(__VA_ARGS__)
   #endif
 
+  #define HEMI_LAUNCHABLE                 __global__
   #define HEMI_DEV_CALLABLE               __host__ __device__
   #define HEMI_DEV_CALLABLE_INLINE        __host__ __device__ inline
   #define HEMI_DEV_CALLABLE_MEMBER        __host__ __device__
@@ -120,6 +121,7 @@ cudaError_t checkCudaErrors()
   #define HEMI_KERNEL_NAME(name)          name
   #define HEMI_KERNEL_LAUNCH(name, gridDim, blockDim, sharedBytes, streamId, ...) name(__VA_ARGS__)
 
+  #define HEMI_LAUNCHABLE
   #define HEMI_DEV_CALLABLE               
   #define HEMI_DEV_CALLABLE_INLINE        inline
   #define HEMI_DEV_CALLABLE_MEMBER
@@ -145,6 +147,14 @@ cudaError_t checkCudaErrors()
   #endif
 
 #endif
+
+// Helper macro for defining device functors that can be launched as kernels
+#define HEMI_KERNEL_FUNCTION(name, ...)                \
+  struct name {                                             \
+      HEMI_DEV_CALLABLE_MEMBER void operator()(__VA_ARGS__) const;  \
+  };                                                        \
+  HEMI_DEV_CALLABLE_MEMBER void name::operator()(__VA_ARGS__) const
+;
 
 // Note: the following two functions demonstrate using the same code to process
 // 1D arrays of data/computations either with a parallel grid of threads on the 

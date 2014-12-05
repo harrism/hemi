@@ -13,6 +13,7 @@
 
 #include "timer.h"
 #include "hemi/hemi.h"
+#include "hemi/launch.h"
 
 const float      RISKFREE = 0.02f;
 const float    VOLATILITY = 0.30f;
@@ -42,10 +43,9 @@ float CND(float d)
 }
 
 // Black-Scholes formula for both call and put
-HEMI_KERNEL(BlackScholes)
-    (float *callResult, float *putResult, const float *stockPrice,
-     const float *optionStrike, const float *optionYears, float Riskfree,
-     float Volatility, int optN)
+HEMI_KERNEL_FUNCTION(BlackScholes, float *callResult, float *putResult, const float *stockPrice,
+                                   const float *optionStrike, const float *optionYears, float Riskfree,
+                                   float Volatility, int optN)
 {
     int offset = hemiGetElementOffset();
     int stride = hemiGetElementStride();
@@ -120,9 +120,6 @@ int main(int argc, char **argv)
 
     initOptions(OPT_N, stockPrice, optionStrike, optionYears);
         
-    int blockDim = 128; // blockDim, gridDim ignored by host code
-    int gridDim  = std::min<int>(1024, (OPT_N + blockDim - 1) / blockDim);
-
     printf("Running %s Version...\n", HEMI_LOC_STRING);
 
     StartTimer();
@@ -137,11 +134,11 @@ int main(int argc, char **argv)
     d_stockPrice   = stockPrice; 
     d_optionStrike = optionStrike;
     d_optionYears  = optionYears;
-#endif
+#endif   
+    BlackScholes bs;
 
-    HEMI_KERNEL_LAUNCH(BlackScholes, gridDim, blockDim, 0, 0,
-                       d_callResult, d_putResult, d_stockPrice, d_optionStrike, 
-                       d_optionYears, RISKFREE, VOLATILITY, OPT_N);
+    hemi::Launch(bs, d_callResult, d_putResult, d_stockPrice, d_optionStrike,
+                     d_optionYears, RISKFREE, VOLATILITY, OPT_N);
        
 #ifdef HEMI_CUDA_COMPILER 
     checkCuda( cudaMemcpy(callResult, d_callResult, OPT_SZ, cudaMemcpyDeviceToHost) );
