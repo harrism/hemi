@@ -1,3 +1,7 @@
+# Windows binaries
+*.exe
+*.exp
+
 # Compiled Object files
 *.slo
 *.lo
