@@ -43,9 +43,10 @@ float CND(float d)
 }
 
 // Black-Scholes formula for both call and put
-HEMI_KERNEL_FUNCTION(BlackScholes, float *callResult, float *putResult, const float *stockPrice,
-                                   const float *optionStrike, const float *optionYears, float Riskfree,
-                                   float Volatility, int optN)
+HEMI_LAUNCHABLE
+void BlackScholes(float *callResult, float *putResult, const float *stockPrice,
+                  const float *optionStrike, const float *optionYears, float Riskfree,
+                  float Volatility, int optN)
 {
     int offset = hemiGetElementOffset();
     int stride = hemiGetElementStride();
@@ -135,10 +136,10 @@ int main(int argc, char **argv)
     d_optionStrike = optionStrike;
     d_optionYears  = optionYears;
 #endif   
-    BlackScholes bs;
+    
 
-    hemi::Launch(bs, d_callResult, d_putResult, d_stockPrice, d_optionStrike,
-                     d_optionYears, RISKFREE, VOLATILITY, OPT_N);
+    hemi::cudaLaunch(BlackScholes, d_callResult, d_putResult, (const float*)d_stockPrice, (const float*)d_optionStrike,
+                     (const float*)d_optionYears, RISKFREE, VOLATILITY, OPT_N);
        
 #ifdef HEMI_CUDA_COMPILER 
     checkCuda( cudaMemcpy(callResult, d_callResult, OPT_SZ, cudaMemcpyDeviceToHost) );
