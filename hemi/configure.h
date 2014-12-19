@@ -14,7 +14,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 #pragma once
 
-//#ifdef HEMI_CUDA_COMPILER
 #include <cuda_occupancy.h>
 #include "execution_policy.h"
 

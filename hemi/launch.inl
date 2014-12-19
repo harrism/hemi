@@ -43,7 +43,7 @@ void launch(const ExecutionPolicy &policy, Function f, Arguments... args)
 {
 #ifdef HEMI_CUDA_COMPILER
     ExecutionPolicy p = policy;
-    checkCuda(configureGrid(policy, Kernel<Function>));
+    checkCuda(configureGrid(p, Kernel<Function>));
     Kernel<<<p.getGridSize(), p.getBlockSize(), p.getSharedMemBytes()>>>(f, args...);
 #else
     Kernel(f, args...);
