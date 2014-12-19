@@ -20,11 +20,13 @@
 *.lib
 
 # visual studio files
+*.deps
 *.suo
 *.pdb
 *.opensdf
 *.sdf
 *.vcxproj.user
+*.vcxproj.filters
 Debug/
 ipch/
 Release/
