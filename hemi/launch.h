@@ -14,31 +14,25 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "kernel.h"
 
-#ifdef HEMI_CUDA_COMPILER
-#include "configure.h"
-#endif
-
-
 namespace hemi {
 
-// Automatic Parallel Launch
+    class ExecutionPolicy; // forward decl
+
+    // Automatic parallel launch for function object
     template <typename Function, typename... Arguments>
-    void Launch(Function f, Arguments... args)
-    {
-#ifdef HEMI_CUDA_COMPILER
-        ExecutionPolicy p;
-        checkCuda(configureGrid(p, Kernel<Function, Arguments...>));
-        Kernel <<<p.getGridSize(), p.getBlockSize(), p.getSharedMemBytes() >>>(f, args...);
-#else
-        Kernel(f, args...);
-#endif
-    }
+    void launch(Function f, Arguments... args);
 
+    // Launch function object with an explicit execution policy / configuration
+    template <typename Function, typename... Arguments>
+    void launch(const ExecutionPolicy &p, Function f, Arguments... args);
 
-// Launch with an explicit execution policy / configuration
-//template <typename ExecutionPolicy, typename Function, typename... Arguments>
-//void Launch(const ExecutionPolicy &p, Function f, Arguments... args);
+    // Automatic parallel launch for CUDA __global__ functions
+    template <typename... Arguments>
+    void cudaLaunch(void(*f)(Arguments...), Arguments... args);
 
+    // Launch __global__ function with an explicit execution policy / configuration
+    template <typename... Arguments>
+    void cudaLaunch(const ExecutionPolicy &p, void(*f)(Arguments...), Arguments... args);
 }
 
-//#include "launch.inl"
+#include "launch.inl"

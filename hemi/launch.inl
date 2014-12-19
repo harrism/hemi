@@ -25,26 +25,25 @@ namespace hemi {
 // Automatic Launch functions for closures (functor or lambda)
 //
 template <typename Function, typename... Arguments>
-void Launch(Function f, Arguments... args)
+void launch(Function f, Arguments... args)
 {
 #ifdef HEMI_CUDA_COMPILER
     ExecutionPolicy p;
-    checkCuda(configureGrid(Kernel<Function, Arguments...>, p));
-    Kernel<<<p.getGridSize(), p.getBlockSize(), p.getSharedMemBytes()>>>(f, args...);
+    launch(p, f, args...);
 #else
     Kernel(f, args...);
 #endif
 }
 
 //
-// Launch with explicit configuration
+// Launch with explicit (or partial) configuration
 //
-/*template <typename Function, typename... Arguments>
-void Launch(const ExecutionPolicy &policy, Function f, Arguments... args)
+template <typename Function, typename... Arguments>
+void launch(const ExecutionPolicy &policy, Function f, Arguments... args)
 {
 #ifdef HEMI_CUDA_COMPILER
     ExecutionPolicy p = policy;
-    configureGrid(Kernel<Function>, policy);
+    checkCuda(configureGrid(policy, Kernel<Function>));
     Kernel<<<p.getGridSize(), p.getBlockSize(), p.getSharedMemBytes()>>>(f, args...);
 #else
     Kernel(f, args...);
@@ -54,27 +53,31 @@ void Launch(const ExecutionPolicy &policy, Function f, Arguments... args)
 //
 // Automatic launch functions for __global__ kernel function pointers: CUDA only
 //
-#ifdef HEMI_CUDA_COMPILER
 
 template <typename... Arguments>
-void Launch(void (*f)(Arguments...), Arguments... args)
+void cudaLaunch(void(*f)(Arguments... args), Arguments... args)
 {
+#ifdef HEMI_CUDA_COMPILER
     ExecutionPolicy p;
-    configureGrid(f, p);
-    f<<<p.getGridSize(), p.getBlockSize(), p.getSharedMemBytes()>>>(args...);
+    cudaLaunch(p, f, args...);
+#else
+    f(args...);
+#endif
 }
 
 //
 // Launch __global__ kernel function with explicit configuration
 //
-/*template <typename... Arguments>
-void Launch(const ExecutionPolicy &policy, void (*f)(Arguments...), Arguments... args)
+template <typename... Arguments>
+void cudaLaunch(const ExecutionPolicy &policy, void (*f)(Arguments...), Arguments... args)
 {
+#ifdef HEMI_CUDA_COMPILER
     ExecutionPolicy p = policy;
-    configureGrid(f, p);
+    checkCuda(configureGrid(p, f));
     f<<<p.getGridSize(), p.getBlockSize(), p.getSharedMemBytes()>>>(args...);
+#else
+    f(args...);
+#endif
 }
 
-#endif // HEMI_CUDA_COMPILER
-*/
 } // namespace hemi
