@@ -19,13 +19,11 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <CudaCompile Include="..\blackscholes.cpp">
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">-x cu %(AdditionalOptions)</AdditionalOptions>
-    </CudaCompile>
+    <ClCompile Include="..\..\blackscholes\blackscholes.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{3B4C8317-FAE1-4127-9B99-4EAEE771EBCA}</ProjectGuid>
-    <RootNamespace>blackscholes_device_vs2013</RootNamespace>
+    <ProjectGuid>{76FC37FF-C80B-4A49-A0F1-DB0461757C2E}</ProjectGuid>
+    <RootNamespace>blackscholes_host_vs2013</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -82,6 +80,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\;..\..\..\;%(AdditionalIncludeDirectories);$(CudaToolkitIncludeDir)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -92,9 +91,6 @@
       <Command>echo copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"
 copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
     </PostBuildEvent>
-    <CudaCompile>
-      <Include>..\..\;..\..\..\;$(CudaToolkitIncludeDir)</Include>
-    </CudaCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
