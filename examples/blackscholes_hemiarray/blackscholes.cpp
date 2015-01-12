@@ -13,6 +13,7 @@
 
 #include "timer.h"
 #include "hemi/hemi.h"
+#include "hemi/launch.h"
 #include "hemi/array.h"
 
 const float      RISKFREE = 0.02f;
@@ -43,8 +44,8 @@ float CND(float d)
 }
 
 // Black-Scholes formula for both call and put
-HEMI_KERNEL(BlackScholes)
-    (float *callResult, float *putResult, const float *stockPrice,
+HEMI_LAUNCHABLE
+void BlackScholes(float *callResult, float *putResult, const float *stockPrice,
      const float *optionStrike, const float *optionYears, float Riskfree,
      float Volatility, int optN)
 {
@@ -105,20 +106,16 @@ int main(int argc, char **argv)
                 optionStrike.writeOnlyHostPtr(),
                 optionYears.writeOnlyHostPtr());
             
-    int blockDim = 128; // blockDim, gridDim ignored by host code
-    int gridDim  = std::min<int>(1024, (OPT_N + blockDim - 1) / blockDim);
-
     printf("Running %s Version...\n", HEMI_LOC_STRING);
 
     StartTimer();
 
-    HEMI_KERNEL_LAUNCH(BlackScholes, gridDim, blockDim, 0, 0,
-                       callResult.writeOnlyPtr(), 
-                       putResult.writeOnlyPtr(), 
-                       stockPrice.readOnlyPtr(), 
-                       optionStrike.readOnlyPtr(), 
-                       optionYears.readOnlyPtr(), 
-                       RISKFREE, VOLATILITY, OPT_N);
+    hemi::cudaLaunch(BlackScholes, callResult.writeOnlyPtr(), 
+                     putResult.writeOnlyPtr(), 
+                     stockPrice.readOnlyPtr(), 
+                     optionStrike.readOnlyPtr(),
+                     optionYears.readOnlyPtr(), 
+                     RISKFREE, VOLATILITY, OPT_N);
 
     // force copy back to host if needed and print a sanity check
     printf("Option 0 call: %f\n", callResult.readOnlyPtr(hemi::host)[0]); 
