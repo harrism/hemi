@@ -60,7 +60,7 @@ public:
     }
     void setSharedMemBytes(size_t arg) { 
         mSharedMemBytes = arg; 
-        if (mSharedMemBytes > 0) mState |= SharedMem; 
+        mState |= SharedMem; 
     }
 
 private:
