@@ -37,3 +37,23 @@ Release/
 # sublime
 *.sublime-project
 *.sublime-workspace
+
+# tags
+.tags
+.tags_sorted_by_file
+
+# executables
+examples/blackscholes/bs_device
+examples/blackscholes/bs_host_g++
+examples/blackscholes/bs_host_nvcc
+examples/blackscholes_hemiarray/bs_device
+examples/blackscholes_hemiarray/bs_host_g++
+examples/blackscholes_hemiarray/bs_host_nvcc
+examples/blackscholes_hostdevice/blackscholes
+examples/blackscholes_nohemi/bs_device
+examples/blackscholes_nohemi/bs_host_g++
+examples/blackscholes_nohemi/bs_host_nvcc
+examples/nbody_vec4/nbody_vec4
+test/test_execution_policy
+test/test_execution_policy.dSYM
+
