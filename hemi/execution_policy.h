@@ -23,7 +23,7 @@ public:
         SharedMem = 1,
         BlockSize = 2,
         GridSize = 4,
-        Full = GridSize | BlockSize | SharedMem
+        FullManual = GridSize | BlockSize | SharedMem
     };
 
     ExecutionPolicy() 
