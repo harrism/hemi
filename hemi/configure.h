@@ -10,7 +10,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 // Please see the file README.md (https://github.com/harrism/hemi/README.md) 
-// for full documentation and discussion.
+// for fullManual documentation and discussion.
 ///////////////////////////////////////////////////////////////////////////////
 #pragma once
 
@@ -34,7 +34,7 @@ cudaError_t configureGrid(ExecutionPolicy &p, KernelFunc k)
 {
     int configState = p.getConfigState();
 
-    if (configState == ExecutionPolicy::Full) return cudaSuccess;
+    if (configState == ExecutionPolicy::FullManual) return cudaSuccess;
 
     cudaDeviceProp props;
     cudaFuncAttributes attribs;

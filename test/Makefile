@@ -15,7 +15,7 @@
 # Points to the root of Google Test, relative to where this file is.
 # Remember to tweak this if you move this file.
 GTEST_DIR = /Users/mharris/src/googletest
-HEMI_DIR = ../
+HEMI_DIR = ..
 CUDA_DIR := /usr/local/cuda
 
 # Flags passed to the preprocessor.
@@ -37,6 +37,8 @@ TESTS = test_execution_policy
 # definition.
 GTEST_HEADERS = $(GTEST_DIR)/include/gtest/*.h \
                 $(GTEST_DIR)/include/gtest/internal/*.h
+
+HEMI_HEADERS = $(HEMI_DIR)/hemi/*.h
 
 # House-keeping build targets.
 
@@ -72,6 +74,8 @@ gtest_main.a : gtest-all.o gtest_main.o
 # Builds a sample test.  A test should link with either gtest.a or
 # gtest_main.a, depending on whether it defines its own main()
 # function.
+
+test_execution_policy.cpp : $(HEMI_HEADERS)
 
 test_execution_policy : test_execution_policy.cpp gtest_main.a
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -I$(HEMI_DIR) -I$(CUDA_DIR)/include -lpthread $^ -o $@

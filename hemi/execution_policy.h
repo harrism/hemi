@@ -51,9 +51,11 @@ public:
     void setGridSize(int arg) { 
         mGridSize = arg;  
         if (mGridSize > 0) mState |= GridSize; 
+        else mState &= (FullManual - GridSize);
     }   
     void setBlockSize(int arg) { mBlockSize = arg; 
         if (mBlockSize > 0) mState |= BlockSize; 
+        else mState &= (FullManual - BlockSize);
     }
     void setMaxBlockSize(int arg) {
     	mMaxBlockSize = arg;
