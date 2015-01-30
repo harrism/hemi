@@ -2,3 +2,6 @@
 - [ ] Tests for cudaLaunch with and without nvcc
 - [ ] Tests for other APIs
 - [ ] Make nbody example work without CUDA
+- [ ] Provide portable utility functions for cudaDeviceReset, etc.
+- [ ] Fix/rename index accessors
+- [ ] Move accessors to device_api.h

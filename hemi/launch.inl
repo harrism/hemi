@@ -39,16 +39,19 @@ void launch(Function f, Arguments... args)
 // Launch with explicit (or partial) configuration
 //
 template <typename Function, typename... Arguments>
+#ifdef HEMI_CUDA_COMPILER
 void launch(const ExecutionPolicy &policy, Function f, Arguments... args)
 {
-#ifdef HEMI_CUDA_COMPILER
     ExecutionPolicy p = policy;
-    checkCuda(configureGrid(p, Kernel<Function>));
+    checkCuda(configureGrid(p, Kernel<Function, Arguments...>));
     Kernel<<<p.getGridSize(), p.getBlockSize(), p.getSharedMemBytes()>>>(f, args...);
-#else
-    Kernel(f, args...);
-#endif
 }
+#else
+void launch(const ExecutionPolicy&, Function f, Arguments... args)
+{
+    Kernel(f, args...);
+}
+#endif
 
 //
 // Automatic launch functions for __global__ kernel function pointers: CUDA only
@@ -69,15 +72,18 @@ void cudaLaunch(void(*f)(Arguments... args), Arguments... args)
 // Launch __global__ kernel function with explicit configuration
 //
 template <typename... Arguments>
+#ifdef HEMI_CUDA_COMPILER
 void cudaLaunch(const ExecutionPolicy &policy, void (*f)(Arguments...), Arguments... args)
 {
-#ifdef HEMI_CUDA_COMPILER
     ExecutionPolicy p = policy;
     checkCuda(configureGrid(p, f));
     f<<<p.getGridSize(), p.getBlockSize(), p.getSharedMemBytes()>>>(args...);
-#else
-    f(args...);
-#endif
 }
+#else
+void cudaLaunch(const ExecutionPolicy&, void (*f)(Arguments...), Arguments... args)
+{
+    f(args...);
+}
+#endif
 
 } // namespace hemi

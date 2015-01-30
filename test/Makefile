@@ -24,14 +24,14 @@ CUDA_DIR := /usr/local/cuda
 CPPFLAGS += -isystem $(GTEST_DIR)/include
 
 # Flags passed to the C++ compiler.
-CXXFLAGS += -g -Wall -Wextra -pthread
+CXXFLAGS += -g -Wall -Wextra -pthread --std=c++11
 
 # Flags passed to nvcc compiler.
-NVCCFLAGS += -g -arch=sm_30
+NVCCFLAGS += -g -arch=sm_30 --std=c++11
 
 # All tests produced by this Makefile.  Remember to add new tests you
 # created to the list.
-TESTS = test_execution_policy
+TESTS = test_execution_policy test_launch test_launch_cuda
 
 # All Google Test headers.  Usually you shouldn't change this
 # definition.
@@ -80,5 +80,8 @@ test_execution_policy.cpp : $(HEMI_HEADERS)
 test_execution_policy : test_execution_policy.cpp gtest_main.a
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -I$(HEMI_DIR) -I$(CUDA_DIR)/include -lpthread $^ -o $@
 
-test_Launch : test_Launch.cu gtest_main.a
-	nvcc $(CPPFLAGS) $(NVCCFLAGS) -I$(HEMI_DIR) -I$(CUDA_DIR)/include -lpthread $^ -o $@	
+test_launch : test_Launch.cpp gtest_main.a
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -I$(HEMI_DIR) -I$(CUDA_DIR)/include -lpthread $^ -o $@	
+
+test_launch_cuda : test_launch.cu gtest_main.a
+	nvcc $(CPPFLAGS) $(NVCCFLAGS) -I$(HEMI_DIR) -lpthread $^ -o $@
