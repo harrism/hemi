@@ -1,9 +1,8 @@
 #include "gtest/gtest.h"
 #include "hemi/launch.h"
 
-inline void ASSERT_SUCCESS(cudaError_t res) {
-	ASSERT_EQ(cudaSuccess, res);
-}
+#define ASSERT_SUCCESS(res) ASSERT_EQ(cudaSuccess, (res));
+#define ASSERT_FAILURE(res) ASSERT_NE(cudaSuccess, (res));
 
 struct Kernel {
 	template <typename... Arguments>
@@ -72,7 +71,7 @@ TEST_F(LaunchTest, AutoConfigMaximalLaunch) {
 
 	ASSERT_GE(gdim, smCount);
 	ASSERT_EQ(gdim%smCount, 0);
-	ASSERT_GE(bdim, 1);
+	ASSERT_GE(bdim, 32);
 }
 
 TEST_F(LaunchTest, ExplicitBlockSize) 
@@ -89,3 +88,31 @@ TEST_F(LaunchTest, ExplicitBlockSize)
 	ASSERT_EQ(bdim, 128);	
 }
 
+TEST_F(LaunchTest, ExplicitGridSize) 
+{
+	hemi::ExecutionPolicy ep;
+	ep.setGridSize(100);
+	hemi::launch(ep, kernel, dCount, dBdim, dGdim);
+	ASSERT_SUCCESS(cudaDeviceSynchronize());
+	ASSERT_SUCCESS(cudaMemcpy(&bdim, dBdim, sizeof(int), cudaMemcpyDefault));
+	ASSERT_SUCCESS(cudaMemcpy(&gdim, dGdim, sizeof(int), cudaMemcpyDefault));
+
+	ASSERT_EQ(gdim, 100);
+	ASSERT_GE(bdim, 32);	
+}
+
+TEST_F(LaunchTest, InvalidConfigShouldFail)
+{
+	// Fail due to block size too large
+	hemi::ExecutionPolicy ep;
+	ep.setBlockSize(10000);
+	hemi::launch(ep, kernel, dCount, dBdim, dGdim);
+	ASSERT_FAILURE(checkCudaErrors());
+
+	// Fail due to excessive shared memory size
+	ep.setBlockSize(0);
+	ep.setGridSize(0);
+	ep.setSharedMemBytes(1000000);
+	hemi::launch(ep, kernel, dCount, dBdim, dGdim);
+	ASSERT_FAILURE(checkCudaErrors());
+}
