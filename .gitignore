@@ -56,4 +56,8 @@ examples/blackscholes_nohemi/bs_host_nvcc
 examples/nbody_vec4/nbody_vec4
 test/test_execution_policy
 test/test_execution_policy.dSYM
+test/test_launch
+test/test_launch.dSYM
+test/test_launch_cuda
+test/test_launch_cuda.dSYM
 
