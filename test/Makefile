@@ -31,7 +31,7 @@ NVCCFLAGS += -g -arch=sm_30 --std=c++11
 
 # All tests produced by this Makefile.  Remember to add new tests you
 # created to the list.
-TESTS = test_execution_policy test_launch test_launch_cuda
+TESTS = test_execution_policy test_launch_host test_launch_device
 
 # All Google Test headers.  Usually you shouldn't change this
 # definition.
@@ -80,8 +80,8 @@ test_execution_policy.cpp : $(HEMI_HEADERS)
 test_execution_policy : test_execution_policy.cpp gtest_main.a
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -I$(HEMI_DIR) -I$(CUDA_DIR)/include -lpthread $^ -o $@
 
-test_launch : test_Launch.cpp gtest_main.a
+test_launch_host : test_Launch.cpp gtest_main.a
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -I$(HEMI_DIR) -I$(CUDA_DIR)/include -lpthread $^ -o $@	
 
-test_launch_cuda : test_launch.cu gtest_main.a
+test_launch_device : test_launch.cu gtest_main.a
 	nvcc $(CPPFLAGS) $(NVCCFLAGS) -I$(HEMI_DIR) -lpthread $^ -o $@
