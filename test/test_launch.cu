@@ -1,4 +1,4 @@
-#include "gtest/gtest.h"
+#include "hemi_test.h"
 #include "hemi/launch.h"
 
 #define ASSERT_SUCCESS(res) ASSERT_EQ(cudaSuccess, (res));

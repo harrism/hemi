@@ -80,10 +80,14 @@ cudaError_t checkCudaErrors()
   #endif
 
   #define HEMI_LAUNCHABLE                 __global__
+  #define HEMI_LAMBDA                     __device__
   #define HEMI_DEV_CALLABLE               __host__ __device__
   #define HEMI_DEV_CALLABLE_INLINE        __host__ __device__ inline
   #define HEMI_DEV_CALLABLE_MEMBER        __host__ __device__
   #define HEMI_DEV_CALLABLE_INLINE_MEMBER __host__ __device__ inline
+
+  // Memory specifiers
+  #define HEMI_MEM_DEVICE                 __device__
 
   // Constants: declares both a device and a host copy of this constant
   // static and extern flavors can be used to declare static and extern
@@ -122,10 +126,14 @@ cudaError_t checkCudaErrors()
   #define HEMI_KERNEL_LAUNCH(name, gridDim, blockDim, sharedBytes, streamId, ...) name(__VA_ARGS__)
 
   #define HEMI_LAUNCHABLE
+  #define HEMI_LAMBDA
   #define HEMI_DEV_CALLABLE               
   #define HEMI_DEV_CALLABLE_INLINE        inline
   #define HEMI_DEV_CALLABLE_MEMBER
   #define HEMI_DEV_CALLABLE_INLINE_MEMBER inline
+
+  // memory specifiers
+  #define HEMI_MEM_DEVICE
 
   #define HEMI_DEFINE_CONSTANT(def, value) def ## _hostconst = value
   #define HEMI_DEFINE_STATIC_CONSTANT(def, value) static def ## _hostconst = value
@@ -156,7 +164,15 @@ cudaError_t checkCudaErrors()
   HEMI_DEV_CALLABLE_MEMBER void name::operator()(__VA_ARGS__) const
 ;
 
-// Note: the following two functions demonstrate using the same code to process
+namespace hemi {
+
+void deviceSynchronize() {
+#ifdef HEMI_CUDA_COMPILER
+  cudaDeviceSynchronize();
+#endif
+}
+
+// Note: the following functions demonstrate using the same code to process
 // 1D arrays of data/computations either with a parallel grid of threads on the 
 // CUDA device, or with a sequential loop on the host. For example, we might 
 // use them like this.
@@ -242,5 +258,7 @@ cudaError_t checkCudaErrors()
   #endif
   }
 #endif
+
+} // namespace hemi
 
 #endif // __HEMI_H__

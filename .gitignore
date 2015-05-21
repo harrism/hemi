@@ -60,4 +60,21 @@ test/test_launch_host
 test/test_launch_host.dSYM
 test/test_launch_device
 test/test_launch_device.dSYM
+test/test_parallel_for_device
+test/test_parallel_for_device.dSYM/
+test/test_parallel_for_host
+test/test_parallel_for_host.dSYM/
+test/test_portable_launch_device
 
+
+test/test_portable_launch_host.dSYM/Contents/Resources/DWARF/test_portable_launch_host
+
+*.plist
+
+test/test_portable_launch_host
+
+test/test_launch.dSYM/Contents/Resources/DWARF/test_launch
+
+test/test_launch_cuda.dSYM/Contents/Resources/DWARF/test_launch_cuda
+
+test/test_launch

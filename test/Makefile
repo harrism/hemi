@@ -27,11 +27,16 @@ CPPFLAGS += -isystem $(GTEST_DIR)/include
 CXXFLAGS += -g -Wall -Wextra -pthread --std=c++11
 
 # Flags passed to nvcc compiler.
-NVCCFLAGS += -g -arch=sm_30 --std=c++11
+NVCCFLAGS += -g -arch=sm_30 --std=c++11 --extended-lambda
 
 # All tests produced by this Makefile.  Remember to add new tests you
 # created to the list.
-TESTS = test_execution_policy test_launch_host test_launch_device
+TESTS = test_execution_policy \
+        test_launch_device \
+        test_portable_launch_host \
+        test_portable_launch_device \
+        test_parallel_for_host \
+        test_parallel_for_device
 
 # All Google Test headers.  Usually you shouldn't change this
 # definition.
@@ -80,8 +85,28 @@ test_execution_policy.cpp : $(HEMI_HEADERS)
 test_execution_policy : test_execution_policy.cpp gtest_main.a
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -I$(HEMI_DIR) -I$(CUDA_DIR)/include -lpthread $^ -o $@
 
-test_launch_host : test_Launch.cpp gtest_main.a
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -I$(HEMI_DIR) -I$(CUDA_DIR)/include -lpthread $^ -o $@	
-
 test_launch_device : test_launch.cu gtest_main.a
 	nvcc $(CPPFLAGS) $(NVCCFLAGS) -I$(HEMI_DIR) -lpthread $^ -o $@
+
+test_portable_launch_host : test_portable_launch.cpp gtest_main.a
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -I$(HEMI_DIR) -I$(CUDA_DIR)/include -lpthread $^ -o $@	
+
+test_portable_launch_device : test_portable_launch.cpp
+	nvcc -x cu $(CPPFLAGS) $(NVCCFLAGS) -I$(HEMI_DIR) -I$(CUDA_DIR)/include $^ -c -o $@.o
+	nvcc $@.o gtest_main.a -lpthread -o $@
+
+test_parallel_for_host : test_parallel_for.cpp gtest_main.a
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -I$(HEMI_DIR) -I$(CUDA_DIR)/include -L$(CUDA_DIR)/lib -lpthread -lcudart $^ -o $@
+
+test_parallel_for_device : test_parallel_for.cpp
+	nvcc -x cu $(CPPFLAGS) $(NVCCFLAGS) -I$(HEMI_DIR) -I$(CUDA_DIR)/include $^ -c -o $@.o
+	nvcc $@.o gtest_main.a -lpthread -o $@
+
+test_test : test.cu
+	nvcc $(CPPFLAGS) $(NVCCFLAGS) -I$(HEMI_DIR) -I$(CUDA_DIR)/include $^ -c -o $@.o
+	nvcc $@.o gtest_main.a -lpthread -o $@
+
+clean:
+	rm -f *.o $(TESTS)
+	rm -rf *.dSYM
+	gtest.a
