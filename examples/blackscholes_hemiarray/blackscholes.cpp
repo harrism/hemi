@@ -13,7 +13,8 @@
 
 #include "timer.h"
 #include "hemi/hemi.h"
-#include "hemi/launch.h"
+#include "hemi/device_api.h"
+#include "hemi/parallel_for.h"
 #include "hemi/array.h"
 
 const float      RISKFREE = 0.02f;
@@ -44,15 +45,11 @@ float CND(float d)
 }
 
 // Black-Scholes formula for both call and put
-HEMI_LAUNCHABLE
 void BlackScholes(float *callResult, float *putResult, const float *stockPrice,
      const float *optionStrike, const float *optionYears, float Riskfree,
      float Volatility, int optN)
 {
-    int offset = hemiGetElementOffset();
-    int stride = hemiGetElementStride();
-
-    for(int opt = offset; opt < optN; opt += stride)
+    hemi::parallel_for(0, optN, [=] HEMI_LAMBDA (int opt)
     {
         float S = stockPrice[opt];
         float X = optionStrike[opt];
@@ -70,7 +67,7 @@ void BlackScholes(float *callResult, float *putResult, const float *stockPrice,
         float expRT = expf(- R * T);
         callResult[opt] = S * CNDD1 - X * expRT * CNDD2;
         putResult[opt]  = X * expRT * (1.0f - CNDD2) - S * (1.0f - CNDD1);
-    }
+    });
 }
 
 float RandFloat(float low, float high)
@@ -110,12 +107,12 @@ int main(int argc, char **argv)
 
     StartTimer();
 
-    hemi::cudaLaunch(BlackScholes, callResult.writeOnlyPtr(), 
-                     putResult.writeOnlyPtr(), 
-                     stockPrice.readOnlyPtr(), 
-                     optionStrike.readOnlyPtr(),
-                     optionYears.readOnlyPtr(), 
-                     RISKFREE, VOLATILITY, OPT_N);
+    BlackScholes(callResult.writeOnlyPtr(), 
+                 putResult.writeOnlyPtr(), 
+                 stockPrice.readOnlyPtr(), 
+                 optionStrike.readOnlyPtr(),
+                 optionYears.readOnlyPtr(), 
+                 RISKFREE, VOLATILITY, OPT_N);
 
     // force copy back to host if needed and print a sanity check
     printf("Option 0 call: %f\n", callResult.readOnlyPtr(hemi::host)[0]); 

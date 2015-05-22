@@ -13,7 +13,8 @@
 
 #include "timer.h"
 #include "hemi/hemi.h"
-#include "hemi/launch.h"
+#include "hemi/parallel_for.h"
+#include "hemi/device_api.h"
 
 const float      RISKFREE = 0.02f;
 const float    VOLATILITY = 0.30f;
@@ -43,15 +44,11 @@ float CND(float d)
 }
 
 // Black-Scholes formula for both call and put
-HEMI_LAUNCHABLE
 void BlackScholes(float *callResult, float *putResult, const float *stockPrice,
                   const float *optionStrike, const float *optionYears, float Riskfree,
                   float Volatility, int optN)
 {
-    int offset = hemiGetElementOffset();
-    int stride = hemiGetElementStride();
-
-    for(int opt = offset; opt < optN; opt += stride)
+    hemi::parallel_for(0, optN, [=] HEMI_LAMBDA (int opt)
     {
         float S = stockPrice[opt];
         float X = optionStrike[opt];
@@ -69,7 +66,7 @@ void BlackScholes(float *callResult, float *putResult, const float *stockPrice,
         float expRT = expf(- R * T);
         callResult[opt] = S * CNDD1 - X * expRT * CNDD2;
         putResult[opt]  = X * expRT * (1.0f - CNDD2) - S * (1.0f - CNDD1);
-    }
+    });
 }
 
 float RandFloat(float low, float high)
@@ -138,8 +135,8 @@ int main(int argc, char **argv)
 #endif   
     
 
-    hemi::cudaLaunch(BlackScholes, d_callResult, d_putResult, (const float*)d_stockPrice, (const float*)d_optionStrike,
-                     (const float*)d_optionYears, RISKFREE, VOLATILITY, OPT_N);
+    BlackScholes(d_callResult, d_putResult, (const float*)d_stockPrice, (const float*)d_optionStrike,
+                 (const float*)d_optionYears, RISKFREE, VOLATILITY, OPT_N);
        
 #ifdef HEMI_CUDA_COMPILER 
     checkCuda( cudaMemcpy(callResult, d_callResult, OPT_SZ, cudaMemcpyDeviceToHost) );

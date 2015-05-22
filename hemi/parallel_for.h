@@ -1,3 +1,4 @@
+#include "hemi.h"
 #include "launch.h"
 #include "grid_stride_range.h"
 
@@ -9,7 +10,7 @@ namespace hemi
 {
 	template <typename index_type, typename F>
 	void parallel_for(index_type first, index_type last, F function) {
-		hemi::launch([=] HEMI_LAMBDA() {
+		hemi::launch([=] HEMI_LAMBDA () {
 			for (auto idx : grid_stride_range(first, last)) function(idx);
 		});
 	}
