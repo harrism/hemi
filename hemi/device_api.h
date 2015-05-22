@@ -13,6 +13,9 @@
 // for full documentation and discussion.
 ///////////////////////////////////////////////////////////////////////////////
 
+#ifndef __HEMI_DEVICE_API_H__
+#define __HEMI_DEVICE_API_H__
+
 // Functions available inside "device" code (whether compiled for CUDA device
 // or CPU.)
 
@@ -87,3 +90,5 @@ namespace hemi
     #endif
     }
 }
+
+#endif // __HEMI_DEVICE_API_H__

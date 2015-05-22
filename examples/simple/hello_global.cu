@@ -1,17 +1,19 @@
 #include <stdio.h>
 #include "hemi/hemi.h"
 #include "hemi/launch.h"
+#include "hemi/device_api.h"
 
-__global__ void hello() { 
+HEMI_LAUNCHABLE
+void hello() { 
     printf("Hello World from thread %d of %d\n", 
-           hemiGetElementOffset(),
-           hemiGetElementStride());
+           hemi::globalThreadIndex(),
+           hemi::globalThreadCount());
 }
 
 int main(void) {
     hemi::cudaLaunch(hello);
 
-    checkCuda(cudaDeviceReset());
+    hemi::deviceSynchronize(); // make sure print flushes before exit
 
     return 0;
 }

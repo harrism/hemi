@@ -51,12 +51,16 @@ examples/blackscholes_hemiarray/bs_host
 examples/blackscholes_hemiarray/bs_host_nvcc
 examples/blackscholes_hostdevice/blackscholes
 examples/blackscholes_nohemi/bs_device
-examples/blackscholes_nohemi/bs_host_g++
+examples/blackscholes_nohemi/bs_host
 examples/blackscholes_nohemi/bs_host_nvcc
 examples/nbody_vec4/nbody_vec4
 examples/parallel_for/parallel_for_device
 examples/parallel_for/parallel_for_host
 examples/parallel_for/parallel_for_host_nvcc
+examples/simple/hello_device
+examples/simple/hello_global
+examples/simple/hello_host
+examples/simple/hello_host_nvcc
 
 test/test_execution_policy
 test/test_execution_policy.dSYM

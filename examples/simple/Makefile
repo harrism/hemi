@@ -20,7 +20,7 @@ endif
 
 LIB_FLAGS += -lcudart
 
-STD := -std=c++11
+STD := --std=c++11
 
 CXX_FLAGS  := $(STD) -I../ -I../../ -I$(CUDA_PATH)/include 
 
@@ -32,20 +32,23 @@ CXX_FLAGS  := $(STD) -I../ -I../../ -I$(CUDA_PATH)/include
 CXX_FLAGS += -O3
 
 CXX_FLAGS += $(DEBUG_FLAGS)
-NVCC_FLAGS := $(CXX_FLAGS) $(DEBUG_FLAGS_NVCC)
 
 NVCC_FLAGS := $(CXX_FLAGS) $(DEBUG_FLAGS_NVCC)
 
-all: bs_device bs_host_nvcc bs_host
+all: hello_device hello_host_nvcc hello_host hello_global
 
-bs_device: blackscholes.cpp
-	$(NVCC) blackscholes.cpp $(NVCC_FLAGS) $(LIB_FLAGS) -x cu -o bs_device
+hello_device: hello.cpp
+	$(NVCC) $? $(NVCC_FLAGS) $(LIB_FLAGS) -x cu -o $@
 
-bs_host_nvcc: blackscholes.cpp
-	$(NVCC) blackscholes.cpp $(CXX_FLAGS) $(LIB_FLAGS) -x c++ -o bs_host_nvcc
+hello_host_nvcc: hello.cpp
+	$(NVCC) $? $(CXX_FLAGS) $(LIB_FLAGS) -x c++ -o $@
 
-bs_host: blackscholes.cpp
-	$(CXX) blackscholes.cpp $(CXX_FLAGS) $(LIB_FLAGS) -o bs_host
+hello_host: hello.cpp
+	$(CXX) $? $(CXX_FLAGS)  $(LIB_FLAGS) -o $@
+
+hello_global: hello_global.cu
+	$(NVCC) $? $(NVCC_FLAGS) $(LIB_FLAGS) -x cu -o $@
+
 
 clean:
-	rm -rf bs_device bs_host_nvcc bs_host
+	rm -rf hello_device hello_host hello_host_nvcc hello_global

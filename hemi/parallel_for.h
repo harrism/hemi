@@ -1,3 +1,6 @@
+#ifndef __HEMI_PARALLEL_FOR_H__
+#define __HEMI_PARALLEL_FOR_H__
+
 #include "hemi.h"
 #include "launch.h"
 #include "grid_stride_range.h"
@@ -15,3 +18,5 @@ namespace hemi
 		});
 	}
 }
+
+#endif // __HEMI_PARALLEL_FOR_H__
