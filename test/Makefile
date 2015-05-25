@@ -102,10 +102,6 @@ test_parallel_for_device : test_parallel_for.cpp
 	nvcc -x cu $(CPPFLAGS) $(NVCCFLAGS) -I$(HEMI_DIR) -I$(CUDA_DIR)/include $^ -c -o $@.o
 	nvcc $@.o gtest_main.a -lpthread -o $@
 
-test_test : test.cu
-	nvcc $(CPPFLAGS) $(NVCCFLAGS) -I$(HEMI_DIR) -I$(CUDA_DIR)/include $^ -c -o $@.o
-	nvcc $@.o gtest_main.a -lpthread -o $@
-
 clean:
 	rm -f *.o $(TESTS)
 	rm -rf *.dSYM
