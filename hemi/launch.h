@@ -12,6 +12,9 @@
 // Please see the file README.md (https://github.com/harrism/hemi/README.md) 
 // for full documentation and discussion.
 ///////////////////////////////////////////////////////////////////////////////
+#ifndef __HEMI_LAUNCH_H__
+#define __HEMI_LAUNCH_H__
+
 #include "kernel.h"
 
 namespace hemi {
@@ -36,3 +39,5 @@ namespace hemi {
 }
 
 #include "launch.inl"
+
+#endif // __HEMI_LAUNCH_H__

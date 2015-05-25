@@ -80,10 +80,14 @@ cudaError_t checkCudaErrors()
   #endif
 
   #define HEMI_LAUNCHABLE                 __global__
+  #define HEMI_LAMBDA                     __device__
   #define HEMI_DEV_CALLABLE               __host__ __device__
   #define HEMI_DEV_CALLABLE_INLINE        __host__ __device__ inline
   #define HEMI_DEV_CALLABLE_MEMBER        __host__ __device__
   #define HEMI_DEV_CALLABLE_INLINE_MEMBER __host__ __device__ inline
+
+  // Memory specifiers
+  #define HEMI_MEM_DEVICE                 __device__
 
   // Constants: declares both a device and a host copy of this constant
   // static and extern flavors can be used to declare static and extern
@@ -122,10 +126,14 @@ cudaError_t checkCudaErrors()
   #define HEMI_KERNEL_LAUNCH(name, gridDim, blockDim, sharedBytes, streamId, ...) name(__VA_ARGS__)
 
   #define HEMI_LAUNCHABLE
+  #define HEMI_LAMBDA
   #define HEMI_DEV_CALLABLE               
   #define HEMI_DEV_CALLABLE_INLINE        inline
   #define HEMI_DEV_CALLABLE_MEMBER
   #define HEMI_DEV_CALLABLE_INLINE_MEMBER inline
+
+  // memory specifiers
+  #define HEMI_MEM_DEVICE
 
   #define HEMI_DEFINE_CONSTANT(def, value) def ## _hostconst = value
   #define HEMI_DEFINE_STATIC_CONSTANT(def, value) static def ## _hostconst = value
@@ -156,91 +164,14 @@ cudaError_t checkCudaErrors()
   HEMI_DEV_CALLABLE_MEMBER void name::operator()(__VA_ARGS__) const
 ;
 
-// Note: the following two functions demonstrate using the same code to process
-// 1D arrays of data/computations either with a parallel grid of threads on the 
-// CUDA device, or with a sequential loop on the host. For example, we might 
-// use them like this.
-//
-//  int offset = hemiGetElementOffset();
-//  int stride = hemiGetElementStride();
-// 
-//  for(int idx = offset; idx < N; idx += stride)
-//    processElement(elementsOut, elementsIn, idx, anotherArgument);
-//
+namespace hemi {
 
-#ifdef __INTEL_COMPILER
-  // Intel OpenMP compiler is not happy with functions in omp parallel for loops, so 
-  // use macros
-  #define hemiGetElementOffset() 0
-  #define hemiGetElementXOffset() 0
-  #define hemiGetElementYOffset() 0
-  #define hemiGetElementStride() 1
-  #define hemiGetElementXStride() 1
-  #define hemiGetElementYStride() 1
-#else
-  // Returns the offset of the current thread's element within the grid for device
-  // code compiled with NVCC, or 0 for sequential host code.
-  HEMI_DEV_CALLABLE_INLINE
-  int hemiGetElementOffset() 
-  {
-  #ifdef HEMI_DEV_CODE
-    return blockIdx.x * blockDim.x + threadIdx.x;
-  #else
-    return 0;
+  inline void deviceSynchronize() {
+  #ifdef HEMI_CUDA_COMPILER
+    checkCuda(cudaDeviceSynchronize());
   #endif
   }
 
-  // Returns the offset of the current thread's X element within the grid for device
-  // code compiled with NVCC, or 0 for sequential host code.
-  HEMI_DEV_CALLABLE_INLINE
-  int hemiGetElementXOffset() 
-  {
-    return hemiGetElementOffset();
-  }
-
-  // Returns the offset of the current thread's Y element within the grid for device
-  // code compiled with NVCC, or 0 for sequential host code.
-  HEMI_DEV_CALLABLE_INLINE
-  int hemiGetElementYOffset() 
-  {
-  #ifdef HEMI_DEV_CODE
-    return blockIdx.y * blockDim.y + threadIdx.y;
-  #else
-    return 0;
-  #endif
-  }
-
-  // Returns the stride of the current grid (blockDim.x * gridDim.x) for device 
-  // code compiled with NVCC, or 1 for sequential host code.
-  HEMI_DEV_CALLABLE_INLINE
-  int hemiGetElementStride() 
-  {
-  #ifdef HEMI_DEV_CODE
-    return blockDim.x * gridDim.x;
-  #else
-    return 1;
-  #endif
-  }
-
-  // Returns the stride of the current grid (blockDim.x * gridDim.x) for device 
-  // code compiled with NVCC, or 1 for sequential host code.
-  HEMI_DEV_CALLABLE_INLINE
-  int hemiGetElementXStride() 
-  {
-    return hemiGetElementStride();
-  }
-
-  // Returns the stride of the current grid (blockDim.x * gridDim.x) for device 
-  // code compiled with NVCC, or 1 for sequential host code.
-  HEMI_DEV_CALLABLE_INLINE
-  int hemiGetElementYStride() 
-  {
-  #ifdef HEMI_DEV_CODE
-    return blockDim.y * gridDim.y;
-  #else
-    return 1;
-  #endif
-  }
-#endif
+} // namespace hemi
 
 #endif // __HEMI_H__

@@ -2,6 +2,7 @@
 #define __BS_SHARED_H__
 
 #include "hemi/hemi.h"
+#include "hemi/grid_stride_range.h"
 #include <math.h>
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -38,10 +39,7 @@ HEMI_KERNEL(BlackScholes)
      float *optionStrike, float *optionYears, float riskFree,
      float volatility, int optN)
 {
-    int offset = hemiGetElementOffset();
-    int stride = hemiGetElementStride();
-
-    for(int opt = offset; opt < optN; opt += stride)
+    for(int opt : hemi::grid_stride_range(0, optN))
     {
         float S = stockPrice[opt];
         float X = optionStrike[opt];

@@ -1,11 +1,12 @@
 #include <stdio.h>
 #include "hemi/hemi.h"
 #include "hemi/launch.h"
+#include "hemi/device_api.h"
 
 HEMI_KERNEL_FUNCTION(hello) {
     printf("Hello World from thread %d of %d\n",
-           hemiGetElementOffset(),
-           hemiGetElementStride());
+           hemi::globalThreadIndex(),
+           hemi::globalThreadCount());
 }
 
 int main(void) {
@@ -14,7 +15,7 @@ int main(void) {
 
     hemi::launch(hi);
 
-    checkCuda(cudaDeviceReset());
+    hemi::deviceSynchronize(); // make sure print flushes before exit
 
     hi(); // call on CPU
 

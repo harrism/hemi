@@ -20,7 +20,7 @@ endif
 
 LIB_FLAGS += -lcudart
 
-STD := -std=c++11
+STD := --std=c++11
 
 CXX_FLAGS  := $(STD) -I../ -I../../ -I$(CUDA_PATH)/include 
 
@@ -32,18 +32,19 @@ CXX_FLAGS  := $(STD) -I../ -I../../ -I$(CUDA_PATH)/include
 CXX_FLAGS += -O3
 
 CXX_FLAGS += $(DEBUG_FLAGS)
+
 NVCC_FLAGS := $(CXX_FLAGS) $(DEBUG_FLAGS_NVCC) --extended-lambda
 
-all: bs_device bs_host_nvcc bs_host
+all: parallel_for_device parallel_for_host parallel_for_host_nvcc
 
-bs_device: blackscholes.cpp
-	$(NVCC) blackscholes.cpp $(NVCC_FLAGS) $(LIB_FLAGS) -x cu -o bs_device
+parallel_for_device: parallel_for.cpp
+	$(NVCC) $? $(NVCC_FLAGS) $(LIB_FLAGS) -x cu -o $@
 
-bs_host_nvcc: blackscholes.cpp
-	$(NVCC) blackscholes.cpp $(CXX_FLAGS) $(LIB_FLAGS) -x c++ -o bs_host_nvcc
+parallel_for_host_nvcc: parallel_for.cpp
+	$(NVCC) $? $(CXX_FLAGS) $(LIB_FLAGS) -x c++ -o $@
 
-bs_host: blackscholes.cpp
-	$(CXX) blackscholes.cpp $(CXX_FLAGS) $(LIB_FLAGS) -o bs_host
+parallel_for_host: parallel_for.cpp
+	$(CXX) $? $(CXX_FLAGS)  $(LIB_FLAGS) -o $@
 
 clean:
-	rm -rf bs_device bs_host_nvcc bs_host
+	rm -rf parallel_for_device parallel_for_host_nvcc parallel_for_host

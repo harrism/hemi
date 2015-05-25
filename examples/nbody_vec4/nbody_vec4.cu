@@ -1,5 +1,6 @@
 #define HEMI_DEBUG
 #include "hemi/launch.h"
+#include "hemi/grid_stride_range.h"
 #include "vec4f.h"
 #include "nbody.h"
 #include <stdio.h>
@@ -37,9 +38,7 @@ Vec4f accumulateForce(const Vec4f &target, const Vec4f *bodies, int N)
 HEMI_LAUNCHABLE
 void allPairsForces(Vec4f *forceVectors, const Vec4f *bodies, int N)
 {
-  for (int idx = blockDim.x * blockIdx.x + threadIdx.x;
-       idx < N;
-       idx += blockDim.x * gridDim.x)
+  for (auto idx : hemi::grid_stride_range(0, N))
     forceVectors[idx] = accumulateForce(bodies[idx], bodies, N);
 }
 
@@ -50,14 +49,12 @@ void allPairsForcesShared(Vec4f *forceVectors, const Vec4f *bodies, int N)
 {
   extern __shared__ Vec4f jBodies[];
 
-  for (int idx = blockDim.x * blockIdx.x + threadIdx.x;
-       idx < N;
-       idx += blockDim.x * gridDim.x)
+  for (auto idx : hemi::grid_stride_range(0, N))
   {
     Vec4f iBody = bodies[idx];
     Vec4f force = Vec4f(0, 0, 0, 0);
    
-    for (int tile = 0; tile < N / blockDim.x; tile++) 
+    for (auto tile : range((unsigned)0, N / blockDim.x))
     {
       jBodies[threadIdx.x] = bodies[tile * blockDim.x + threadIdx.x];
 

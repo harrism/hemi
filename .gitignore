@@ -44,20 +44,39 @@ Release/
 
 # executables
 examples/blackscholes/bs_device
-examples/blackscholes/bs_host_g++
+examples/blackscholes/bs_host
 examples/blackscholes/bs_host_nvcc
 examples/blackscholes_hemiarray/bs_device
-examples/blackscholes_hemiarray/bs_host_g++
+examples/blackscholes_hemiarray/bs_host
 examples/blackscholes_hemiarray/bs_host_nvcc
 examples/blackscholes_hostdevice/blackscholes
 examples/blackscholes_nohemi/bs_device
-examples/blackscholes_nohemi/bs_host_g++
+examples/blackscholes_nohemi/bs_host
 examples/blackscholes_nohemi/bs_host_nvcc
 examples/nbody_vec4/nbody_vec4
+examples/parallel_for/parallel_for_device
+examples/parallel_for/parallel_for_host
+examples/parallel_for/parallel_for_host_nvcc
+examples/simple/hello_device
+examples/simple/hello_global
+examples/simple/hello_host
+examples/simple/hello_host_nvcc
+
 test/test_execution_policy
 test/test_execution_policy.dSYM
 test/test_launch_host
 test/test_launch_host.dSYM
 test/test_launch_device
 test/test_launch_device.dSYM
+test/test_parallel_for_device
+test/test_parallel_for_device.dSYM/
+test/test_parallel_for_host
+test/test_parallel_for_host.dSYM/
+test/test_portable_launch_device
+test/test_portable_launch_host.dSYM/
+test/test_portable_launch_host
+test/test_launch.dSYM/
+test/test_launch
+
+*.plist
 
