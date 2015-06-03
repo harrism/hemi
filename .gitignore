@@ -61,6 +61,7 @@ examples/simple/hello_device
 examples/simple/hello_global
 examples/simple/hello_host
 examples/simple/hello_host_nvcc
+examples/simple/*.dSYM
 
 test/test_execution_policy
 test/test_execution_policy.dSYM
