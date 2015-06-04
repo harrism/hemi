@@ -166,9 +166,11 @@ cudaError_t checkCudaErrors()
 
 namespace hemi {
 
-  inline void deviceSynchronize() {
+  inline cudaError_t deviceSynchronize() {
   #ifdef HEMI_CUDA_COMPILER
-    checkCuda(cudaDeviceSynchronize());
+    return checkCuda(cudaDeviceSynchronize());
+  #else
+    return cudaSuccess;
   #endif
   }
 
