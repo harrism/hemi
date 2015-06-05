@@ -33,9 +33,11 @@ CXX_FLAGS += -O3
 
 CXX_FLAGS += $(DEBUG_FLAGS)
 
-NVCC_FLAGS := $(CXX_FLAGS) $(DEBUG_FLAGS_NVCC)
+NVCC_FLAGS := $(CXX_FLAGS) $(DEBUG_FLAGS_NVCC) --extended-lambda
 
-all: hello_device hello_host_nvcc hello_host hello_global
+EXES := hello_device hello_host_nvcc hello_host hello_global saxpy_host saxpy_device
+
+all: $(EXES)
 
 hello_device: hello.cpp
 	$(NVCC) $? $(NVCC_FLAGS) $(LIB_FLAGS) -x cu -o $@
@@ -49,6 +51,12 @@ hello_host: hello.cpp
 hello_global: hello_global.cu
 	$(NVCC) $? $(NVCC_FLAGS) $(LIB_FLAGS) -x cu -o $@
 
+saxpy_host: saxpy.cpp
+	$(CXX) $? $(CXX_FLAGS) $(LIB_FLAGS) -o $@
+
+saxpy_device: saxpy.cpp
+	$(NVCC) $? $(NVCC_FLAGS) $(LIB_FLAGS) -x cu -o $@
+
 
 clean:
-	rm -rf hello_device hello_host hello_host_nvcc hello_global
+	rm -f $(EXES)

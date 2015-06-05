@@ -15,7 +15,7 @@
 # Points to the root of Google Test, relative to where this file is.
 # Remember to tweak this if you move this file.
 GTEST_DIR = /Users/mharris/src/googletest
-HEMI_DIR = ..
+HEMI_DIR = ../
 CUDA_DIR := /usr/local/cuda
 
 # Flags passed to the preprocessor.
@@ -36,7 +36,9 @@ TESTS = test_execution_policy \
         test_portable_launch_host \
         test_portable_launch_device \
         test_parallel_for_host \
-        test_parallel_for_device
+        test_parallel_for_device \
+        test_array_host \
+        test_array_device
 
 # All Google Test headers.  Usually you shouldn't change this
 # definition.
@@ -51,6 +53,7 @@ all : $(TESTS)
 
 clean :
 	rm -f $(TESTS) gtest.a gtest_main.a *.o
+	rm -rf *.dSYM
 
 # Builds gtest.a and gtest_main.a.
 
@@ -102,7 +105,11 @@ test_parallel_for_device : test_parallel_for.cpp
 	nvcc -x cu $(CPPFLAGS) $(NVCCFLAGS) -I$(HEMI_DIR) -I$(CUDA_DIR)/include $^ -c -o $@.o
 	nvcc $@.o gtest_main.a -lpthread -o $@
 
-clean:
-	rm -f *.o $(TESTS)
-	rm -rf *.dSYM
-	gtest.a
+test_array_host: test_array.cpp gtest_main.a
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -I$(HEMI_DIR) -I$(CUDA_DIR)/include -L$(CUDA_DIR)/lib -lpthread -lcudart $^ -o $@
+
+test_array_device: test_array.cpp 
+	nvcc -x cu $(CPPFLAGS) $(NVCCFLAGS) -I$(HEMI_DIR) -I$(CUDA_DIR)/include $^ -c -o $@.o
+	nvcc $@.o gtest_main.a -lpthread -o $@
+
+

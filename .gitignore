@@ -61,22 +61,21 @@ examples/simple/hello_device
 examples/simple/hello_global
 examples/simple/hello_host
 examples/simple/hello_host_nvcc
+examples/simple/saxpy_host
+examples/simple/saxpy_device
 
 test/test_execution_policy
-test/test_execution_policy.dSYM
 test/test_launch_host
-test/test_launch_host.dSYM
 test/test_launch_device
-test/test_launch_device.dSYM
 test/test_parallel_for_device
-test/test_parallel_for_device.dSYM/
 test/test_parallel_for_host
-test/test_parallel_for_host.dSYM/
 test/test_portable_launch_device
-test/test_portable_launch_host.dSYM/
 test/test_portable_launch_host
 test/test_launch.dSYM/
 test/test_launch
+test/test_array_device
+test/test_array_host
 
 *.plist
+*.dSYM
 

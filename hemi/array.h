@@ -39,7 +39,7 @@ namespace hemi {
     class Array 
     {
     public:
-        Array(size_t n, bool usePinned) : 
+        Array(size_t n, bool usePinned=true) : 
           nSize(n), 
           hPtr(0),
           dPtr(0),
