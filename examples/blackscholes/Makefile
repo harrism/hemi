@@ -16,6 +16,8 @@ STD := -std=c++11
 
 CXX_FLAGS  := $(STD) -I../ -I../../
 
+HOST_ONLY_FLAGS := -DHEMI_CUDA_DISABLE
+
 # uncomment for debug
 #DEBUG_FLAGS := -g -DDEBUG
 #DEBUG_FLAGS_NVCC := -G
@@ -32,10 +34,10 @@ bs_device: blackscholes.cpp
 	$(NVCC) blackscholes.cpp $(NVCC_FLAGS) -x cu -o bs_device
 
 bs_host_nvcc: blackscholes.cpp
-	$(NVCC) blackscholes.cpp $(CXX_FLAGS) -x c++ -o bs_host_nvcc
+	$(NVCC) blackscholes.cpp $(CXX_FLAGS) $(HOST_ONLY_FLAGS) -x c++ -o bs_host_nvcc
 
 bs_host: blackscholes.cpp
-	$(CXX) blackscholes.cpp $(CXX_FLAGS) -o bs_host
+	$(CXX) blackscholes.cpp $(CXX_FLAGS) $(HOST_ONLY_FLAGS) -o bs_host
 
 clean:
 	rm -rf bs_device bs_host_nvcc bs_host
