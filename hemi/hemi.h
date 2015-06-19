@@ -15,10 +15,6 @@
 #ifndef __HEMI_H__
 #define __HEMI_H__
 
-#include <stdio.h>
-#include <assert.h>
-#include "cuda_runtime_api.h"
-
 /* HEMI_VERSION encodes the version number of the HEMI utilities.
  *
  *   HEMI_VERSION / 100000 is the major version.
@@ -26,37 +22,13 @@
  */
 #define HEMI_VERSION 100000
 
-// Convenience function for checking CUDA runtime API results
-// can be wrapped around any runtime API call. No-op in release builds.
-inline
-cudaError_t checkCuda(cudaError_t result)
-{
-#if defined(DEBUG) || defined(_DEBUG)
-  if (result != cudaSuccess) {
-    fprintf(stderr, "CUDA Runtime Error: %s\n", cudaGetErrorString(result));
-    assert(result == cudaSuccess);
-  }
-#endif
-  return result;
-}
+// Note: when compiling on a system without CUDA installed
+// be sure to define this macro. Can also be used to disable CUDA 
+// device execution on systems with CUDA installed.
+// #define HEMI_CUDA_DISABLE
 
-// Convenience function for checking CUDA error state including 
-// errors caused by asynchronous calls (like kernel launches). Note that
-// this causes device synchronization, but is a no-op in release builds.
-inline
-cudaError_t checkCudaErrors()
-{
-  cudaError_t result = cudaSuccess;
-  checkCuda(result = cudaGetLastError()); // runtime API errors
-#if defined(DEBUG) || defined(_DEBUG)
-  result = cudaDeviceSynchronize(); // async kernel launch errors
-  if (result != cudaSuccess)
-    fprintf(stderr, "CUDA Launch Error: %s\n", cudaGetErrorString(result));  
-#endif
-  return result;
-}
+#if !defined(HEMI_CUDA_DISABLE) && defined(__CUDACC__) // CUDA compiler
 
-#ifdef __CUDACC__ // CUDA compiler
   #define HEMI_CUDA_COMPILER              // to detect CUDACC compilation
   #define HEMI_LOC_STRING "Device"
 
@@ -69,14 +41,14 @@ cudaError_t checkCudaErrors()
   
   #if defined(DEBUG) || defined(_DEBUG)
     #define HEMI_KERNEL_LAUNCH(name, gridDim, blockDim, sharedBytes, streamId, ...) \
-      do {                                                                     \
+    do {                                                                     \
         name ## _kernel<<< (gridDim), (blockDim), (sharedBytes), (streamId) >>>\
             (__VA_ARGS__);                                                     \
         checkCudaErrors();                                                     \
-      } while(0)
+    } while(0)
   #else
     #define HEMI_KERNEL_LAUNCH(name, gridDim, blockDim, sharedBytes, streamId, ...) \
-      name ## _kernel<<< (gridDim) , (blockDim), (sharedBytes), (streamId) >>>(__VA_ARGS__)
+        name ## _kernel<<< (gridDim) , (blockDim), (sharedBytes), (streamId) >>>(__VA_ARGS__)
   #endif
 
   #define HEMI_LAUNCHABLE                 __global__
@@ -164,15 +136,18 @@ cudaError_t checkCudaErrors()
   HEMI_DEV_CALLABLE_MEMBER void name::operator()(__VA_ARGS__) const
 ;
 
+#include "hemi_error.h"
+
 namespace hemi {
 
-  inline cudaError_t deviceSynchronize() {
-  #ifdef HEMI_CUDA_COMPILER
-    return checkCuda(cudaDeviceSynchronize());
-  #else
-    return cudaSuccess;
-  #endif
-  }
+    inline hemi::Error_t deviceSynchronize() 
+    {
+#ifdef HEMI_CUDA_COMPILER
+        if (cudaSuccess != checkCuda(cudaDeviceSynchronize()))
+            return hemi::cudaError; 
+#endif
+        return hemi::success;
+    }
 
 } // namespace hemi
 

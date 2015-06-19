@@ -8,21 +8,15 @@ NVCC := nvcc
 
 ifeq ($(HOST_OS),darwin)
 	CXX := clang++
-	CUDA_PATH ?= /Developer/NVIDIA/CUDA-7.0
-	LIB_FLAGS := -L$(CUDA_PATH)/lib
 else
 	CXX := g++
-	CUDA_PATH ?= /usr/local/cuda
-	LIB_FLAGS_32 := -L$(CUDA_PATH)/lib
-	LIB_FLAGS_64 := -L$(CUDA_PATH)/lib64
-	LIB_FLAGS := $(LIB_FLAGS_$(ARCH))
 endif
-
-LIB_FLAGS += -lcudart
 
 STD := --std=c++11
 
-CXX_FLAGS  := $(STD) -I../ -I../../ -I$(CUDA_PATH)/include 
+CXX_FLAGS  := $(STD) -I../../
+
+HOST_ONLY_FLAGS := -DHEMI_CUDA_DISABLE
 
 # uncomment for debug
 #DEBUG_FLAGS := -g -DDEBUG
@@ -35,28 +29,39 @@ CXX_FLAGS += $(DEBUG_FLAGS)
 
 NVCC_FLAGS := $(CXX_FLAGS) $(DEBUG_FLAGS_NVCC) --extended-lambda
 
-EXES := hello_device hello_host_nvcc hello_host hello_global saxpy_host saxpy_device
+EXES := hello_device hello_host_nvcc hello_host \
+		hello_lambda_device hello_lambda_host_nvcc hello_lambda_host \
+        hello_global \
+        saxpy_host saxpy_device
 
 all: $(EXES)
 
 hello_device: hello.cpp
-	$(NVCC) $? $(NVCC_FLAGS) $(LIB_FLAGS) -x cu -o $@
+	$(NVCC) $? $(NVCC_FLAGS) -x cu -o $@
 
 hello_host_nvcc: hello.cpp
-	$(NVCC) $? $(CXX_FLAGS) $(LIB_FLAGS) -x c++ -o $@
+	$(NVCC) $? $(CXX_FLAGS) -x c++ -o $@
 
 hello_host: hello.cpp
-	$(CXX) $? $(CXX_FLAGS)  $(LIB_FLAGS) -o $@
+	$(CXX) $? $(CXX_FLAGS) $(HOST_ONLY_FLAGS) -o $@
+
+hello_lambda_device: hello_lambda.cpp
+	$(NVCC) $? $(NVCC_FLAGS) -x cu -o $@
+
+hello_lambda_host_nvcc: hello_lambda.cpp
+	$(NVCC) $? $(CXX_FLAGS) -x c++ -o $@
+
+hello_lambda_host: hello_lambda.cpp
+	$(CXX) $? $(CXX_FLAGS) $(HOST_ONLY_FLAGS) -o $@
 
 hello_global: hello_global.cu
-	$(NVCC) $? $(NVCC_FLAGS) $(LIB_FLAGS) -x cu -o $@
+	$(NVCC) $? $(NVCC_FLAGS) -x cu -o $@
 
 saxpy_host: saxpy.cpp
-	$(CXX) $? $(CXX_FLAGS) $(LIB_FLAGS) -o $@
+	$(CXX) $? $(CXX_FLAGS) $(HOST_ONLY_FLAGS) -o $@
 
 saxpy_device: saxpy.cpp
-	$(NVCC) $? $(NVCC_FLAGS) $(LIB_FLAGS) -x cu -o $@
-
+	$(NVCC) $? $(NVCC_FLAGS) -x cu -o $@
 
 clean:
 	rm -f $(EXES)

@@ -8,21 +8,15 @@ NVCC := nvcc
 
 ifeq ($(HOST_OS),darwin)
 	CXX := clang++
-	CUDA_PATH ?= /Developer/NVIDIA/CUDA-7.0
-	LIB_FLAGS := -L$(CUDA_PATH)/lib
 else
 	CXX := g++
-	CUDA_PATH ?= /usr/local/cuda
-	LIB_FLAGS_32 := -L$(CUDA_PATH)/lib
-	LIB_FLAGS_64 := -L$(CUDA_PATH)/lib64
-	LIB_FLAGS := $(LIB_FLAGS_$(ARCH))
 endif
-
-LIB_FLAGS += -lcudart
 
 STD := --std=c++11
 
-CXX_FLAGS  := $(STD) -I../ -I../../ -I$(CUDA_PATH)/include 
+CXX_FLAGS  := $(STD) -I../ -I../../
+
+HOST_ONLY_FLAGS := -DHEMI_CUDA_DISABLE
 
 # uncomment for debug
 #DEBUG_FLAGS := -g -DDEBUG
@@ -38,13 +32,13 @@ NVCC_FLAGS := $(CXX_FLAGS) $(DEBUG_FLAGS_NVCC) --extended-lambda
 all: parallel_for_device parallel_for_host parallel_for_host_nvcc
 
 parallel_for_device: parallel_for.cpp
-	$(NVCC) $? $(NVCC_FLAGS) $(LIB_FLAGS) -x cu -o $@
+	$(NVCC) $? $(NVCC_FLAGS) -x cu -o $@
 
 parallel_for_host_nvcc: parallel_for.cpp
-	$(NVCC) $? $(CXX_FLAGS) $(LIB_FLAGS) -x c++ -o $@
+	$(NVCC) $? $(CXX_FLAGS) -x c++ -o $@
 
 parallel_for_host: parallel_for.cpp
-	$(CXX) $? $(CXX_FLAGS)  $(LIB_FLAGS) -o $@
+	$(CXX) $? $(CXX_FLAGS) $(HOST_ONLY_FLAGS) -o $@
 
 clean:
 	rm -rf parallel_for_device parallel_for_host_nvcc parallel_for_host
