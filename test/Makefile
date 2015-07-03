@@ -8,7 +8,7 @@ NVCC := nvcc
 
 ifeq ($(HOST_OS),darwin)
 	CXX := clang++
-	CUDA_PATH ?= /Developer/NVIDIA/CUDA-7.0
+	CUDA_PATH ?= /usr/local/cuda
 	LIB_FLAGS := -L$(CUDA_PATH)/lib
 else
 	CXX := g++
@@ -33,7 +33,7 @@ CPPFLAGS += -isystem $(GTEST_DIR)/include
 CXXFLAGS += -g -Wall -Wextra -pthread --std=c++11
 
 # Flags passed to nvcc compiler.
-NVCCFLAGS += -g -arch=sm_30 --std=c++11 --extended-lambda
+NVCCFLAGS += -g -arch=sm_30 --std=c++11 --expt-extended-lambda
 
 # All tests produced by this Makefile.  Remember to add new tests you
 # created to the list.

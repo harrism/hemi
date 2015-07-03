@@ -8,7 +8,7 @@ NVCC := nvcc
 
 ifeq ($(HOST_OS),darwin)
 	CXX := clang++
-	CUDA_PATH ?= /Developer/NVIDIA/CUDA-7.0
+	CUDA_PATH ?= /usr/local/cuda
 	LIB_FLAGS := -L$(CUDA_PATH)/lib
 else
 	CXX) := g++

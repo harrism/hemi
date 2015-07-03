@@ -27,7 +27,7 @@ CXX_FLAGS += -O3
 
 CXX_FLAGS += $(DEBUG_FLAGS)
 
-NVCC_FLAGS := $(CXX_FLAGS) $(DEBUG_FLAGS_NVCC) --extended-lambda
+NVCC_FLAGS := $(CXX_FLAGS) $(DEBUG_FLAGS_NVCC) --expt-extended-lambda
 
 all: parallel_for_device parallel_for_host parallel_for_host_nvcc
 

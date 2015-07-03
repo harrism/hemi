@@ -27,7 +27,7 @@ CXX_FLAGS += -O3
 
 CXX_FLAGS += $(DEBUG_FLAGS)
 
-NVCC_FLAGS := $(CXX_FLAGS) $(DEBUG_FLAGS_NVCC) --extended-lambda
+NVCC_FLAGS := $(CXX_FLAGS) $(DEBUG_FLAGS_NVCC) --expt-extended-lambda
 
 EXES := hello_device hello_host_nvcc hello_host \
 		hello_lambda_device hello_lambda_host_nvcc hello_lambda_host \
