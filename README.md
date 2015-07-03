@@ -13,12 +13,17 @@ Hemi simplifies writing portable CUDA C/C++ code. In the screenshot below, the c
 Current Version
 ---------------
 
-This is version: 1.0 (HEMI_VERSION == 100000)
+This is version: 2.0 (HEMI_VERSION == 200000)
 
 Hemi on github
 --------------
 
 The home for Hemi is https://github.com/harrism/hemi, where you can find the latest changes and information.
+
+Requirements
+------------
+
+Hemi requires a host compiler with support for C++11. For CUDA device execution, Hemi requires CUDA 7.0 or later. To launch lambda expressions on the device, Hemi requires CUDA 7.5 or later with experimental support for "extended lambdas".
 
 hemi/hemi.h
 -----------
@@ -227,7 +232,7 @@ https://github.com/harrism/hemi
 License and Copyright
 =====================
 
-Copyright 2012-2014, NVIDIA Corporation
+Copyright 2012-2015, NVIDIA Corporation
 
 Licensed under the BSD License. Please see the LICENSE file included with the HEMI source code.
 

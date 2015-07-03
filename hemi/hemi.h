@@ -20,7 +20,7 @@
  *   HEMI_VERSION / 100000 is the major version.
  *   HEMI_VERSION / 100 % 1000 is the minor version.
  */
-#define HEMI_VERSION 100000
+#define HEMI_VERSION 200000
 
 // Note: when compiling on a system without CUDA installed
 // be sure to define this macro. Can also be used to disable CUDA 
