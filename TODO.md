@@ -1,4 +1,4 @@
-- [ ] Add streams to ExecutionPolicy
+- [x] Add streams to ExecutionPolicy
 - [ ] Add version of parallel_for with an ExecutionPolicy
 - [ ] Make nbody example work without CUDA
 - [x] Tests for cudaLaunch with and without nvcc

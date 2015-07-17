@@ -60,6 +60,9 @@
   // Memory specifiers
   #define HEMI_MEM_DEVICE                 __device__
 
+  // Stream type
+  typedef cudaStream_t hemiStream_t;
+
   // Constants: declares both a device and a host copy of this constant
   // static and extern flavors can be used to declare static and extern
   // linkage as required.
@@ -105,6 +108,9 @@
 
   // memory specifiers
   #define HEMI_MEM_DEVICE
+
+  // Stream type
+  typedef int hemiStream_t;
 
   #define HEMI_DEFINE_CONSTANT(def, value) def ## _hostconst = value
   #define HEMI_DEFINE_STATIC_CONSTANT(def, value) static def ## _hostconst = value

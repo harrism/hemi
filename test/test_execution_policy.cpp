@@ -100,7 +100,7 @@ TEST(ExecutionPolicyTest, StateReflectsConfiguration) {
 	EXPECT_EQ (0, p.getSharedMemBytes());
 
     // Full Manual Configuration
-    p = ExecutionPolicy(1, 256, 10);
+    p = ExecutionPolicy{1, 256, 10};
     configState = p.getConfigState();
     EXPECT_EQ (ExecutionPolicy::FullManual, configState);
     EXPECT_NE (ExecutionPolicy::Automatic, configState);
@@ -157,4 +157,8 @@ TEST(ExecutionPolicyTest, StateReflectsConfiguration) {
 	configState = p.getConfigState();
 	EXPECT_EQ(0, configState & ExecutionPolicy::GridSize);
 	EXPECT_EQ(0, configState & ExecutionPolicy::BlockSize);
+
+    // Setting stream (trivial)
+    p.setStream(1);
+    EXPECT_EQ(1, p.getStream());
 }

@@ -37,7 +37,8 @@ NVCCFLAGS += -g -arch=sm_30 --std=c++11 --expt-extended-lambda
 
 # All tests produced by this Makefile.  Remember to add new tests you
 # created to the list.
-TESTS = test_execution_policy \
+TESTS = test_execution_policy_host \
+        test_execution_policy_device \
         test_launch_device \
         test_portable_launch_host \
         test_portable_launch_device \
@@ -85,15 +86,14 @@ gtest.a : gtest-all.o
 gtest_main.a : gtest-all.o gtest_main.o
 	$(AR) $(ARFLAGS) $@ $^
 
-# Builds a sample test.  A test should link with either gtest.a or
-# gtest_main.a, depending on whether it defines its own main()
-# function.
+# Build tests
 
-test_execution_policy.cpp : $(HEMI_HEADERS)
-
-test_execution_policy : test_execution_policy.cpp gtest_main.a
+test_execution_policy_host : test_execution_policy.cpp gtest_main.a
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(LIB_FLAGS) -I$(HEMI_DIR) -I$(CUDA_DIR)/include -lpthread $^ -o $@
 
+test_execution_policy_device : test_execution_policy.cpp gtest_main.a
+	nvcc $(CPPFLAGS) $(NVCCFLAGS) -I$(HEMI_DIR) -lpthread $^ -o $@
+	
 test_launch_device : test_launch.cu gtest_main.a
 	nvcc $(CPPFLAGS) $(NVCCFLAGS) -I$(HEMI_DIR) -lpthread $^ -o $@
 

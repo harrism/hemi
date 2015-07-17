@@ -14,6 +14,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 #pragma once
 
+#include "hemi/hemi.h"
+
 namespace hemi {
 
 class ExecutionPolicy {
@@ -30,13 +32,22 @@ public:
     : mState(Automatic), 
       mGridSize(0), 
       mBlockSize(0), 
-      mSharedMemBytes(0) {}
+      mSharedMemBytes(0),
+      mStream((hemiStream_t)0) {}
     
     ExecutionPolicy(int gridSize, int blockSize, size_t sharedMemBytes)
-    : mState(0) {
+    : mState(0), mStream(0) {
       setGridSize(gridSize);
       setBlockSize(blockSize);
       setSharedMemBytes(sharedMemBytes);  
+    }
+
+    ExecutionPolicy(int gridSize, int blockSize, size_t sharedMemBytes, hemiStream_t stream)
+    : mState(0) {
+      setGridSize(gridSize);
+      setBlockSize(blockSize);
+      setSharedMemBytes(sharedMemBytes);
+      setStream(stream);
     }
           
     ~ExecutionPolicy() {}
@@ -47,6 +58,7 @@ public:
     int    getBlockSize()      const { return mBlockSize;      }
     int    getMaxBlockSize()   const { return mMaxBlockSize;   }
     size_t getSharedMemBytes() const { return mSharedMemBytes; }
+    hemiStream_t getStream()   const { return mStream; }
  
     void setGridSize(int arg) { 
         mGridSize = arg;  
@@ -64,6 +76,9 @@ public:
         mSharedMemBytes = arg; 
         mState |= SharedMem; 
     }
+    void setStream(hemiStream_t stream) {
+        mStream = stream;
+    }
 
 private:
     int    mState;
@@ -71,6 +86,7 @@ private:
     int    mBlockSize;
     int    mMaxBlockSize;
     size_t mSharedMemBytes;
+    hemiStream_t mStream;
 };
 
 }

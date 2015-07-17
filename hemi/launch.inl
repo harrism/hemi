@@ -44,7 +44,10 @@ void launch(const ExecutionPolicy &policy, Function f, Arguments... args)
 {
     ExecutionPolicy p = policy;
     checkCuda(configureGrid(p, Kernel<Function, Arguments...>));
-    Kernel<<<p.getGridSize(), p.getBlockSize(), p.getSharedMemBytes()>>>(f, args...);
+    Kernel<<<p.getGridSize(), 
+             p.getBlockSize(), 
+             p.getSharedMemBytes(), 
+             p.getStream()>>>(f, args...);
 }
 #else
 void launch(const ExecutionPolicy&, Function f, Arguments... args)
@@ -77,7 +80,10 @@ void cudaLaunch(const ExecutionPolicy &policy, void (*f)(Arguments...), Argument
 {
     ExecutionPolicy p = policy;
     checkCuda(configureGrid(p, f));
-    f<<<p.getGridSize(), p.getBlockSize(), p.getSharedMemBytes()>>>(args...);
+    f<<<p.getGridSize(), 
+        p.getBlockSize(), 
+        p.getSharedMemBytes(),
+        p.getStream()>>>(args...);
 }
 #else
 void cudaLaunch(const ExecutionPolicy&, void (*f)(Arguments...), Arguments... args)
