@@ -39,14 +39,14 @@ NVCC_FLAGS := $(CXX_FLAGS) $(DEBUG_FLAGS_NVCC)
 %.o : %.cpp
 	$(CXX)  -c $< -o $@ $(CXX_FLAGS)
 
-%.cuo : %.cu
-	$(NVCC) -c $< -o $@ $(NVCC_FLAGS)
+%.cuo : %.cpp
+	$(NVCC) -x cu -c $< -o $@ $(NVCC_FLAGS)
 
 EXE := blackscholes
 
 all: $(EXE)
 
-OBJS := blackscholes.o blackscholes.cuo
+OBJS := blackscholes_launch.o blackscholes_launch.cuo blackscholes.o 
 
 $(EXE) : $(OBJS)
 	$(CXX) $(OBJS) $(CXX_FLAGS) $(LIB_FLAGS) -o $@

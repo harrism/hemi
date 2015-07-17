@@ -17,9 +17,13 @@ const float      RISKFREE = 0.02f;
 const float    VOLATILITY = 0.30f;
 
 // Process an array of optN options on CUDA device
-void BlackScholesCuda(float *callResult, float *putResult, float *stockPrice,
-                      float *optionStrike, float *optionYears, float Riskfree,
-                      float Volatility, int optN);
+void BlackScholesLaunch_device(float *callResult, float *putResult, float *stockPrice,
+                               float *optionStrike, float *optionYears, float Riskfree,
+                               float Volatility, int optN);
+
+void BlackScholesLaunch_host(float *callResult, float *putResult, float *stockPrice,
+                            float *optionStrike, float *optionYears, float Riskfree,
+                            float Volatility, int optN);
 
 float RandFloat(float low, float high)
 {
@@ -59,8 +63,8 @@ int main(int argc, char **argv)
 
     StartTimer();
     
-    BlackScholes(callResult, putResult, stockPrice, optionStrike,
-                 optionYears, RISKFREE, VOLATILITY, OPT_N);
+    BlackScholesLaunch_host(callResult, putResult, stockPrice, optionStrike,
+                            optionYears, RISKFREE, VOLATILITY, OPT_N);
 
     printf("Option 0 call: %f\n", callResult[0]); 
     printf("Option 0 put:  %f\n", putResult[0]);
@@ -90,7 +94,7 @@ int main(int argc, char **argv)
     cudaMemcpy(d_optionStrike, optionStrike, OPT_SZ, cudaMemcpyHostToDevice);
     cudaMemcpy(d_optionYears, optionYears, OPT_SZ, cudaMemcpyHostToDevice);
 
-    BlackScholesCuda(d_callResult, d_putResult, d_stockPrice, d_optionStrike, 
+    BlackScholesLaunch_device(d_callResult, d_putResult, d_stockPrice, d_optionStrike, 
                      d_optionYears, RISKFREE, VOLATILITY, OPT_N);
    
     cudaMemcpy(callResult, d_callResult, OPT_SZ, cudaMemcpyDeviceToHost);

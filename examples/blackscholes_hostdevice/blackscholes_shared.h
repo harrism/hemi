@@ -1,5 +1,4 @@
-#ifndef __BS_SHARED_H__
-#define __BS_SHARED_H__
+#pragma once
 
 #include "hemi/hemi.h"
 #include "hemi/grid_stride_range.h"
@@ -35,9 +34,9 @@ float CND(float d)
 // Black-Scholes formula for both call and put
 ///////////////////////////////////////////////////////////////////////////////
 HEMI_KERNEL(BlackScholes)
-    (float *callResult, float *putResult, float *stockPrice,
-     float *optionStrike, float *optionYears, float riskFree,
-     float volatility, int optN)
+           (float *callResult, float *putResult, float *stockPrice,
+            float *optionStrike, float *optionYears, float riskFree,
+            float volatility, int optN)
 {
     for(int opt : hemi::grid_stride_range(0, optN))
     {
@@ -59,5 +58,3 @@ HEMI_KERNEL(BlackScholes)
         putResult[opt]  = X * expRT * (1.0f - CNDD2) - S * (1.0f - CNDD1);
     }
 }
-
-#endif // __BS_SHARED_H__
