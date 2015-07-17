@@ -1,12 +1,28 @@
-Hemi: CUDA Portable C/C++ Utilities
-===================================
+Hemi: Simpler, More Portable CUDA C++
+=====================================
 
 Read about Hemi on the [NVIDIA Parallel Forall Blog](http://devblogs.nvidia.com/parallelforall/developing-portable-cuda-cc-code-hemi/).
 
 [<img align="right" src="https://raw.github.com/harrism/hemi/master/hemi-logo-transparent.png" width="272" height="152"/>](https://raw.github.com/harrism/hemi/master/hemi-logo.png)
-CUDA C/C++ and the NVIDIA NVCC compiler toolchain support a number of features designed to make it easier to write portable code, including language integration of host and device code and data, declaration specifiers (e.g. `__host__` and `__device__`) and preprocessor definitions (`__CUDACC__`). These features combine to enable developers to write code that can be compiled and run on either the host, the device, or both. Other compilers don't recognize these features, however, so to really write portable code, we need preprocessor macros. This is where Hemi comes in.
+Hemi simplifies writing portable CUDA C/C++ code. With Hemi, 
 
-Hemi simplifies writing portable CUDA C/C++ code. In the screenshot below, the code shown on the left is a simple black scholes code written to be compilable with either NVCC or a standard C++ host compiler, and also runnable on either the CPU or GPU. The right column is the same code written using Hemi's macros and smart heterogeneous Array container class, `hemi::Array`. Using Hemi, the length of this code is reduced by half.
+ - You can write parallel loops in-line in your CPU code, and run them on your GPU;
+ - You can easily write code that compiles and runs either on the CPU or GPU;
+ - You can easily launch C++ Lambda functions as GPU kernels;
+ - Launch configuration details like thread block size are an optimization detail, rather than a requirement;
+
+With Hemi, parallel code for the GPU can be as simple as the `parallel_for` loop in the following code, which can also be compiled and run on the CPU.
+
+```
+void saxpy(int n, float a, const float *x, float *y)
+{
+  hemi::parallel_for(0, n, [=] HEMI_LAMBDA (int i) {
+      y[i] = a * x[i] + y[i];
+  }); 
+}
+```
+
+In the screenshot below, the code shown on the left is a simple black scholes code written to be compilable with either NVCC or a standard C++ host compiler, and also runnable on either the CPU or GPU. The right column is the same code written using Hemi's macros and smart heterogeneous Array container class, `hemi::Array`. Using Hemi, the length of this code is reduced by half.
 
 ![Hemi simplifies portable CUDA C/C++ code](https://raw.github.com/harrism/hemi/master/hemi_simplifies_portable_cuda.png)
 
@@ -23,17 +39,23 @@ The home for Hemi is https://github.com/harrism/hemi, where you can find the lat
 Requirements
 ------------
 
-Hemi requires a host compiler with support for C++11. For CUDA device execution, Hemi requires CUDA 7.0 or later. To launch lambda expressions on the device, Hemi requires CUDA 7.5 or later with experimental support for "extended lambdas".
+Hemi requires a host compiler with support for C++11 or later. For CUDA device execution, Hemi requires CUDA 7.0 or later. To launch lambda expressions on the GPU using `hemi::launch()` or `hemi::parallel_for()`, Hemi requires CUDA 7.5 or later with experimental support for "extended lambdas" (enabled using the `nvcc` command line option `--expt-extended-lambda`).
+
+
+
+GPU Lambdas and Parallel For
+----------------------------
+
+Hemi 
 
 hemi/hemi.h
 -----------
 
-The hemi.h header provides simple macros that are useful for reusing code between CUDA C/C++ and C/C++ written for other platforms (e.g. CPUs). 
+The `hemi.h` header provides simple macros that are useful for reusing code between CUDA C/C++ and C/C++ written for other platforms (e.g. CPUs). 
 
 The macros are used to decorate function prototypes and variable declarations so that they can be compiled by either NVCC or a host compiler (for example gcc or cl.exe, the MS Visual Studio compiler). 
  
-The macros can be used within .cu, .cuh, .cpp, .h, and .inl files to define code that can
-be compiled either for the host (e.g., CPU) or the device (e.g., GPU). 
+The macros can be used within .cu, .cuh, .cpp, .h, and .inl files to define code that can be compiled either for the host (e.g., CPU) or the device (e.g., GPU). 
 
 hemi/array.h
 ------------

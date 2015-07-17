@@ -2,7 +2,7 @@
 // 
 // "Hemi" CUDA Portable C/C++ Utilities
 // 
-// Copyright 2012-2014 NVIDIA Corporation
+// Copyright 2012-2015 NVIDIA Corporation
 //
 // License: BSD License, see LICENSE file in Hemi home directory
 //

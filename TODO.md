@@ -1,7 +1,8 @@
 - [ ] Add streams to ExecutionPolicy
-- [ ] Tests for cudaLaunch with and without nvcc
-- [ ] Tests for other APIs
+- [ ] Add version of parallel_for with an ExecutionPolicy
 - [ ] Make nbody example work without CUDA
-- [ ] Provide portable utility functions for cudaDeviceReset, etc.
-- [ ] Fix/rename index accessors
-- [ ] Move accessors to device_api.h
+- [x] Tests for cudaLaunch with and without nvcc
+- [x] Tests for other APIs
+- [x] Provide portable utility functions for cudaDeviceReset, etc.
+- [x] Fix/rename index accessors
+- [x] Move accessors to device_api.h

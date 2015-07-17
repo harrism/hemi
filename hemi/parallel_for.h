@@ -1,5 +1,18 @@
-#ifndef __HEMI_PARALLEL_FOR_H__
-#define __HEMI_PARALLEL_FOR_H__
+///////////////////////////////////////////////////////////////////////////////
+// 
+// "Hemi" CUDA Portable C/C++ Utilities
+// 
+// Copyright 2012-2015 NVIDIA Corporation
+//
+// License: BSD License, see LICENSE file in Hemi home directory
+//
+// The home for Hemi is https://github.com/harrism/hemi
+//
+///////////////////////////////////////////////////////////////////////////////
+// Please see the file README.md (https://github.com/harrism/hemi/README.md) 
+// for full documentation and discussion.
+///////////////////////////////////////////////////////////////////////////////
+#pragma once
 
 #include "hemi.h"
 #include "launch.h"
@@ -18,5 +31,3 @@ namespace hemi
 		});
 	}
 }
-
-#endif // __HEMI_PARALLEL_FOR_H__

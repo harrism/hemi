@@ -2,7 +2,7 @@
 // 
 // "Hemi" CUDA Portable C/C++ Utilities
 // 
-// Copyright 2012-2014 NVIDIA Corporation
+// Copyright 2012-2015 NVIDIA Corporation
 //
 // License: BSD License, see LICENSE file in Hemi home directory
 //
@@ -12,9 +12,7 @@
 // Please see the file README.md (https://github.com/harrism/hemi/README.md) 
 // for full documentation and discussion.
 ///////////////////////////////////////////////////////////////////////////////
-
-#ifndef __HEMI_DEVICE_API_H__
-#define __HEMI_DEVICE_API_H__
+#pragma once
 
 // Functions available inside "device" code (whether compiled for CUDA device
 // or CPU.)
@@ -90,5 +88,3 @@ namespace hemi
     #endif
     }
 }
-
-#endif // __HEMI_DEVICE_API_H__
