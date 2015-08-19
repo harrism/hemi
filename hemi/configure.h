@@ -19,6 +19,7 @@
 
 namespace hemi {
 
+inline
 size_t availableSharedBytesPerBlock(size_t sharedMemPerMultiprocessor,
                                     size_t sharedSizeBytesStatic,
                                     int blocksPerSM,

@@ -14,7 +14,7 @@ struct k {
 	}
 };
 
-TEST(LaunchTest, KernelFunction_AutoConfig) {
+TEST(PortableLaunchTest, KernelFunction_AutoConfig) {
 	k<int> kernel;
 	hemi::launch(kernel, 1);
 }

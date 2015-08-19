@@ -37,15 +37,16 @@ NVCCFLAGS += -g -arch=sm_30 --std=c++11 --expt-extended-lambda
 
 # All tests produced by this Makefile.  Remember to add new tests you
 # created to the list.
-TESTS = test_execution_policy_host \
-        test_execution_policy_device \
-        test_launch_device \
-        test_portable_launch_host \
-        test_portable_launch_device \
-        test_parallel_for_host \
-        test_parallel_for_device \
-        test_array_host \
-        test_array_device
+TESTS_HOST = test_execution_policy_host \
+	test_portable_launch_host \
+	test_parallel_for_host \
+	test_array_host
+
+TESTS_DEVICE = test_execution_policy_device \
+	test_launch_device \
+	test_portable_launch_device \
+	test_parallel_for_device \
+	test_array_device
 
 # All Google Test headers.  Usually you shouldn't change this
 # definition.
@@ -56,10 +57,10 @@ HEMI_HEADERS = $(HEMI_DIR)/hemi/*.h
 
 # House-keeping build targets.
 
-all : $(TESTS)
+all : test_hemi_device test_hemi_host
 
 clean :
-	rm -f $(TESTS) gtest.a gtest_main.a *.o
+	rm -f test_hemi_device test_hemi_host gtest.a gtest_main.a *.o
 	rm -rf *.dSYM
 
 # Builds gtest.a and gtest_main.a.
@@ -88,34 +89,36 @@ gtest_main.a : gtest-all.o gtest_main.o
 
 # Build tests
 
-test_execution_policy_host : test_execution_policy.cpp gtest_main.a
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(LIB_FLAGS) -I$(HEMI_DIR) -I$(CUDA_DIR)/include -lpthread $^ -o $@
+test_execution_policy_host.o: test_execution_policy.cpp
+	$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) -I$(HEMI_DIR) -I$(CUDA_DIR)/include $^ -o $@
 
-test_execution_policy_device : test_execution_policy.cpp gtest_main.a
-	nvcc $(CPPFLAGS) $(NVCCFLAGS) -I$(HEMI_DIR) -lpthread $^ -o $@
+test_execution_policy_device.o: test_execution_policy.cpp
+	nvcc -c $(CPPFLAGS) $(NVCCFLAGS) -I$(HEMI_DIR) $^ -o $@
 	
-test_launch_device : test_launch.cu gtest_main.a
-	nvcc $(CPPFLAGS) $(NVCCFLAGS) -I$(HEMI_DIR) -lpthread $^ -o $@
+test_launch_device.o: test_launch.cu
+	nvcc -c $(CPPFLAGS) $(NVCCFLAGS) -I$(HEMI_DIR) $^ -o $@
 
-test_portable_launch_host : test_portable_launch.cpp gtest_main.a
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(LIB_FLAGS) -I$(HEMI_DIR) -I$(CUDA_DIR)/include -lpthread $^ -o $@	
+test_portable_launch_host.o: test_portable_launch.cpp
+	$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) -I$(HEMI_DIR) -I$(CUDA_DIR)/include  $^ -o $@	
 
-test_portable_launch_device : test_portable_launch.cpp
-	nvcc -x cu $(CPPFLAGS) $(NVCCFLAGS) -I$(HEMI_DIR) -I$(CUDA_DIR)/include $^ -c -o $@.o
-	nvcc $@.o gtest_main.a -lpthread -o $@
+test_portable_launch_device.o: test_portable_launch.cpp
+	nvcc -x cu $(CPPFLAGS) $(NVCCFLAGS) -I$(HEMI_DIR) -I$(CUDA_DIR)/include $^ -c -o $@
 
-test_parallel_for_host : test_parallel_for.cpp gtest_main.a
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(LIB_FLAGS) -I$(HEMI_DIR) -I$(CUDA_DIR)/include -L$(CUDA_DIR)/lib -lpthread -lcudart $^ -o $@
+test_parallel_for_host.o: test_parallel_for.cpp
+	$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) -I$(HEMI_DIR) -I$(CUDA_DIR)/include -L$(CUDA_DIR)/lib  -lcudart $^ -o $@
 
-test_parallel_for_device : test_parallel_for.cpp
-	nvcc -x cu $(CPPFLAGS) $(NVCCFLAGS) -I$(HEMI_DIR) -I$(CUDA_DIR)/include $^ -c -o $@.o
-	nvcc $@.o gtest_main.a -lpthread -o $@
+test_parallel_for_device.o: test_parallel_for.cpp
+	nvcc -x cu $(CPPFLAGS) $(NVCCFLAGS) -I$(HEMI_DIR) -I$(CUDA_DIR)/include $^ -c -o $@
 
-test_array_host: test_array.cpp gtest_main.a
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(LIB_FLAGS) -I$(HEMI_DIR) -I$(CUDA_DIR)/include -L$(CUDA_DIR)/lib -lpthread -lcudart $^ -o $@
+test_array_host.o: test_array.cpp
+	$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) -I$(HEMI_DIR) -I$(CUDA_DIR)/include -L$(CUDA_DIR)/lib  -lcudart $^ -o $@
 
-test_array_device: test_array.cpp 
-	nvcc -x cu $(CPPFLAGS) $(NVCCFLAGS) -I$(HEMI_DIR) -I$(CUDA_DIR)/include $^ -c -o $@.o
-	nvcc $@.o gtest_main.a -lpthread -o $@
+test_array_device.o: test_array.cpp 
+	nvcc -x cu $(CPPFLAGS) $(NVCCFLAGS) -I$(HEMI_DIR) -I$(CUDA_DIR)/include $^ -c -o $@
+	
+test_hemi_device: $(TESTS_DEVICE:=.o) gtest_main.a
+	nvcc $^ gtest_main.a -lpthread $(LIB_FLAGS) -o $@
 
+test_hemi_host: $(TESTS_HOST:=.o) gtest_main.a
+	nvcc $^ gtest_main.a -lpthread $(LIB_FLAGS) -o $@
 
