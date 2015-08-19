@@ -67,18 +67,8 @@ examples/simple/hello_lambda_host_nvcc
 examples/simple/saxpy_host
 examples/simple/saxpy_device
 
-test/test_execution_policy_host
-test/test_execution_policy_device
-test/test_launch_host
-test/test_launch_device
-test/test_parallel_for_device
-test/test_parallel_for_host
-test/test_portable_launch_device
-test/test_portable_launch_host
-test/test_launch.dSYM/
-test/test_launch
-test/test_array_device
-test/test_array_host
+test/test_hemi_device
+test/test_hemi_host
 
 *.plist
 *.dSYM
