@@ -16,6 +16,7 @@
 
 #include "hemi.h"
 #include "launch.h"
+#include "configure.h"
 #include "grid_stride_range.h"
 
 // TODO, add versions with execution policy
@@ -24,9 +25,17 @@
 
 namespace hemi 
 {
+	class ExecutionPolicy; // forward decl
+
 	template <typename index_type, typename F>
 	void parallel_for(index_type first, index_type last, F function) {
-		hemi::launch([=] HEMI_LAMBDA () {
+		ExecutionPolicy p;
+		parallel_for(p, first, last, function);
+	}
+
+	template <typename index_type, typename F>
+	void parallel_for(const ExecutionPolicy &p, index_type first, index_type last, F function) {
+		hemi::launch(p, [=] HEMI_LAMBDA () {
 			for (auto idx : grid_stride_range(first, last)) function(idx);
 		});
 	}

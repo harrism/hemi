@@ -105,13 +105,13 @@ test_portable_launch_device.o: test_portable_launch.cpp
 	nvcc -x cu $(CPPFLAGS) $(NVCCFLAGS) -I$(HEMI_DIR) -I$(CUDA_DIR)/include $^ -c -o $@
 
 test_parallel_for_host.o: test_parallel_for.cpp
-	$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) -I$(HEMI_DIR) -I$(CUDA_DIR)/include -L$(CUDA_DIR)/lib  -lcudart $^ -o $@
+	$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) -I$(HEMI_DIR) -I$(CUDA_DIR)/include $^ -o $@
 
 test_parallel_for_device.o: test_parallel_for.cpp
 	nvcc -x cu $(CPPFLAGS) $(NVCCFLAGS) -I$(HEMI_DIR) -I$(CUDA_DIR)/include $^ -c -o $@
 
 test_array_host.o: test_array.cpp
-	$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) -I$(HEMI_DIR) -I$(CUDA_DIR)/include -L$(CUDA_DIR)/lib  -lcudart $^ -o $@
+	$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) -I$(HEMI_DIR) -I$(CUDA_DIR)/include $^ -o $@
 
 test_array_device.o: test_array.cpp 
 	nvcc -x cu $(CPPFLAGS) $(NVCCFLAGS) -I$(HEMI_DIR) -I$(CUDA_DIR)/include $^ -c -o $@
