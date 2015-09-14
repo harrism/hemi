@@ -1,8 +1,6 @@
 Hemi: Simpler, More Portable CUDA C++
 =====================================
 
-Read about Hemi on the [NVIDIA Parallel Forall Blog](http://devblogs.nvidia.com/parallelforall/developing-portable-cuda-cc-code-hemi/).
-
 [<img align="right" src="https://raw.github.com/harrism/hemi/master/hemi-logo-transparent.png" width="272" height="152"/>](https://raw.github.com/harrism/hemi/master/hemi-logo.png)
 Hemi simplifies writing portable CUDA C/C++ code. With Hemi, 
 
@@ -33,6 +31,11 @@ Hemi on github
 --------------
 
 The home for Hemi is https://github.com/harrism/hemi, where you can find the latest changes and information.
+
+Blog Posts
+----------
+
+Read about Hemi 1.0 on the [NVIDIA Parallel Forall Blog](http://devblogs.nvidia.com/parallelforall/developing-portable-cuda-cc-code-hemi/).
 
 Requirements
 ------------
