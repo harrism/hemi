@@ -321,7 +321,7 @@ This code can be compiled and run as a sequential function on the host or as a C
 
 Hemi provides a complete set of portable element accessors in `hemi\device_api.h` including `localThreadIndex()`, `globalBlockCount()`, etc.
 
-Note: the `hemiGetElement*()` functions are specialized to simple (but common) element-wise parallelism. As such, they may not be useful for arbitrary strides, data sharing, or other more complex parallelism arrangements, but they may serve as examples for creating your own.
+Note: the `globalThreadIndex()`, `globalThreadCount()`, etc. functions are specialized to simple (but common) element-wise parallelism. As such, they may not be useful for arbitrary strides, data sharing, or other more complex parallelism arrangements, but they may serve as examples for creating your own.
 
 Mix and Match
 =============
