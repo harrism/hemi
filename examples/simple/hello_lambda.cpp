@@ -5,9 +5,9 @@
 int main(void) {
 
     hemi::launch([=] HEMI_LAMBDA() {
-    	printf("Hello World from Lambda in thread %d of %d\n",
-    		   hemi::globalThreadIndex(),
-    		   hemi::globalThreadCount());
+        printf("Hello World from Lambda in thread %d of %d\n",
+            hemi::globalThreadIndex(),
+            hemi::globalThreadCount());
     });
 
     hemi::deviceSynchronize(); // make sure print flushes before exit

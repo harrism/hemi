@@ -5,7 +5,7 @@ using namespace hemi;
 
 int main(void)
 {
-	parallel_for(0, 100, [] HEMI_LAMBDA(int i) { 
+	parallel_for(0, 100, [] HEMI_LAMBDA (int i) { 
 		printf("%d\n", i); 
 	});
 
