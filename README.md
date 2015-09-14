@@ -20,8 +20,6 @@ void saxpy(int n, float a, const float *x, float *y)
 }
 ```
 
-In the screenshot below, the code shown on the left is a simple black scholes code written to be compilable with either NVCC or a standard C++ host compiler, and also runnable on either the CPU or GPU. The right column is the same code written using Hemi's macros and smart heterogeneous Array container class, `hemi::Array`. Using Hemi, the length of this code is reduced by half.
-
 Current Version
 ---------------
 
