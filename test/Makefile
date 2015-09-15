@@ -20,7 +20,7 @@ endif
 
 # Points to the root of Google Test, relative to where this file is.
 # Remember to tweak this if you move this file.
-GTEST_DIR = /Users/mharris/src/googletest
+GTEST_DIR = googletest
 HEMI_DIR = ../
 CUDA_DIR := /usr/local/cuda
 
