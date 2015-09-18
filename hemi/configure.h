@@ -14,8 +14,13 @@
 ///////////////////////////////////////////////////////////////////////////////
 #pragma once
 
-#include <cuda_occupancy.h>
+
 #include "execution_policy.h"
+
+#ifndef HEMI_CUDA_DISABLE
+
+#include "hemi_error.h"
+#include <cuda_occupancy.h>
 
 namespace hemi {
 
@@ -105,4 +110,4 @@ cudaError_t configureGrid(ExecutionPolicy &p, KernelFunc k)
 	
 }
 
-//#endif
+#endif // HEMI_CUDA_DISABLE
