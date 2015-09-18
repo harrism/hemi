@@ -13,6 +13,8 @@
 // for full documentation and discussion.
 ///////////////////////////////////////////////////////////////////////////////
 
+#pragma once
+
 #include <stdio.h>
 #include <assert.h>
 
