@@ -42,14 +42,18 @@ NVCC_FLAGS := $(CXX_FLAGS) $(DEBUG_FLAGS_NVCC)
 %.cuo : %.cpp
 	$(NVCC) -x cu -c $< -o $@ $(NVCC_FLAGS)
 
-EXE := blackscholes
+EXE = bs_hostdevice bs_hostonly
 
 all: $(EXE)
 
-OBJS := blackscholes_launch.o blackscholes_launch.cuo blackscholes.o 
+BS_HOSTDEVICE_OBJS := blackscholes.cuo
+BS_HOSTONLY_OBJS := blackscholes.o
 
-$(EXE) : $(OBJS)
-	$(CXX) $(OBJS) $(CXX_FLAGS) $(LIB_FLAGS) -o $@
+bs_hostdevice : $(BS_HOSTDEVICE_OBJS)
+	$(CXX) $(BS_HOSTDEVICE_OBJS) $(CXX_FLAGS) $(LIB_FLAGS) -o $@
+
+bs_hostonly : $(BS_HOSTONLY_OBJS)
+	$(CXX) $(BS_HOSTONLY_OBJS) $(CXX_FLAGS) $(LIB_FLAGS) -o $@
 
 clean:
 	rm -rf *.o *.cuo $(EXE)
