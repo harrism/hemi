@@ -9,17 +9,71 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include <stdlib.h>
 #include <stdio.h>
+#include <math.h>
 
 #include "timer.h"
-#include "blackscholes_shared.h"
+#include "hemi/hemi.h"
+#include "hemi/launch.h"
+#include "hemi/grid_stride_range.h"
+#include "hemi/hemi_error.h"
 
 const float      RISKFREE = 0.02f;
 const float    VOLATILITY = 0.30f;
 
-// Process an array of optN options on CUDA device
-void BlackScholesCuda(float *callResult, float *putResult, float *stockPrice,
-                      float *optionStrike, float *optionYears, float Riskfree,
-                      float Volatility, int optN);
+///////////////////////////////////////////////////////////////////////////////
+// Polynomial approximation of cumulative normal distribution function
+///////////////////////////////////////////////////////////////////////////////
+HEMI_DEV_CALLABLE_INLINE
+float CND(float d)
+{
+    const float       A1 = 0.31938153f;
+    const float       A2 = -0.356563782f;
+    const float       A3 = 1.781477937f;
+    const float       A4 = -1.821255978f;
+    const float       A5 = 1.330274429f;
+    const float RSQRT2PI = 0.39894228040143267793994605993438f;
+
+    float
+        K = 1.0f / (1.0f + 0.2316419f * fabsf(d));
+
+    float
+        cnd = RSQRT2PI * expf(-0.5f * d * d) * 
+        (K * (A1 + K * (A2 + K * (A3 + K * (A4 + K * A5)))));
+
+    if(d > 0)
+        cnd = 1.0f - cnd;
+
+    return cnd;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Black-Scholes formula for both call and put
+///////////////////////////////////////////////////////////////////////////////
+HEMI_KERNEL_FUNCTION(BlackScholes, 
+                     float *callResult, float *putResult, float *stockPrice,
+                     float *optionStrike, float *optionYears, float riskFree,
+                     float volatility, int optN)
+{
+    for(int opt : hemi::grid_stride_range(0, optN))
+    {
+        float S = stockPrice[opt];
+        float X = optionStrike[opt];
+        float T = optionYears[opt]; 
+        float R = riskFree;
+        float V = volatility;
+
+        float sqrtT = sqrtf(T);
+        float    d1 = (logf(S / X) + (R + 0.5f * V * V) * T) / (V * sqrtT);
+        float    d2 = d1 - V * sqrtT;
+        float CNDD1 = CND(d1);
+        float CNDD2 = CND(d2);
+
+        //Calculate Call and Put simultaneously
+        float expRT = expf(- R * T);
+        callResult[opt] = S * CNDD1 - X * expRT * CNDD2;
+        putResult[opt]  = X * expRT * (1.0f - CNDD2) - S * (1.0f - CNDD1);
+    }
+}
 
 float RandFloat(float low, float high)
 {
@@ -42,6 +96,8 @@ int main(int argc, char **argv)
 {
     int OPT_N  = 4000000;
     int OPT_SZ = OPT_N * sizeof(float);
+
+    BlackScholes bs;
                
     printf("Initializing data...\n");
 
@@ -59,8 +115,9 @@ int main(int argc, char **argv)
 
     StartTimer();
     
-    BlackScholes(callResult, putResult, stockPrice, optionStrike,
-                 optionYears, RISKFREE, VOLATILITY, OPT_N);
+    // run BlackScholes operator on host
+    bs(callResult, putResult, stockPrice, optionStrike, 
+       optionYears, RISKFREE, VOLATILITY, OPT_N);
 
     printf("Option 0 call: %f\n", callResult[0]); 
     printf("Option 0 put:  %f\n", putResult[0]);
@@ -86,15 +143,24 @@ int main(int argc, char **argv)
     printf("Running Device Version...\n");
 
     StartTimer();
+    
+    // Launch Black-Scholes operator on device
+#ifdef HEMI_CUDA_COMPILER
     cudaMemcpy(d_stockPrice, stockPrice, OPT_SZ, cudaMemcpyHostToDevice);
     cudaMemcpy(d_optionStrike, optionStrike, OPT_SZ, cudaMemcpyHostToDevice);
     cudaMemcpy(d_optionYears, optionYears, OPT_SZ, cudaMemcpyHostToDevice);
 
-    BlackScholesCuda(d_callResult, d_putResult, d_stockPrice, d_optionStrike, 
-                     d_optionYears, RISKFREE, VOLATILITY, OPT_N);
-   
+    hemi::launch(bs, 
+                 d_callResult, d_putResult, d_stockPrice, d_optionStrike, 
+                 d_optionYears, RISKFREE, VOLATILITY, OPT_N);
+
     cudaMemcpy(callResult, d_callResult, OPT_SZ, cudaMemcpyDeviceToHost);
     cudaMemcpy(putResult, d_putResult, OPT_SZ, cudaMemcpyDeviceToHost);
+#else // demonstrates that "launch" goes to host when not compiled with NVCC
+    hemi::launch(bs, 
+                 callResult, putResult, stockPrice, optionStrike, 
+                 optionYears, RISKFREE, VOLATILITY, OPT_N);
+#endif
 
     printf("Option 0 call: %f\n", callResult[0]); 
     printf("Option 0 put:  %f\n", putResult[0]);

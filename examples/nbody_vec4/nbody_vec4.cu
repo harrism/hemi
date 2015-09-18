@@ -1,3 +1,6 @@
+#define HEMI_DEBUG
+#include "hemi/launch.h"
+#include "hemi/grid_stride_range.h"
 #include "vec4f.h"
 #include "nbody.h"
 #include <stdio.h>
@@ -32,36 +35,38 @@ Vec4f accumulateForce(const Vec4f &target, const Vec4f *bodies, int N)
 }
 
 // Simple CUDA kernel that computes all-pairs n-body gravitational forces.
-HEMI_KERNEL(allPairsForces)(Vec4f *forceVectors, const Vec4f *bodies, int N)
+HEMI_LAUNCHABLE
+void allPairsForces(Vec4f *forceVectors, const Vec4f *bodies, int N)
 {
-  int idx = blockDim.x * blockIdx.x + threadIdx.x;
-  forceVectors[idx] = accumulateForce(bodies[idx], bodies, N);
+  for (auto idx : hemi::grid_stride_range(0, N))
+    forceVectors[idx] = accumulateForce(bodies[idx], bodies, N);
 }
 
 // CUDA kernel that computes all-pairs n-body gravitational forces. Optimized
 // version of allPairsForcesKernel that uses shared memory for data reuse.
-HEMI_KERNEL(allPairsForcesShared)
-  (Vec4f *forceVectors, const Vec4f *bodies, int N)
+HEMI_LAUNCHABLE
+void allPairsForcesShared(Vec4f *forceVectors, const Vec4f *bodies, int N)
 {
-  int idx = blockDim.x * blockIdx.x + threadIdx.x;
-  
-  __shared__ Vec4f jBodies[256];
+  extern __shared__ Vec4f jBodies[];
 
-  Vec4f iBody = bodies[idx];
-  Vec4f force = Vec4f(0, 0, 0, 0);
- 
-  for (int tile = 0; tile < gridDim.x; tile++) 
+  for (auto idx : hemi::grid_stride_range(0, N))
   {
-    jBodies[threadIdx.x] = bodies[tile * blockDim.x + threadIdx.x];
+    Vec4f iBody = bodies[idx];
+    Vec4f force = Vec4f(0, 0, 0, 0);
+   
+    for (auto tile : range((unsigned)0, N / blockDim.x))
+    {
+      jBodies[threadIdx.x] = bodies[tile * blockDim.x + threadIdx.x];
 
-    __syncthreads();
+      __syncthreads();
+          
+      force += accumulateForce(iBody, jBodies, blockDim.x);
         
-    force += accumulateForce(iBody, jBodies, blockDim.x);
-      
-    __syncthreads();
-  }
+      __syncthreads();
+    }
 
-  forceVectors[idx] = force;
+    forceVectors[idx] = force;
+  }
 }
 
 // Host wrapper function that launches the CUDA kernels
@@ -69,19 +74,21 @@ void allPairsForcesCuda(Vec4f *forceVectors,
                         const Vec4f *bodies, 
                         int N, bool useShared)
 {
-  int blockDim = 256;
-  int gridDim = (N + blockDim - 1) / blockDim;
-
   float ss = 0.01f;
   checkCuda( cudaMemcpyToSymbol(HEMI_DEV_CONSTANT(softeningSquared), 
                                 &ss, sizeof(float), 0, cudaMemcpyHostToDevice) );
 
-  if (useShared)
-    HEMI_KERNEL_LAUNCH(allPairsForcesShared, gridDim, blockDim, 0, 0,
-                       forceVectors, bodies, N);
-  else
-    HEMI_KERNEL_LAUNCH(allPairsForces, gridDim, blockDim, 0, 0,
-                       forceVectors, bodies, N);
+  if (useShared) {
+    // we specify the block size and shared memory size, but grid
+    // size is automatically chosen
+    const int blockSize = 256;
+    hemi::ExecutionPolicy ep;
+    ep.setBlockSize(blockSize);
+    ep.setSharedMemBytes(blockSize * sizeof(Vec4f));
+    hemi::cudaLaunch(ep, allPairsForcesShared, forceVectors, bodies, N);
+  }
+  else // fully automatic configuration in this case
+    hemi::cudaLaunch(allPairsForces, forceVectors, bodies, N);
 }
 
 // Example of using a host/device class from host code in a .cu file

@@ -1,3 +1,7 @@
+# Windows binaries
+*.exe
+*.exp
+
 # Compiled Object files
 *.slo
 *.lo
@@ -16,11 +20,13 @@
 *.lib
 
 # visual studio files
+*.deps
 *.suo
 *.pdb
 *.opensdf
 *.sdf
 *.vcxproj.user
+*.vcxproj.filters
 Debug/
 ipch/
 Release/
@@ -31,3 +37,39 @@ Release/
 # sublime
 *.sublime-project
 *.sublime-workspace
+
+# tags
+.tags
+.tags_sorted_by_file
+
+# executables
+examples/blackscholes/bs_device
+examples/blackscholes/bs_host
+examples/blackscholes/bs_host_nvcc
+examples/blackscholes_hemiarray/bs_device
+examples/blackscholes_hemiarray/bs_host
+examples/blackscholes_hemiarray/bs_host_nvcc
+examples/blackscholes_hostdevice/blackscholes
+examples/blackscholes_nohemi/bs_device
+examples/blackscholes_nohemi/bs_host
+examples/blackscholes_nohemi/bs_host_nvcc
+examples/nbody_vec4/nbody_vec4
+examples/parallel_for/parallel_for_device
+examples/parallel_for/parallel_for_host
+examples/parallel_for/parallel_for_host_nvcc
+examples/simple/hello_device
+examples/simple/hello_global
+examples/simple/hello_host
+examples/simple/hello_host_nvcc
+examples/simple/hello_lambda_device
+examples/simple/hello_lambda_host
+examples/simple/hello_lambda_host_nvcc
+examples/simple/saxpy_host
+examples/simple/saxpy_device
+
+test/test_hemi_device
+test/test_hemi_host
+
+*.plist
+*.dSYM
+

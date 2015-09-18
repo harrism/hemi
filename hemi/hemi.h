@@ -2,7 +2,7 @@
 // 
 // "Hemi" CUDA Portable C/C++ Utilities
 // 
-// Copyright 2012-2014 NVIDIA Corporation
+// Copyright 2012-2015 NVIDIA Corporation
 //
 // License: BSD License, see LICENSE file in Hemi home directory
 //
@@ -12,51 +12,22 @@
 // Please see the file README.md (https://github.com/harrism/hemi/README.md) 
 // for full documentation and discussion.
 ///////////////////////////////////////////////////////////////////////////////
-#ifndef __HEMI_H__
-#define __HEMI_H__
-
-#include <stdio.h>
-#include <assert.h>
-#include "cuda_runtime_api.h"
+#pragma once
 
 /* HEMI_VERSION encodes the version number of the HEMI utilities.
  *
  *   HEMI_VERSION / 100000 is the major version.
  *   HEMI_VERSION / 100 % 1000 is the minor version.
  */
-#define HEMI_VERSION 100000
+#define HEMI_VERSION 200000
 
-// Convenience function for checking CUDA runtime API results
-// can be wrapped around any runtime API call. No-op in release builds.
-inline
-cudaError_t checkCuda(cudaError_t result)
-{
-#if defined(DEBUG) || defined(_DEBUG)
-  if (result != cudaSuccess) {
-    fprintf(stderr, "CUDA Runtime Error: %s\n", cudaGetErrorString(result));
-    assert(result == cudaSuccess);
-  }
-#endif
-  return result;
-}
+// Note: when compiling on a system without CUDA installed
+// be sure to define this macro. Can also be used to disable CUDA 
+// device execution on systems with CUDA installed.
+// #define HEMI_CUDA_DISABLE
 
-// Convenience function for checking CUDA error state including 
-// errors caused by asynchronous calls (like kernel launches). Note that
-// this causes device synchronization, but is a no-op in release builds.
-inline
-cudaError_t checkCudaErrors()
-{
-  cudaError_t result = cudaSuccess;
-  checkCuda(result = cudaGetLastError()); // runtime API errors
-#if defined(DEBUG) || defined(_DEBUG)
-  result = cudaDeviceSynchronize(); // async kernel launch errors
-  if (result != cudaSuccess)
-    fprintf(stderr, "CUDA Launch Error: %s\n", cudaGetErrorString(result));  
-#endif
-  return result;
-}
+#if !defined(HEMI_CUDA_DISABLE) && defined(__CUDACC__) // CUDA compiler
 
-#ifdef __CUDACC__ // CUDA compiler
   #define HEMI_CUDA_COMPILER              // to detect CUDACC compilation
   #define HEMI_LOC_STRING "Device"
 
@@ -69,20 +40,28 @@ cudaError_t checkCudaErrors()
   
   #if defined(DEBUG) || defined(_DEBUG)
     #define HEMI_KERNEL_LAUNCH(name, gridDim, blockDim, sharedBytes, streamId, ...) \
-      do {                                                                     \
+    do {                                                                     \
         name ## _kernel<<< (gridDim), (blockDim), (sharedBytes), (streamId) >>>\
             (__VA_ARGS__);                                                     \
         checkCudaErrors();                                                     \
-      } while(0)
+    } while(0)
   #else
     #define HEMI_KERNEL_LAUNCH(name, gridDim, blockDim, sharedBytes, streamId, ...) \
-      name ## _kernel<<< (gridDim) , (blockDim), (sharedBytes), (streamId) >>>(__VA_ARGS__)
+        name ## _kernel<<< (gridDim) , (blockDim), (sharedBytes), (streamId) >>>(__VA_ARGS__)
   #endif
 
+  #define HEMI_LAUNCHABLE                 __global__
+  #define HEMI_LAMBDA                     __device__
   #define HEMI_DEV_CALLABLE               __host__ __device__
   #define HEMI_DEV_CALLABLE_INLINE        __host__ __device__ inline
   #define HEMI_DEV_CALLABLE_MEMBER        __host__ __device__
   #define HEMI_DEV_CALLABLE_INLINE_MEMBER __host__ __device__ inline
+
+  // Memory specifiers
+  #define HEMI_MEM_DEVICE                 __device__
+
+  // Stream type
+  typedef cudaStream_t hemiStream_t;
 
   // Constants: declares both a device and a host copy of this constant
   // static and extern flavors can be used to declare static and extern
@@ -120,10 +99,18 @@ cudaError_t checkCudaErrors()
   #define HEMI_KERNEL_NAME(name)          name
   #define HEMI_KERNEL_LAUNCH(name, gridDim, blockDim, sharedBytes, streamId, ...) name(__VA_ARGS__)
 
+  #define HEMI_LAUNCHABLE
+  #define HEMI_LAMBDA
   #define HEMI_DEV_CALLABLE               
   #define HEMI_DEV_CALLABLE_INLINE        inline
   #define HEMI_DEV_CALLABLE_MEMBER
   #define HEMI_DEV_CALLABLE_INLINE_MEMBER inline
+
+  // memory specifiers
+  #define HEMI_MEM_DEVICE
+
+  // Stream type
+  typedef int hemiStream_t;
 
   #define HEMI_DEFINE_CONSTANT(def, value) def ## _hostconst = value
   #define HEMI_DEFINE_STATIC_CONSTANT(def, value) static def ## _hostconst = value
@@ -146,91 +133,25 @@ cudaError_t checkCudaErrors()
 
 #endif
 
-// Note: the following two functions demonstrate using the same code to process
-// 1D arrays of data/computations either with a parallel grid of threads on the 
-// CUDA device, or with a sequential loop on the host. For example, we might 
-// use them like this.
-//
-//  int offset = hemiGetElementOffset();
-//  int stride = hemiGetElementStride();
-// 
-//  for(int idx = offset; idx < N; idx += stride)
-//    processElement(elementsOut, elementsIn, idx, anotherArgument);
-//
+// Helper macro for defining device functors that can be launched as kernels
+#define HEMI_KERNEL_FUNCTION(name, ...)                \
+  struct name {                                             \
+      HEMI_DEV_CALLABLE_MEMBER void operator()(__VA_ARGS__) const;  \
+  };                                                        \
+  HEMI_DEV_CALLABLE_MEMBER void name::operator()(__VA_ARGS__) const
+;
 
-#ifdef __INTEL_COMPILER
-  // Intel OpenMP compiler is not happy with functions in omp parallel for loops, so 
-  // use macros
-  #define hemiGetElementOffset() 0
-  #define hemiGetElementXOffset() 0
-  #define hemiGetElementYOffset() 0
-  #define hemiGetElementStride() 1
-  #define hemiGetElementXStride() 1
-  #define hemiGetElementYStride() 1
-#else
-  // Returns the offset of the current thread's element within the grid for device
-  // code compiled with NVCC, or 0 for sequential host code.
-  HEMI_DEV_CALLABLE_INLINE
-  int hemiGetElementOffset() 
-  {
-  #ifdef HEMI_DEV_CODE
-    return blockIdx.x * blockDim.x + threadIdx.x;
-  #else
-    return 0;
-  #endif
-  }
+#include "hemi_error.h"
 
-  // Returns the offset of the current thread's X element within the grid for device
-  // code compiled with NVCC, or 0 for sequential host code.
-  HEMI_DEV_CALLABLE_INLINE
-  int hemiGetElementXOffset() 
-  {
-    return hemiGetElementOffset();
-  }
+namespace hemi {
 
-  // Returns the offset of the current thread's Y element within the grid for device
-  // code compiled with NVCC, or 0 for sequential host code.
-  HEMI_DEV_CALLABLE_INLINE
-  int hemiGetElementYOffset() 
-  {
-  #ifdef HEMI_DEV_CODE
-    return blockIdx.y * blockDim.y + threadIdx.y;
-  #else
-    return 0;
-  #endif
-  }
-
-  // Returns the stride of the current grid (blockDim.x * gridDim.x) for device 
-  // code compiled with NVCC, or 1 for sequential host code.
-  HEMI_DEV_CALLABLE_INLINE
-  int hemiGetElementStride() 
-  {
-  #ifdef HEMI_DEV_CODE
-    return blockDim.x * gridDim.x;
-  #else
-    return 1;
-  #endif
-  }
-
-  // Returns the stride of the current grid (blockDim.x * gridDim.x) for device 
-  // code compiled with NVCC, or 1 for sequential host code.
-  HEMI_DEV_CALLABLE_INLINE
-  int hemiGetElementXStride() 
-  {
-    return hemiGetElementStride();
-  }
-
-  // Returns the stride of the current grid (blockDim.x * gridDim.x) for device 
-  // code compiled with NVCC, or 1 for sequential host code.
-  HEMI_DEV_CALLABLE_INLINE
-  int hemiGetElementYStride() 
-  {
-  #ifdef HEMI_DEV_CODE
-    return blockDim.y * gridDim.y;
-  #else
-    return 1;
-  #endif
-  }
+    inline hemi::Error_t deviceSynchronize() 
+    {
+#ifdef HEMI_CUDA_COMPILER
+        if (cudaSuccess != checkCuda(cudaDeviceSynchronize()))
+            return hemi::cudaError; 
 #endif
+        return hemi::success;
+    }
 
-#endif // __HEMI_H__
+} // namespace hemi

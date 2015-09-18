@@ -1,0 +1,6 @@
+[submodule "hemi/range"]
+	path = hemi/range
+	url = https://github.com/harrism/cpp11-range.git
+[submodule "test/googletest"]
+	path = test/googletest
+	url = https://github.com/google/googletest.git

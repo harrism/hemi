@@ -2,7 +2,7 @@
 // 
 // "Hemi" CUDA Portable C/C++ Utilities
 // 
-// Copyright 2012-2014 NVIDIA Corporation
+// Copyright 2012-2015 NVIDIA Corporation
 //
 // License: BSD License, see LICENSE file in Hemi home directory
 //
@@ -12,8 +12,7 @@
 // Please see the file README.md (https://github.com/harrism/hemi/README.md) 
 // for full documentation and discussion.
 ///////////////////////////////////////////////////////////////////////////////
-#ifndef __HEMI_ARRAY_H__
-#define __HEMI_ARRAY_H__
+#pragma once
 
 #include "hemi/hemi.h"
 #include <cstring>
@@ -39,7 +38,7 @@ namespace hemi {
     class Array 
     {
     public:
-        Array(size_t n, bool usePinned) : 
+        Array(size_t n, bool usePinned=true) : 
           nSize(n), 
           hPtr(0),
           dPtr(0),
@@ -283,6 +282,3 @@ namespace hemi {
         
     };
 } 
-
-#endif // __HEMI_ARRAY_H__
-

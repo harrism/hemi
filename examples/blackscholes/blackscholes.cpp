@@ -13,6 +13,8 @@
 
 #include "timer.h"
 #include "hemi/hemi.h"
+#include "hemi/parallel_for.h"
+#include "hemi/device_api.h"
 
 const float      RISKFREE = 0.02f;
 const float    VOLATILITY = 0.30f;
@@ -42,15 +44,11 @@ float CND(float d)
 }
 
 // Black-Scholes formula for both call and put
-HEMI_KERNEL(BlackScholes)
-    (float *callResult, float *putResult, const float *stockPrice,
-     const float *optionStrike, const float *optionYears, float Riskfree,
-     float Volatility, int optN)
+void BlackScholes(float *callResult, float *putResult, const float *stockPrice,
+                  const float *optionStrike, const float *optionYears, float Riskfree,
+                  float Volatility, int optN)
 {
-    int offset = hemiGetElementOffset();
-    int stride = hemiGetElementStride();
-
-    for(int opt = offset; opt < optN; opt += stride)
+    hemi::parallel_for(0, optN, [=] HEMI_LAMBDA (int opt)
     {
         float S = stockPrice[opt];
         float X = optionStrike[opt];
@@ -68,7 +66,7 @@ HEMI_KERNEL(BlackScholes)
         float expRT = expf(- R * T);
         callResult[opt] = S * CNDD1 - X * expRT * CNDD2;
         putResult[opt]  = X * expRT * (1.0f - CNDD2) - S * (1.0f - CNDD1);
-    }
+    });
 }
 
 float RandFloat(float low, float high)
@@ -120,9 +118,6 @@ int main(int argc, char **argv)
 
     initOptions(OPT_N, stockPrice, optionStrike, optionYears);
         
-    int blockDim = 128; // blockDim, gridDim ignored by host code
-    int gridDim  = std::min<int>(1024, (OPT_N + blockDim - 1) / blockDim);
-
     printf("Running %s Version...\n", HEMI_LOC_STRING);
 
     StartTimer();
@@ -137,11 +132,11 @@ int main(int argc, char **argv)
     d_stockPrice   = stockPrice; 
     d_optionStrike = optionStrike;
     d_optionYears  = optionYears;
-#endif
+#endif   
+    
 
-    HEMI_KERNEL_LAUNCH(BlackScholes, gridDim, blockDim, 0, 0,
-                       d_callResult, d_putResult, d_stockPrice, d_optionStrike, 
-                       d_optionYears, RISKFREE, VOLATILITY, OPT_N);
+    BlackScholes(d_callResult, d_putResult, (const float*)d_stockPrice, (const float*)d_optionStrike,
+                 (const float*)d_optionYears, RISKFREE, VOLATILITY, OPT_N);
        
 #ifdef HEMI_CUDA_COMPILER 
     checkCuda( cudaMemcpy(callResult, d_callResult, OPT_SZ, cudaMemcpyDeviceToHost) );
