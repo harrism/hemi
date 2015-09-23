@@ -4,10 +4,10 @@ Hemi: Simpler, More Portable CUDA C++
 [<img align="right" src="https://raw.github.com/harrism/hemi/master/hemi-logo-transparent.png" width="272" height="152"/>](https://raw.github.com/harrism/hemi/master/hemi-logo.png)
 Hemi simplifies writing portable CUDA C/C++ code. With Hemi, 
 
- - You can write parallel loops in line in your CPU code, and run them on your GPU;
- - You can easily write code that compiles and runs either on the CPU or GPU;
- - You can easily launch C++ Lambda functions as GPU kernels;
- - Launch configuration details like thread block size and grid size are an optimization detail, rather than a requirement;
+ - you can write parallel kernels like you write for loops—--in line in your CPU code—--and run them on your GPU;
+ - you can easily write code that compiles and runs either on the CPU or GPU;
+ - you can easily launch C++ Lambda functions as GPU kernels;
+ - kernel launch configuration details like thread block size and grid size are optimization details, rather than requirements.
 
 With Hemi, parallel code for the GPU can be as simple as the `parallel_for` loop in the following code, which can also be compiled and run on the CPU.
 
@@ -299,7 +299,7 @@ Both `checkCuda` and `checkCudaErrors` act as No-ops when DEBUG is not defined (
 Iteration
 ---------
 
-For kernel functions with simple independent element-wise parallelism, hemi.h provides two functions to enable iterating over elements sequentially in host code or in parallel in device code. 
+For kernel functions with simple independent element-wise parallelism, `hemi/device_api.h` provides functions to enable iterating over elements sequentially in host code or in parallel in device code. 
 
  - `globalThreadIndex()` returns the offset of the current thread within the 1D grid, or zero for host code. In device code, it resolves to `blockDim.x * blockIdx.x + threadIdx.x`.
  - `globalThreadCount()` returns the size of the 1D grid in threads, or one in host code. In device code, it resolves to `gridDim.x * blockDim.x`.

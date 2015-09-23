@@ -1,5 +1,7 @@
+- [ ] Update to cudart version of occupancy API
+- [ ] Unified memory examples
 - [ ] Consider abstraction for __shared__ memory
-- [ ] Make nbody example work without CUDA
+- [ ] Make nbody example work without CUDA?
 - [ ] Consider __launch_bounds__ support...
 - [ ] Multi-dimensional thread/block accessors
 - [x] Add version of parallel_for with an ExecutionPolicy
