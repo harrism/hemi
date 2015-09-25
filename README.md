@@ -28,7 +28,7 @@ This is version: 2.0 (HEMI_VERSION == 200000)
 Hemi on github
 --------------
 
-The home for Hemi is https://github.com/harrism/hemi, where you can find the latest changes and information.
+The home for Hemi is [http://harrism.github.io/hemi/](http://harrism.github.io/hemi/), where you can find the latest changes and information.
 
 Blog Posts
 ----------
