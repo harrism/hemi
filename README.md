@@ -4,7 +4,7 @@ Hemi: Simpler, More Portable CUDA C++
 [<img align="right" src="https://raw.github.com/harrism/hemi/master/hemi-logo-transparent.png" width="272" height="152"/>](https://raw.github.com/harrism/hemi/master/hemi-logo.png)
 Hemi simplifies writing portable CUDA C/C++ code. With Hemi, 
 
- - you can write parallel kernels like you write for loops—--in line in your CPU code—--and run them on your GPU;
+ - you can write parallel kernels like you write for loops—in line in your CPU code—and run them on your GPU;
  - you can easily write code that compiles and runs either on the CPU or GPU;
  - you can easily launch C++ Lambda functions as GPU kernels;
  - kernel launch configuration details like thread block size and grid size are optimization details, rather than requirements.
