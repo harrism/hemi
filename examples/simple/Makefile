@@ -64,4 +64,5 @@ saxpy_device: saxpy.cpp
 	$(NVCC) $? $(NVCC_FLAGS) -x cu -o $@
 
 clean:
-	rm -f $(EXES)
+	rm -f $(EXES) *.o
+	rm -rf *.dSYM

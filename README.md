@@ -32,8 +32,7 @@ The home for Hemi is https://github.com/harrism/hemi, where you can find the lat
 
 Blog Posts
 ----------
-
-Read about Hemi 1.0 on the [NVIDIA Parallel Forall Blog](http://devblogs.nvidia.com/parallelforall/developing-portable-cuda-cc-code-hemi/).
+Read about Hemi 2 on the [NVIDIA Parallel Forall Blog](http://devblogs.nvidia.com/parallelforall/simple-portable-parallel-c-hemi-2/). [An older post about Hemi 1.0](http://devblogs.nvidia.com/parallelforall/developing-portable-cuda-cc-code-hemi/).
 
 Requirements
 ------------
