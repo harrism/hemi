@@ -3,60 +3,184 @@
   <head>
     <meta charset='utf-8'>
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-    <link href='https://fonts.googleapis.com/css?family=Architects+Daughter' rel='stylesheet' type='text/css'>
-    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen" />
-    <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen" />
-    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print" />
-
+    <link href='https://fonts.googleapis.com/css?family=Chivo:900' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-dark.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print">
     <!--[if lt IE 9]>
     <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
-
     <title>Hemi by harrism</title>
   </head>
 
   <body>
-    <header>
+    <div id="container">
       <div class="inner">
-        <h1>Hemi</h1>
-        <h2>Portable CUDA C/C++</h2>
-        <a href="https://github.com/harrism/hemi" class="button"><small>View project on</small>GitHub</a>
-      </div>
-    </header>
 
-    <div id="content-wrapper">
-      <div class="inner clearfix">
-        <section id="main-content">
-          <p><strong>Simple utilities to enable code reuse and portability between CUDA C/C++ and standard C/C++.</strong></p>
+        <header>
+          <h1>Hemi</h1>
+          <h2>Portable CUDA C/C++</h2>
+        </header>
 
-<p>Read about Hemi on the <a href="https://developer.nvidia.com/content/developing-portable-cuda-cc-code-hemi">NVIDIA Parallel Forall Blog</a>.</p>
+        <section id="downloads" class="clearfix">
+          <a href="https://github.com/harrism/hemi/zipball/master" id="download-zip" class="button"><span>Download .zip</span></a>
+          <a href="https://github.com/harrism/hemi/tarball/master" id="download-tar-gz" class="button"><span>Download .tar.gz</span></a>
+          <a href="https://github.com/harrism/hemi" id="view-on-github" class="button"><span>View on GitHub</span></a>
+        </section>
+
+        <hr>
+
+        <section id="main_content">
+          <h1>
+<a id="hemi-simpler-more-portable-cuda-c" class="anchor" href="#hemi-simpler-more-portable-cuda-c" aria-hidden="true"><span class="octicon octicon-link"></span></a>Hemi: Simpler, More Portable CUDA C++</h1>
 
 <p><a href="https://raw.github.com/harrism/hemi/master/hemi-logo.png"><img align="right" src="https://raw.github.com/harrism/hemi/master/hemi-logo-transparent.png" width="272" height="152"></a>
-CUDA C/C++ and the NVIDIA NVCC compiler toolchain support a number of features designed to make it easier to write portable code, including language integration of host and device code and data, declaration specifiers (e.g. <code>__host__</code> and <code>__device__</code>) and preprocessor definitions (<code>__CUDACC__</code>). These features combine to enable developers to write code that can be compiled and run on either the host, the device, or both. Other compilers don't recognize these features, however, so to really write portable code, we need preprocessor macros. This is where Hemi comes in.</p>
+Hemi simplifies writing portable CUDA C/C++ code. With Hemi, </p>
 
-<p>Hemi simplifies writing portable CUDA C/C++ code. In the screenshot below, the code shown on the left is a simple black scholes code written to be compilable with either NVCC or a standard C++ host compiler, and also runnable on either the CPU or GPU. The right column is the same code written using Hemi's macros and smart heterogeneous Array container class, <code>hemi::Array</code>. Using Hemi, the length of this code is reduced by half.</p>
+<ul>
+<li>you can write parallel kernels like you write for loops—in line in your CPU code—and run them on your GPU;</li>
+<li>you can easily write code that compiles and runs either on the CPU or GPU;</li>
+<li>you can easily launch C++ Lambda functions as GPU kernels;</li>
+<li>kernel launch configuration details like thread block size and grid size are optimization details, rather than requirements.</li>
+</ul>
 
-<p><img src="https://raw.github.com/harrism/hemi/master/hemi_simplifies_portable_cuda.png" alt="Hemi simplifies portable CUDA C/C++ code"></p>
+<p>With Hemi, parallel code for the GPU can be as simple as the <code>parallel_for</code> loop in the following code, which can also be compiled and run on the CPU.</p>
 
-<h2>Current Version</h2>
+<pre><code>void saxpy(int n, float a, const float *x, float *y)
+{
+  hemi::parallel_for(0, n, [=] HEMI_LAMBDA (int i) {
+      y[i] = a * x[i] + y[i];
+  }); 
+}
+</code></pre>
 
-<p>This is version: 0.1 (HEMI_VERSION == 000100)</p>
+<h2>
+<a id="current-version" class="anchor" href="#current-version" aria-hidden="true"><span class="octicon octicon-link"></span></a>Current Version</h2>
 
-<h2>Hemi on github</h2>
+<p>This is version: 2.0 (HEMI_VERSION == 200000)</p>
+
+<h2>
+<a id="hemi-on-github" class="anchor" href="#hemi-on-github" aria-hidden="true"><span class="octicon octicon-link"></span></a>Hemi on github</h2>
 
 <p>The home for Hemi is <a href="https://github.com/harrism/hemi">https://github.com/harrism/hemi</a>, where you can find the latest changes and information.</p>
 
-<h2>hemi/hemi.h</h2>
+<h2>
+<a id="blog-posts" class="anchor" href="#blog-posts" aria-hidden="true"><span class="octicon octicon-link"></span></a>Blog Posts</h2>
 
-<p>The hemi.h header provides simple macros that are useful for reusing code between CUDA C/C++ and C/C++ written for other platforms (e.g. CPUs). </p>
+<p>Read about Hemi 2 on the <a href="http://devblogs.nvidia.com/parallelforall/simple-portable-parallel-c-hemi-2/">NVIDIA Parallel Forall Blog</a>. <a href="http://devblogs.nvidia.com/parallelforall/developing-portable-cuda-cc-code-hemi/">An older post about Hemi 1.0</a>.</p>
+
+<h2>
+<a id="requirements" class="anchor" href="#requirements" aria-hidden="true"><span class="octicon octicon-link"></span></a>Requirements</h2>
+
+<p>Hemi 2 requires a host compiler with support for C++11 or later. For CUDA device execution, Hemi requires CUDA 7.0 or later. To launch lambda expressions on the GPU using <code>hemi::launch()</code> or <code>hemi::parallel_for()</code>, Hemi requires CUDA 7.5 or later with experimental support for "extended lambdas" (enabled using the <code>nvcc</code> command line option <code>--expt-extended-lambda</code>).</p>
+
+<h1>
+<a id="features" class="anchor" href="#features" aria-hidden="true"><span class="octicon octicon-link"></span></a>Features</h1>
+
+<h2>
+<a id="gpu-lambdas-and-parallel-for" class="anchor" href="#gpu-lambdas-and-parallel-for" aria-hidden="true"><span class="octicon octicon-link"></span></a>GPU Lambdas and Parallel For</h2>
+
+<p>CUDA 7.5 provides an experimental feature, "GPU Lambdas", which enables C++11 Lambda functions with <code>__device__</code> annotation to be defined in host code and passed to kernels running on the device. Hemi 2 leverages this feature to provide the <code>hemi::parallel_for</code> function which, when compiled for the GPU, launches a parallel kernel which executes the provided GPU lambda function as the body of a parallel loop. When compiled for the CPU, the lambda is executed as the body of a sequential CPU loop. This makes parallel functions nearly as easy to write as a for loop, as the following code shows:</p>
+
+<pre><code>parallel_for(0, 100, [] HEMI_LAMBDA (int i) { 
+    printf("%d\n", i); 
+});
+</code></pre>
+
+<p>GPU Lambdas can also be launched directly on the GPU using <code>hemi::launch</code>:</p>
+
+<pre><code>hemi::launch([=] HEMI_LAMBDA() {
+    printf("Hello World from Lambda in thread %d of %d\n",
+        hemi::globalThreadIndex(),
+        hemi::globalThreadCount());
+});
+</code></pre>
+
+<p>To launch lambda expressions on the GPU using <code>hemi::launch()</code> or <code>hemi::parallel_for()</code>, Hemi requires <a href="http://developer.nvidia.com/cuda-toolkit">CUDA 7.5</a> or later with experimental support for "extended lambdas" (enabled using the <code>nvcc</code> command line option <code>--expt-extended-lambda</code>).</p>
+
+<h2>
+<a id="portable-parallel-execution" class="anchor" href="#portable-parallel-execution" aria-hidden="true"><span class="octicon octicon-link"></span></a>Portable Parallel Execution</h2>
+
+<p><code>hemi::launch</code> can also be used to portably launch function objects (or <em>functors</em>), which are objects of classes that define an <code>operator()</code> member. To be launched on the GPU, the <code>operator()</code> should be declared with <code>HEMI_DEV_CALLABLE_MEMBER</code>. To make this easy, Hemi 2 provides the convenience macro <code>HEMI_KERNEL_FUNCTION()</code>. The simple example <code>hello.cpp</code> demonstrates its use:</p>
+
+<pre><code>HEMI_KERNEL_FUNCTION(hello) {
+  printf("Hello World from thread %d of %d\n",
+         hemi::globalThreadIndex(),
+         hemi::globalThreadCount());
+}
+
+int main(void) {
+  hello hi;
+  hemi::launch(hi);          // launch on the GPU
+  hemi::deviceSynchronize(); // make sure print flushes before exit
+
+  hi();                      // call on CPU
+  return 0;
+}
+</code></pre>
+
+<p>As you can see, <code>HEMI_KERNEL_FUNCTION()</code> actually defines a functor which must be instantiated. Once instantiated, it can either be launched on the GPU or called from the CPU.</p>
+
+<p>You can define portable CUDA kernel functions using <code>HEMI_LAUNCHABLE</code>, which defines the function using CUDA <code>__global__</code> when compiled using <code>nvcc</code>, or as a normal host function otherwise. Launch these functions portably using <code>hemi::cudaLaunch()</code>. The example <code>hello_global.cu</code> demonstrates:</p>
+
+<pre><code>HEMI_LAUNCHABLE void hello() { 
+  printf("Hello World from thread %d of %d\n", 
+         hemi::globalThreadIndex(),
+         hemi::globalThreadCount());
+}
+
+int main(void) {
+  hemi::cudaLaunch(hello);
+  hemi::deviceSynchronize(); // make sure print flushes before exit
+  return 0;
+}
+</code></pre>
+
+<h2>
+<a id="automatic-execution-configuration" class="anchor" href="#automatic-execution-configuration" aria-hidden="true"><span class="octicon octicon-link"></span></a>Automatic Execution Configuration</h2>
+
+<p>In both of the examples in the previous section, the execution configuration (the number of thread blocks and size of each block) is automatically decided by Hemi based on the GPU it is running on.  In general, when compiled for the GPU, <code>hemi::launch()</code>, <code>hemi::cudaLaunch()</code> and <code>hemi::parallel_for()</code> will choose a grid configuration that occupies all multiprocessors (SMs) on the GPU.</p>
+
+<p>Automatic Execution Configuration is flexible, though. You can explicitly specify the entire execution configuration---grid size, thread block size, and dynamic shared memory allocation---or you can partially specify the execution configuration. For example, you might need to specify just the thread block size. Hemi makes it easy to take full control when you need it for performance tuning, but when you are getting started parallelizing your code, or for functions where ultimate performance is not crucial, you can just let Hemi configure the parallelism for you.</p>
+
+<p>As an example, the <code>nbody_vec4</code> example provides an optimized version of its main kernel that tiles data in CUDA shared memory. For this, it needs to specify the block size and shared memory allocation explicitly.</p>
+
+<pre><code>const int blockSize = 256;
+hemi::ExecutionPolicy ep;
+ep.setBlockSize(blockSize);
+ep.setSharedMemBytes(blockSize * sizeof(Vec4f));
+hemi::cudaLaunch(ep, allPairsForcesShared, forceVectors, bodies, N);
+</code></pre>
+
+<p>However, note that the number of blocks in the grid is left to Hemi to choose at run time.</p>
+
+<h2>
+<a id="simple-grid-stride-loops" class="anchor" href="#simple-grid-stride-loops" aria-hidden="true"><span class="octicon octicon-link"></span></a>Simple Grid-Stride Loops</h2>
+
+<p>A common design pattern in writing scalable, portable parallel CUDA kernels is to use <a href="http://devblogs.nvidia.com/parallelforall/cuda-pro-tip-write-flexible-kernels-grid-stride-loops/">grid-stride loops</a>. Grid-stride loops let you decouple the size of your CUDA grid from the data size it is processing, resulting in less coupling between your host and device code. This also has portability and debugging benefits. </p>
+
+<p>Hemi 2 includes a <a href="http://devblogs.nvidia.com/parallelforall/power-cpp11-cuda-7/">grid-stride range</a> helper, <code>grid_stride_range()</code>, which makes it trivial to use C++11 range-based for loops to iterate in parallel. <code>grid_stride_range()</code> can be used in traditional CUDA kernels, such as the following <code>saxpy</code> kernel, or it can be combined with other Hemi portability features (in fact it is used in the implementation of <code>hemi::parallel_for()</code>).</p>
+
+<pre><code>__global__
+void saxpy(int n, float a, float *x, float *y)
+{
+  for (auto i : grid_stride_range(0, n)) {
+    y[i] = a * x[i] + y[i];
+  }
+}
+</code></pre>
+
+<h2>
+<a id="hemihemih" class="anchor" href="#hemihemih" aria-hidden="true"><span class="octicon octicon-link"></span></a>hemi/hemi.h</h2>
+
+<p>The <code>hemi.h</code> header provides simple macros that are useful for reusing code between CUDA C/C++ and C/C++ written for other platforms (e.g. CPUs). </p>
 
 <p>The macros are used to decorate function prototypes and variable declarations so that they can be compiled by either NVCC or a host compiler (for example gcc or cl.exe, the MS Visual Studio compiler). </p>
 
-<p>The macros can be used within .cu, .cuh, .cpp, .h, and .inl files to define code that can
-be compiled either for the host (e.g., CPU) or the device (e.g., GPU). </p>
+<p>The macros can be used within .cu, .cuh, .cpp, .h, and .inl files to define code that can be compiled either for the host (e.g., CPU) or the device (e.g., GPU). </p>
 
-<h2>hemi/array.h</h2>
+<h2>
+<a id="hemiarrayh" class="anchor" href="#hemiarrayh" aria-hidden="true"><span class="octicon octicon-link"></span></a>hemi/array.h</h2>
 
 <p>One of the biggest challenges in writing portable CUDA code is memory management. HEMI provides the <code>hemi::Array</code> C++ template class as a simple data management wrapper which allows arrays of arbitrary type to be created and used with both host and device code. hemi::Array maintains a host and a device pointer for each array. It lazily transfers data between the host and device as needed when the user requests a pointer to the host or device memory. Pointer requests specify read-only, read/write, or write-only options so that valid flags can be maintained and data is only copied when the requested pointer is invalid.</p>
 
@@ -68,14 +192,14 @@ hemi::Array&lt;Vec4f&gt; forceVectors(N, true);
 randomizeBodies(bodies.writeOnlyHostPtr(), N);
 
 // Call host function defined in a .cpp compilation unit
-allPairsForcesHost(forceVectors.writeOnlyHostPtr(), bodies.readOnlyHostPtr(), N);
-
+allPairsForcesHost(forceVectors.writeOnlyHostPtr(), bodies.
+                   readOnlyHostPtr(), N);
 printf("CPU: Force vector 0: (%0.3f, %0.3f, %0.3f)\n", 
        forceVectors.readOnlyHostPtr()[0].x, 
        forceVectors.readOnlyHostPtr()[0].y, 
        forceVectors.readOnlyHostPtr()[0].z);
 
-...
+    ...
 
 // Call device function defined in a .cu compilation unit
 // that uses host/device shared functions and class member functions
@@ -90,18 +214,22 @@ printf("GPU: Force vector 0: (%0.3f, %0.3f, %0.3f)\n",
 
 <p>Typical CUDA code requires explicit duplication of host allocations on the device,and explicit copy calls between them. <code>hemi::Array</code> allows CUDA code to be used without writing a single <code>cudaMalloc</code>, <code>cudaFree</code>, or <code>cudaMemcpy</code>. <code>hemi::Array</code> supports pinned host memory for efficient PCI-express transfers, and handles CUDA error checking internally.</p>
 
-<h2>Portable functions</h2>
+<h2>
+<a id="portable-functions" class="anchor" href="#portable-functions" aria-hidden="true"><span class="octicon octicon-link"></span></a>Portable Functions</h2>
 
 <p>A common use for host-device code sharing is commonly used utility functions. For example, if we wish to define an inline function to compute the average of two floats that can be called either from host code or device code, and can be compiled by either the host compiler or NVCC, we define it like this:</p>
 
-<pre><code>HEMI_DEV_CALLABLE_INLINE float avgf(float x, float y) { return (x+y)/2.0f; }
+<pre><code>HEMI_DEV_CALLABLE_INLINE float avgf(float x, float y) { 
+  return (x+y)/2.0f; 
+}
 </code></pre>
 
 <p>The macro definition ensures that when compiled by NVCC, both a host and device version of the function are generated, and a normal inline function is generated when compiled by the host compiler.</p>
 
 <p>For example use, see the <code>CND()</code> function in the "blackscholes" example, as well as several other functions used in the examples.</p>
 
-<h2>Portable classes</h2>
+<h2>
+<a id="portable-classes" class="anchor" href="#portable-classes" aria-hidden="true"><span class="octicon octicon-link"></span></a>Portable Classes</h2>
 
 <p>The <code>HEMI_DEV_CALLABLE_MEMBER</code> and <code>HEMI_DEV_CALLABLE_INLINE_MEMBER</code> macros can be used to create classes that are reusable between host and device code, by decorating any member function prototype that will be used by both device and host code. Here is an example excerpt of a portable class (a 4D vector type used in the "nbody_vec4" example).</p>
 
@@ -134,9 +262,11 @@ printf("GPU: Force vector 0: (%0.3f, %0.3f, %0.3f)\n",
 
 <p>The <code>HEMI_ALIGN</code> macro is used on types that will be passed in arrays or pointers as arguments to CUDA device kernel functions, to ensure proper alignment. <code>HEMI_ALIGN</code> generates correct alignment specifiers for the host compilers, too. For details on alignment, see the NVIDIA CUDA C Programming Guide (Section 5.3 in v5.0).</p>
 
-<h2>Portable kernels</h2>
+<h2>
+<a id="portable-kernels-legacy-interface" class="anchor" href="#portable-kernels-legacy-interface" aria-hidden="true"><span class="octicon octicon-link"></span></a>Portable Kernels (Legacy Interface)</h2>
 
-<p><code>HEMI_KERNEL</code> can be used to declare a function that is launchable as a CUDA kernel when compiled with NVCC, or as a C/C++ (host) function when compiled with the host compiler. <code>HEMI_KERNEL_LAUNCH</code> is a convenience macro that can be used to launch a kernel function on the device when compiled with NVCC, or call the host function when compiled with the host compiler. </p>
+<p>**<code>HEMI_KERNEL</code> and <code>HEMI_KERNEL_LAUNCH</code> are the Hemi 1.x interface for defining portable kernels. <code>HEMI_LAUNCHABLE</code>
+<code>HEMI_KERNEL</code> can be used to declare a function that is launchable as a CUDA kernel when compiled with NVCC, or as a C/C++ (host) function when compiled with the host compiler. <code>HEMI_KERNEL_LAUNCH</code> is a convenience macro that can be used to launch a kernel function on the device when compiled with NVCC, or call the host function when compiled with the host compiler. </p>
 
 <p>For example, here is an excerpt from the "blackscholes" example.</p>
 
@@ -159,7 +289,8 @@ HEMI_KERNEL_LAUNCH(BlackScholes, gridDim, blockDim, 0, 0,
 
 <p><code>HEMI_KERNEL_LAUNCH</code> requires grid and block dimensions to be passed to it, but these parameters are ignored when compiled for the host. When<code>DEBUG</code> is defined, <code>HEMI_KERNEL_LAUNCH</code> checks for CUDA launch and runtime errors.</p>
 
-<h2>Portable Constants</h2>
+<h2>
+<a id="portable-constants" class="anchor" href="#portable-constants" aria-hidden="true"><span class="octicon octicon-link"></span></a>Portable Constants</h2>
 
 <p>Global constant values can be defined using the <code>HEMI_DEFINE_CONSTANT</code> macro, which takes a name and an initial value. When compiled with NVCC as CUDA code, this declares two versions of the constant, one <code>__constant__</code> variable for the device, and one normal host variable. When compiled with a host compiler, only the host variable is defined.</p>
 
@@ -173,13 +304,15 @@ HEMI_KERNEL_LAUNCH(BlackScholes, gridDim, blockDim, 0, 0,
                    &amp;ss, sizeof(float), 0, cudaMemcpyHostToDevice)
 </code></pre>
 
-<h2>Note: Non-inline functions and methods</h2>
+<h2>
+<a id="note-non-inline-functions-and-methods" class="anchor" href="#note-non-inline-functions-and-methods" aria-hidden="true"><span class="octicon octicon-link"></span></a>Note: Non-Inline Functions and Methods</h2>
 
-<p>There are non-inline versions of the macros (<code>HEMI_DEV_CALLABLE</code> and <code>HEMI_DEV_CALLABLE_MEMBER</code>. Care needs to be taken to avoid multiple definition linker errors due to using these in headers that are included into multiple compilation units. The best way to use <code>HEMI_DEV_CALLABLE</code> is to declare functions using this macro in a header, and define their implementation in a .cu file, and compile it with NVCC. This will generate code for both host and device. The host code will be linked into your library or application and callable from other host code compilation units (.c and .cpp files).  </p>
+<p>There are non-inline versions of the macros (<code>HEMI_DEV_CALLABLE</code> and <code>HEMI_DEV_CALLABLE_MEMBER</code>. Take care to avoid multiple definition linker errors due to using these in headers that are included into multiple compilation units. The best way to use <code>HEMI_DEV_CALLABLE</code> is to declare functions using this macro in a header, and define their implementation in a .cu file, and compile it with NVCC. This will generate code for both host and device. The host code will be linked into your library or application and callable from other host code compilation units (.c and .cpp files).  </p>
 
 <p>Likewise, for <code>HEMI_DEV_CALLABLE_MEMBER</code>, put the class and function declaration in a header, and the member function implementations in a .cu file, compiled by NVCC.</p>
 
-<h2>Note: Device-specific code</h2>
+<h2>
+<a id="note-device-specific-code" class="anchor" href="#note-device-specific-code" aria-hidden="true"><span class="octicon octicon-link"></span></a>Note: Device-Specific Code</h2>
 
 <p>Note: Code in functions like this must be portable. In other words it must be able to compile and run for both the host or device. If it is not, within the function you can use <code>HEMI_DEV_CODE</code> to define separate code for host and device. Example:</p>
 
@@ -193,52 +326,57 @@ float inverseLength(float softening = 0.0f) const {
 }
 </code></pre>
 
-<h1>Utility Functions</h1>
+<h1>
+<a id="utility-functions" class="anchor" href="#utility-functions" aria-hidden="true"><span class="octicon octicon-link"></span></a>Utility Functions</h1>
 
-<h2>CUDA Error Checking</h2>
+<h2>
+<a id="cuda-error-checking" class="anchor" href="#cuda-error-checking" aria-hidden="true"><span class="octicon octicon-link"></span></a>CUDA Error Checking</h2>
 
 <p>hemi.h provides two convenience functions for checking CUDA errors. <code>checkCuda</code> verifies that its single argument has the value <code>cudaSuccess</code>, and otherwise prints an error message and asserts if #DEBUG is defined. This function is typically wrapped around CUDA 
 API calls, for example:</p>
 
-<pre><code>checkCuda( cudaMemcpy(d_stockPrice,   stockPrice,   OPT_SZ, cudaMemcpyHostToDevice) );
+<pre><code>checkCuda(cudaMemcpy(d_stockPrice, stockPrice, OPT_SZ,
+                     cudaMemcpyHostToDevice) );
 </code></pre>
 
 <p><code>checkCudaErrors</code> takes no arguments and checks the current state of the CUDA context for errors. This function synchronizes the CUDA device (<code>cudaDeviceSynchronize()</code>) to ensure asynchronous launch errors are caught.</p>
 
 <p>Both <code>checkCuda</code> and <code>checkCudaErrors</code> act as No-ops when DEBUG is not defined (i.e. release builds).</p>
 
-<h2>Iteration</h2>
+<h2>
+<a id="iteration" class="anchor" href="#iteration" aria-hidden="true"><span class="octicon octicon-link"></span></a>Iteration</h2>
 
-<p>For kernel functions with simple independent element-wise parallelism, hemi.h provides two functions to enable iterating over elements sequentially in host code or in parallel in device code. </p>
+<p>For kernel functions with simple independent element-wise parallelism, <code>hemi/device_api.h</code> provides functions to enable iterating over elements sequentially in host code or in parallel in device code. </p>
 
 <ul>
 <li>
-<code>hemiGetElementOffset()</code> returns the offset of the current thread within the 1D grid, or zero for host code. In device code, it resolves to <code>blockDim.x * blockIdx.x + threadIdx.x</code>.</li>
+<code>globalThreadIndex()</code> returns the offset of the current thread within the 1D grid, or zero for host code. In device code, it resolves to <code>blockDim.x * blockIdx.x + threadIdx.x</code>.</li>
 <li>
-<code>hemiGetElementStride()</code> returns the size of the 1D grid in threads, or one in host code. In device code, it resolves to <code>gridDim.x * blockDim.x</code>.</li>
-</ul><p>From the "blackscholes" example:</p>
+<code>globalThreadCount()</code> returns the size of the 1D grid in threads, or one in host code. In device code, it resolves to <code>gridDim.x * blockDim.x</code>.</li>
+</ul>
 
-<pre><code>// Black-Scholes formula for both call and put
-HEMI_KERNEL(BlackScholes)
-    (float *callResult, float *putResult, const float *stockPrice,
-     const float *optionStrike, const float *optionYears, float Riskfree,
-     float Volatility, int optN)
+<p>Here's a SAXPY implementation using the above functions.</p>
+
+<pre><code>HEMI_LAUNCHABLE
+void saxpy(int n, float a, float *x, float *y)
 {
-    int offset = hemiGetElementOffset();
-    int stride = hemiGetElementStride();
-
-    for(int opt = offset; opt &lt; optN; opt += stride)
-    {
-        // ... compute call and put value based on Black-Scholes formula
-    }
+  using namespace hemi;
+  for (int i = globalThreadIndex(); i &lt; n; i += globalThreadCount()) {
+    y[i] = a * x[i] + y[i];
+  }
 }
 </code></pre>
 
+<p>Note it's simpler to use a range-based for loop using <code>grid_stride_range()</code> as shown previously.</p>
+
 <p>This code can be compiled and run as a sequential function on the host or as a CUDA kernel for the device.</p>
 
-<p>Note: the <code>hemiGetElement*()</code> functions are specialized to simple (but common), 1D element-wise parallelism. As such, they may not be useful for multidimensional grids, arbitrary strides, or other more complex parallelism arrangements, but they may serve as examples for creating your own.</p>
+<p>Hemi provides a complete set of portable element accessors in <code>hemi\device_api.h</code> including <code>localThreadIndex()</code>, <code>globalBlockCount()</code>, etc.</p>
 
-<h1>Mix and Match</h1>
+<p>Note: the <code>globalThreadIndex()</code>, <code>globalThreadCount()</code>, etc. functions are specialized to simple (but common) element-wise parallelism. As such, they may not be useful for arbitrary strides, data sharing, or other more complex parallelism arrangements, but they may serve as examples for creating your own.</p>
+
+<h1>
+<a id="mix-and-match" class="anchor" href="#mix-and-match" aria-hidden="true"><span class="octicon octicon-link"></span></a>Mix and Match</h1>
 
 <p>HEMI is intended to provide a loosely-coupled set of utilities and examples for creating reusable, portable CUDA C/C++ code. Feel free to use the parts that you need and ignore others. You may modify and replace portions as needed. We have selected a permissive open source license to encourage these kinds of flexible use.</p>
 
@@ -246,33 +384,20 @@ HEMI_KERNEL(BlackScholes)
 
 <p><a href="https://github.com/harrism/hemi">https://github.com/harrism/hemi</a></p>
 
-<h1>License and Copyright</h1>
+<h1>
+<a id="license-and-copyright" class="anchor" href="#license-and-copyright" aria-hidden="true"><span class="octicon octicon-link"></span></a>License and Copyright</h1>
 
-<p>Copyright 2012, NVIDIA Corporation</p>
+<p>Copyright 2012-2015, NVIDIA Corporation</p>
 
-<p>Licensed under the Apache License, v2.0.  Please see the LICENSE file included with the HEMI source code.</p>
-
-<p><a href="http://githalytics.com/harrism/hemi"><img src="https://cruel-carlota.pagodabox.com/06d00d410f9df2a26a2c2a4e81d7c1eb" alt="githalytics.com alpha" title="githalytics.com"></a></p>
+<p>Licensed under the BSD License. Please see the LICENSE file included with the HEMI source code.</p>
         </section>
 
-        <aside id="sidebar">
-          <a href="https://github.com/harrism/hemi/zipball/master" class="button">
-            <small>Download</small>
-            .zip file
-          </a>
-          <a href="https://github.com/harrism/hemi/tarball/master" class="button">
-            <small>Download</small>
-            .tar.gz file
-          </a>
+        <footer>
+          Hemi is maintained by <a href="https://github.com/harrism">harrism</a><br>
+          This page was generated by <a href="https://pages.github.com">GitHub Pages</a>. Tactile theme by <a href="https://twitter.com/jasonlong">Jason Long</a>.
+        </footer>
 
-          <p class="repo-owner"><a href="https://github.com/harrism/hemi"></a> is maintained by <a href="https://github.com/harrism">harrism</a>.</p>
-
-          <p>This page was generated by <a href="pages.github.com">GitHub Pages</a> using the Architect theme by <a href="http://twitter.com/jasonlong">Jason Long</a>.</p>
-        </aside>
-      </div>
-    </div>
-
-            <script type="text/javascript">
+                  <script type="text/javascript">
             var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
             document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
           </script>
@@ -283,5 +408,7 @@ HEMI_KERNEL(BlackScholes)
             } catch(err) {}
           </script>
 
+      </div>
+    </div>
   </body>
 </html>
