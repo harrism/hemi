@@ -231,6 +231,7 @@ namespace hemi {
 
         void deallocateHost()
         {
+            assert(!isForeignHostPtr);
             if (isHostAlloced) {
 #ifndef HEMI_CUDA_DISABLE
                 if (isPinned)
