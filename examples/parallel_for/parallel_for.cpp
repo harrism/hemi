@@ -9,6 +9,10 @@ int main(void)
 		printf("%d\n", i); 
 	});
 
+	parallel_for(index2d{0, 0}, index2d{10, 10}, [] HEMI_LAMBDA (int i, int j) {
+		printf("%d, %d\n", i, j);
+	});
+
 	deviceSynchronize();
 
 	return 0;

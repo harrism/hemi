@@ -21,20 +21,35 @@
 
 namespace hemi
 {
+    template <unsigned Dim = 0>
 	HEMI_DEV_CALLABLE_INLINE
     unsigned int globalThreadIndex() {
     #ifdef HEMI_DEV_CODE
+        if (Dim == 0)
     	return threadIdx.x + blockIdx.x * blockDim.x;
+        else if (Dim == 1)
+            return threadIdx.y + blockIdx.y * blockDim.y;
+        else if (Dim == 2)
+            return threadIdx.z + blockIdx.z * blockDim.z;
+        else
+            return 0;
     #else
     	return 0;
     #endif
     }
 
-
+    template <unsigned Dim = 0>
     HEMI_DEV_CALLABLE_INLINE
     unsigned int globalThreadCount() {
     #ifdef HEMI_DEV_CODE
+        if (Dim == 0)
     	return blockDim.x * gridDim.x;
+        else if (Dim == 1)
+    	    return blockDim.y * gridDim.y;
+        else if (Dim == 2)
+    	    return blockDim.z * gridDim.z;
+        else
+            return 0;
     #else
     	return 1;
     #endif

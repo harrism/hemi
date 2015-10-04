@@ -28,11 +28,11 @@ using step_range = typename range_proxy<T>::step_range_proxy;
 
 namespace hemi {
 
-	template <typename T>
+	template <unsigned Dim, typename T>
 	HEMI_DEV_CALLABLE_INLINE
 	step_range<T> grid_stride_range(T begin, T end) {
-	    begin += hemi::globalThreadIndex();
-	    return range(begin, end).step(hemi::globalThreadCount());
+	    begin += hemi::globalThreadIndex<Dim>();
+	    return range(begin, end).step(hemi::globalThreadCount<Dim>());
 	}
 	
 }
