@@ -28,7 +28,7 @@ template <typename Function, typename... Arguments>
 void launch(Function f, Arguments... args)
 {
 #ifdef HEMI_CUDA_COMPILER
-    ExecutionPolicy p;
+    ExecutionPolicy p(1);
     launch(p, f, args...);
 #else
     Kernel(f, args...);
@@ -64,7 +64,7 @@ template <typename... Arguments>
 void cudaLaunch(void(*f)(Arguments... args), Arguments... args)
 {
 #ifdef HEMI_CUDA_COMPILER
-    ExecutionPolicy p;
+    ExecutionPolicy p(1);
     cudaLaunch(p, f, args...);
 #else
     f(args...);
