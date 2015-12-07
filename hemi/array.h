@@ -131,6 +131,7 @@ namespace hemi {
             if (isDeviceValid && !isHostValid) copyDeviceToHost();
             else assert(isHostValid);
             isDeviceValid = false;
+            isHostValid   = true;
             return hPtr;
         }
 
@@ -138,6 +139,7 @@ namespace hemi {
         {
             if (!isDeviceValid && isHostValid) copyHostToDevice();
             else assert(isDeviceValid);
+            isDeviceValid = true;
             isHostValid = false;
             return dPtr;
         }
