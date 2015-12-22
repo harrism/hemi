@@ -204,7 +204,6 @@ namespace hemi {
         void allocateHost() const
         {
             assert(!isHostAlloced);
-            assert(!isDeviceAlloced);
 #ifndef HEMI_CUDA_DISABLE
             if (isPinned)
                 checkCuda( cudaHostAlloc((void**)&hPtr, nSize * sizeof(T), 0));
@@ -267,7 +266,8 @@ namespace hemi {
         void copyDeviceToHost() const
         {
 #ifndef HEMI_CUDA_DISABLE
-            assert(isDeviceAlloced && isHostAlloced);
+            assert(isDeviceAlloced);
+            if (!isHostAlloced) allocateHost();
             checkCuda( cudaMemcpy(hPtr, 
                                   dPtr, 
                                   nSize * sizeof(T), 
