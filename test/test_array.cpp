@@ -43,10 +43,10 @@ TEST(ArrayTest, CreatesAndFillsArrayOnDevice)
 	ASSERT_SUCCESS(hemi::deviceSynchronize());
 }
 
-template <typename T>
-void squareOnDevice(T* ptr, int n) {
-	hemi::parallel_for(0, n, [=] HEMI_LAMBDA (int i) { 
-		ptr[i] = ptr[i]*ptr[i]; 
+void squareOnDevice(hemi::Array<float> &a) {
+	float *ad = a.ptr();
+	hemi::parallel_for(0, a.size(), [=] HEMI_LAMBDA (int i) { 
+		ad[i] = ad[i]*ad[i]; 
 	});
 }
 
@@ -61,7 +61,7 @@ TEST(ArrayTest, FillsOnHostModifiesOnDevice)
 	float *ptr = data.writeOnlyHostPtr();
 	std::fill(ptr, ptr+n, val);
 
-	squareOnDevice(data.ptr(), n);
+	squareOnDevice(data);
 
 	for(int i = 0; i < n; i++) {
 		ASSERT_EQ(val*val, data.readOnlyPtr(hemi::host)[i]);

@@ -39,4 +39,17 @@ namespace hemi
 			for (auto idx : grid_stride_range(first, last)) function(idx);
 		});
 	}
+
+	template <typename F>
+	void parallel_for(size_t first, size_t last, F function) {
+		ExecutionPolicy p;
+		parallel_for(p, first, last, function);
+	}
+
+	template <typename F>
+	void parallel_for(const ExecutionPolicy &p, size_t first, size_t last, F function) {
+		hemi::launch(p, [=] HEMI_LAMBDA () {
+			for (auto idx : grid_stride_range(first, last)) function(idx);
+		});
+	}
 }
