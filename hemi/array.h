@@ -128,6 +128,7 @@ namespace hemi {
             else if (!isHostAlloced) allocateHost();
             else assert(isHostValid);
             isDeviceValid = false;
+            isHostValid   = true;
             return hPtr;
         }
 
@@ -136,6 +137,7 @@ namespace hemi {
             if (!isDeviceValid && isHostValid) copyHostToDevice();
             else if (!isDeviceAlloced) allocateDevice();
             else assert(isDeviceValid);
+            isDeviceValid = true;
             isHostValid = false;
             return dPtr;
         }
