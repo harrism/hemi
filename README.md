@@ -39,6 +39,16 @@ Requirements
 
 Hemi 2 requires a host compiler with support for C++11 or later. For CUDA device execution, Hemi requires CUDA 7.0 or later. To launch lambda expressions on the GPU using `hemi::launch()` or `hemi::parallel_for()`, Hemi requires CUDA 7.5 or later with experimental support for "extended lambdas" (enabled using the `nvcc` command line option `--expt-extended-lambda`).
 
+Installing
+----------
+
+Once you clone Hemi from Github, you need to sync its submodules in order to use the range helper (`range.hpp`) and to run tests based on the Google test framework. To do so, run the following Git commands in your hemi base directory:
+
+    > git submodule init
+    > git submodule update
+
+Hemi is a header-only library, so there is no further installation required. Simply include the hemi headers for the features you need. See the examples for demonstration.
+
 Features
 ========
 
