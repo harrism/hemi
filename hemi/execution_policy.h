@@ -15,6 +15,7 @@
 #pragma once
 
 #include "hemi/hemi.h"
+#include "hemi/stream.h"
 
 namespace hemi {
 
@@ -33,7 +34,7 @@ public:
       mGridSize(0), 
       mBlockSize(0), 
       mSharedMemBytes(0),
-      mStream((hemiStream_t)0) {}
+      mStream(0) {}
     
     ExecutionPolicy(int gridSize, int blockSize, size_t sharedMemBytes)
     : mState(0), mStream(0) {
@@ -42,7 +43,15 @@ public:
       setSharedMemBytes(sharedMemBytes);  
     }
 
-    ExecutionPolicy(int gridSize, int blockSize, size_t sharedMemBytes, hemiStream_t stream)
+    ExecutionPolicy(int gridSize, int blockSize, size_t sharedMemBytes, Stream & stream)
+    : mState(0) {
+      setGridSize(gridSize);
+      setBlockSize(blockSize);
+      setSharedMemBytes(sharedMemBytes);
+      setStream(stream);
+    }
+
+    ExecutionPolicy(int gridSize, int blockSize, size_t sharedMemBytes, stream_t stream)
     : mState(0) {
       setGridSize(gridSize);
       setBlockSize(blockSize);
@@ -52,13 +61,12 @@ public:
           
     ~ExecutionPolicy() {}
 
-    int    getConfigState()    const { return mState;          }
-    
-    int    getGridSize()       const { return mGridSize;       }
-    int    getBlockSize()      const { return mBlockSize;      }
-    int    getMaxBlockSize()   const { return mMaxBlockSize;   }
-    size_t getSharedMemBytes() const { return mSharedMemBytes; }
-    hemiStream_t getStream()   const { return mStream; }
+    int      getConfigState()    const { return mState;          }
+    int      getGridSize()       const { return mGridSize;       }
+    int      getBlockSize()      const { return mBlockSize;      }
+    int      getMaxBlockSize()   const { return mMaxBlockSize;   }
+    size_t   getSharedMemBytes() const { return mSharedMemBytes; }
+    stream_t getStream()         const { return mStream;         }
  
     void setGridSize(int arg) { 
         mGridSize = arg;  
@@ -76,7 +84,10 @@ public:
         mSharedMemBytes = arg; 
         mState |= SharedMem; 
     }
-    void setStream(hemiStream_t stream) {
+    void setStream(Stream & stream) {
+        mStream = stream.id();
+    }
+    void setStream(stream_t stream) {
         mStream = stream;
     }
 
@@ -86,7 +97,7 @@ private:
     int    mBlockSize;
     int    mMaxBlockSize;
     size_t mSharedMemBytes;
-    hemiStream_t mStream;
+    stream_t mStream;
 };
 
 }

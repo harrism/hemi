@@ -15,6 +15,7 @@
 #pragma once
 
 #include "hemi/hemi.h"
+#include "hemi/stream.h"
 #include <cstring>
 
 #ifndef HEMI_ARRAY_DEFAULT_LOCATION
@@ -47,7 +48,9 @@ namespace hemi {
           isHostAlloced(false),
           isDeviceAlloced(false),
           isHostValid(false),
-          isDeviceValid(false) 
+          isDeviceValid(false),
+          isAsync(false),
+          streamID(0) 
         {
         }
 
@@ -61,7 +64,9 @@ namespace hemi {
           isHostAlloced(true),
           isDeviceAlloced(false),
           isHostValid(true),
-          isDeviceValid(false) 
+          isDeviceValid(false),
+          isAsync(false),
+          streamID(0)
         {
         }
 
@@ -73,6 +78,30 @@ namespace hemi {
         }
 
         size_t size() const { return nSize; }
+
+
+        // Make all memory transfers asynchronous.
+        // The user must take care himself not to access the host memory until
+        // the transfers are completed using hemi::deviceSynchronize.
+        void setAsync(bool async, stream_t stream = 0)
+        {
+            isAsync = async;
+            this->streamID = streamID;
+        }
+
+        // Make all memory transfers asynchronous and use the target stream.
+        // The user must take care himself not to access the host memory until
+        // the transfers are completed using hemi::Stream::synchronize.
+        void setAsync(bool async, Stream & stream)
+        {
+            isAsync = async;
+            this->streamID = stream.id();
+        }
+
+
+        bool async() const { return isAsync; }
+        stream_t stream() const { return streamID; }
+
 
         // copy from/to raw external pointers (host or device)
 
@@ -101,16 +130,32 @@ namespace hemi {
                 deallocateDevice();
                 nSize = n;
             }
-            checkCuda( cudaMemcpy(writeOnlyDevicePtr(), other, 
-                                  nSize * sizeof(T), cudaMemcpyDeviceToDevice) );
+            if (isAsync)
+            {
+                checkCuda( cudaMemcpyAsync(writeOnlyDevicePtr(), other, 
+                                           nSize * sizeof(T), cudaMemcpyDeviceToDevice, streamID) );
+            }
+            else
+            {
+                checkCuda( cudaMemcpy(writeOnlyDevicePtr(), other, 
+                                      nSize * sizeof(T), cudaMemcpyDeviceToDevice) );
+            }
         }
 
         void copyToDevice(T *other, size_t n)
         {
             assert(isDeviceAlloced);
             assert(n <= nSize);
-            checkCuda( cudaMemcpy(other, readOnlyDevicePtr(), 
-                                  nSize * sizeof(T), cudaMemcpyDeviceToDevice) );
+            if (isAsync)
+            {            
+                checkCuda( cudaMemcpyAsync(other, readOnlyDevicePtr(), 
+                                           nSize * sizeof(T), cudaMemcpyDeviceToDevice, streamID) );
+            }
+            else
+            {                                      
+                checkCuda( cudaMemcpy(other, readOnlyDevicePtr(), 
+                                      nSize * sizeof(T), cudaMemcpyDeviceToDevice) );
+            }
         }
 #endif
 
@@ -201,6 +246,9 @@ namespace hemi {
         mutable bool    isHostValid;
         mutable bool    isDeviceValid;
 
+        bool            isAsync;
+        stream_t        streamID;
+
     protected:
         void allocateHost() const
         {
@@ -259,10 +307,17 @@ namespace hemi {
 #ifndef HEMI_CUDA_DISABLE
             assert(isHostAlloced);
             if (!isDeviceAlloced) allocateDevice();
-            checkCuda( cudaMemcpy(dPtr, 
-                                  hPtr, 
-                                  nSize * sizeof(T), 
-                                  cudaMemcpyHostToDevice) );
+            if (isAsync)
+            {
+                assert(isPinned || isForeignHostPtr);
+                checkCuda( cudaMemcpyAsync(dPtr, hPtr, nSize * sizeof(T), 
+                                           cudaMemcpyHostToDevice, streamID) );
+            }
+            else
+            {                                           
+                checkCuda( cudaMemcpy(dPtr, hPtr, nSize * sizeof(T), 
+                                      cudaMemcpyHostToDevice) );
+            }                                          
             isDeviceValid = true;
 #endif
         }
@@ -272,10 +327,17 @@ namespace hemi {
 #ifndef HEMI_CUDA_DISABLE
             assert(isDeviceAlloced);
             if (!isHostAlloced) allocateHost();
-            checkCuda( cudaMemcpy(hPtr, 
-                                  dPtr, 
-                                  nSize * sizeof(T), 
-                                  cudaMemcpyDeviceToHost) );
+            if (isAsync)
+            {
+                assert(isPinned || isForeignHostPtr);
+                checkCuda( cudaMemcpyAsync(hPtr, dPtr, nSize * sizeof(T), 
+                                           cudaMemcpyDeviceToHost, streamID) );
+            }
+            else
+            {
+                checkCuda( cudaMemcpy(hPtr, dPtr, nSize * sizeof(T), 
+                                      cudaMemcpyDeviceToHost) );
+            }
             isHostValid = true;
 #endif
         }
