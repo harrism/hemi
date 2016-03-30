@@ -82,7 +82,7 @@ namespace hemi {
         void setAsync(bool async, stream_t stream = 0)
         {
             isAsync = async;
-            this->streamID = streamID;
+            streamID = stream;
         }
 
         // Make all memory transfers asynchronous and use the target stream.
@@ -91,7 +91,7 @@ namespace hemi {
         void setAsync(bool async, Stream & stream)
         {
             isAsync = async;
-            this->streamID = stream.id();
+            streamID = stream.id();
         }
 
 
