@@ -59,6 +59,7 @@
 
   // Memory specifiers
   #define HEMI_MEM_DEVICE                 __device__
+  #define HEMI_MEM_SHARED                 __shared__
 
   // Constants: declares both a device and a host copy of this constant
   // static and extern flavors can be used to declare static and extern
@@ -105,6 +106,7 @@
 
   // memory specifiers
   #define HEMI_MEM_DEVICE
+  #define HEMI_MEM_SHARED  
 
   #define HEMI_DEFINE_CONSTANT(def, value) def ## _hostconst = value
   #define HEMI_DEFINE_STATIC_CONSTANT(def, value) static def ## _hostconst = value
