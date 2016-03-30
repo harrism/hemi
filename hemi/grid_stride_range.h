@@ -23,17 +23,21 @@
 using namespace util::lang;
 
 // type alias to simplify typing...
-template<typename T>
-using step_range = typename range_proxy<T>::step_range_proxy;
+using step_range = typename range_proxy<int>::step_range_proxy;
 
 namespace hemi {
 
-	template <typename T>
 	HEMI_DEV_CALLABLE_INLINE
-	step_range<T> grid_stride_range(T begin, T end) {
+	step_range grid_stride_range(int begin, int end) {
 	    begin += hemi::globalThreadIndex();
 	    return range(begin, end).step(hemi::globalThreadCount());
 	}
+
+	HEMI_DEV_CALLABLE_INLINE
+	step_range block_stride_range(int begin, int end) {
+	    begin += hemi::localThreadIndex();
+	    return range(begin, end).step(hemi::localThreadCount());
+	}	
 	
 }
 /////////////////////////////////////////////////////////////////
