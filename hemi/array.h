@@ -74,7 +74,8 @@ namespace hemi {
         }
 
         size_t size() const { return nSize; }
-
+        bool async() const { return isAsync; }
+        stream_t stream() const { return streamID; }
 
         // Make all memory transfers asynchronous.
         // The user must take care himself not to access the host memory until
@@ -93,11 +94,6 @@ namespace hemi {
             isAsync = async;
             streamID = stream.id();
         }
-
-
-        bool async() const { return isAsync; }
-        stream_t stream() const { return streamID; }
-
 
         // copy from/to raw external pointers (host or device)
 
