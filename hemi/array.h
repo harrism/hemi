@@ -39,7 +39,7 @@ namespace hemi {
     class Array 
     {
     public:
-        Array(size_t n, bool usePinned=true) : 
+        Array(size_t n = 0, bool usePinned = true) : 
           nSize(n), 
           hPtr(nullptr),
           dPtr(nullptr),
@@ -95,15 +95,20 @@ namespace hemi {
             streamID = stream.id();
         }
 
-        // copy from/to raw external pointers (host or device)
-
-        void copyFromHost(const T *other, size_t n)
+        void resize(size_t n)
         {
-            if ((hPtr || dPtr) && nSize != n) {
+            if (nSize != n) {
                 deallocateHost();
                 deallocateDevice();
                 nSize = n;
             }
+        }
+
+        // copy from/to raw external pointers (host or device)
+
+        void copyFromHost(const T *other, size_t n)
+        {
+            resize(n);
             memcpy(writeOnlyHostPtr(), other, nSize * sizeof(T));
         }
 
@@ -117,11 +122,7 @@ namespace hemi {
 #ifndef HEMI_CUDA_DISABLE
         void copyFromDevice(const T *other, size_t n)
         {
-            if ((hPtr || dPtr) && nSize != n) {
-                deallocateHost();
-                deallocateDevice();
-                nSize = n;
-            }
+            resize(n);
             if (isAsync)
             {
                 checkCuda( cudaMemcpyAsync(writeOnlyDevicePtr(), other, 
@@ -241,6 +242,7 @@ namespace hemi {
     protected:
         void allocateHost() const
         {
+            assert(nSize > 0);        
             assert(!hPtr);
 #ifndef HEMI_CUDA_DISABLE
             if (isPinned)
@@ -255,6 +257,7 @@ namespace hemi {
         
         void allocateDevice() const
         {
+            assert(nSize > 0);        
 #ifndef HEMI_CUDA_DISABLE
             assert(!dPtr);
             checkCuda( cudaMalloc((void**)&dPtr, nSize * sizeof(T)) );
