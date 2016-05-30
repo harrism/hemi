@@ -63,6 +63,9 @@ saxpy_host: saxpy.cpp
 saxpy_device: saxpy.cpp
 	$(NVCC) $? $(NVCC_FLAGS) -x cu -o $@
 
+saxpy_shmoo_device: saxpy_shmoo.cpp
+	$(NVCC) $? $(NVCC_FLAGS) -x cu -o $@
+
 clean:
 	rm -f $(EXES) *.o
 	rm -rf *.dSYM

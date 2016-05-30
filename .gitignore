@@ -66,6 +66,7 @@ examples/simple/hello_lambda_host
 examples/simple/hello_lambda_host_nvcc
 examples/simple/saxpy_host
 examples/simple/saxpy_device
+examples/simple/saxpy_shmoo_device
 
 test/test_hemi_device
 test/test_hemi_host

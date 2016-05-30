@@ -22,19 +22,19 @@ namespace hemi {
 
     // Automatic parallel launch for function object
     template <typename Function, typename... Arguments>
-    void launch(Function f, Arguments... args);
+    ExecutionPolicy launch(Function f, Arguments... args);
 
     // Launch function object with an explicit execution policy / configuration
     template <typename Function, typename... Arguments>
-    void launch(const ExecutionPolicy &p, Function f, Arguments... args);
+    ExecutionPolicy launch(const ExecutionPolicy &p, Function f, Arguments... args);
 
     // Automatic parallel launch for CUDA __global__ functions
     template <typename... Arguments>
-    void cudaLaunch(void(*f)(Arguments...), Arguments... args);
+    ExecutionPolicy cudaLaunch(void(*f)(Arguments...), Arguments... args);
 
     // Launch __global__ function with an explicit execution policy / configuration
     template <typename... Arguments>
-    void cudaLaunch(const ExecutionPolicy &p, void(*f)(Arguments...), Arguments... args);
+    ExecutionPolicy cudaLaunch(const ExecutionPolicy &p, void(*f)(Arguments...), Arguments... args);
 }
 
 #include "launch.inl"

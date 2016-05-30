@@ -34,6 +34,12 @@ public:
       mBlockSize(0), 
       mSharedMemBytes(0),
       mStream((hemiStream_t)0) {}
+
+    ExecutionPolicy(int gridSize, int blockSize)
+    : mState(0), mStream(0) {
+      setGridSize(gridSize);
+      setBlockSize(blockSize);
+    }
     
     ExecutionPolicy(int gridSize, int blockSize, size_t sharedMemBytes)
     : mState(0), mStream(0) {

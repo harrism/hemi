@@ -25,13 +25,15 @@ namespace hemi {
 // Automatic Launch functions for closures (functor or lambda)
 //
 template <typename Function, typename... Arguments>
-void launch(Function f, Arguments... args)
+ExecutionPolicy launch(Function f, Arguments... args)
 {
 #ifdef HEMI_CUDA_COMPILER
     ExecutionPolicy p;
     launch(p, f, args...);
+    return p;
 #else
     Kernel(f, args...);
+    return ExecutionPolicy();
 #endif
 }
 
@@ -40,7 +42,7 @@ void launch(Function f, Arguments... args)
 //
 template <typename Function, typename... Arguments>
 #ifdef HEMI_CUDA_COMPILER
-void launch(const ExecutionPolicy &policy, Function f, Arguments... args)
+ExecutionPolicy launch(const ExecutionPolicy &policy, Function f, Arguments... args)
 {
     ExecutionPolicy p = policy;
     checkCuda(configureGrid(p, Kernel<Function, Arguments...>));
@@ -48,11 +50,13 @@ void launch(const ExecutionPolicy &policy, Function f, Arguments... args)
              p.getBlockSize(), 
              p.getSharedMemBytes(), 
              p.getStream()>>>(f, args...);
+    return p;
 }
 #else
-void launch(const ExecutionPolicy&, Function f, Arguments... args)
+ExecutionPolicy launch(const ExecutionPolicy&, Function f, Arguments... args)
 {
     Kernel(f, args...);
+    return ExecutionPolicy();
 }
 #endif
 
@@ -61,13 +65,15 @@ void launch(const ExecutionPolicy&, Function f, Arguments... args)
 //
 
 template <typename... Arguments>
-void cudaLaunch(void(*f)(Arguments... args), Arguments... args)
+ExecutionPolicy cudaLaunch(void(*f)(Arguments... args), Arguments... args)
 {
 #ifdef HEMI_CUDA_COMPILER
     ExecutionPolicy p;
     cudaLaunch(p, f, args...);
+    return p;
 #else
     f(args...);
+    return ExecutionPolicy();
 #endif
 }
 
@@ -76,7 +82,7 @@ void cudaLaunch(void(*f)(Arguments... args), Arguments... args)
 //
 template <typename... Arguments>
 #ifdef HEMI_CUDA_COMPILER
-void cudaLaunch(const ExecutionPolicy &policy, void (*f)(Arguments...), Arguments... args)
+ExecutionPolicy cudaLaunch(const ExecutionPolicy &policy, void (*f)(Arguments...), Arguments... args)
 {
     ExecutionPolicy p = policy;
     checkCuda(configureGrid(p, f));
@@ -84,11 +90,13 @@ void cudaLaunch(const ExecutionPolicy &policy, void (*f)(Arguments...), Argument
         p.getBlockSize(), 
         p.getSharedMemBytes(),
         p.getStream()>>>(args...);
+    return p;
 }
 #else
-void cudaLaunch(const ExecutionPolicy&, void (*f)(Arguments...), Arguments... args)
+ExecutionPolicy cudaLaunch(const ExecutionPolicy&, void (*f)(Arguments...), Arguments... args)
 {
     f(args...);
+    return ExecutionPolicy();
 }
 #endif
 
