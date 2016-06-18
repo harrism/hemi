@@ -32,6 +32,10 @@ namespace hemi {
 	//template <typename T> class Table2D; // forward decl
 	template <typename T> class Table3D; // forward decl
 
+	// move these typedefs to hemi.h maybe
+	// http://tipsandtricks.runicsoft.com/Cpp/MemberFunctionPointers.html
+	typedef float ( hemi::Table3D::*table ) (float, float, float);
+
 	enum Location {
         host   = 0,
         device = 1
@@ -47,6 +51,24 @@ namespace hemi {
     	nSizeY(ny);
     	nSizeZ(nz);
     	{	
+    	}
+
+    	~Table3D()
+    	{
+    		deallocateDevice();
+            deallocateHost();
+    	}
+
+    	table GetTable(T x, T y, T z)
+    	{
+    		// notice the typedef
+    		table tbl;
+#ifdef HEMI_DEV_CODE
+    		tbl = &hemi::Table3D::dEval;
+#else
+    		tbl = &hemi::Table3D::hEval;
+#endif
+    		return tbl;
     	}
 
     private:
