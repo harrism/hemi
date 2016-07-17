@@ -16,6 +16,7 @@
 
 #include "hemi/hemi.h"
 #include <cstring>
+#include <climits>
 #include <type_traits> 
 
 #ifndef HEMI_ARRAY_DEFAULT_LOCATION
@@ -216,7 +217,7 @@ namespace hemi {
 	resDesc.res.linear.devPtr = dPtr;
 	resDesc.res.linear.sizeInBytes = volumeSize.width * volumeSize.height * volumeSize.depth * sizeof(T);
 	resDesc.res.linear.desc.f = cudaChannelFormatKindFloat;
-	resDesc.res.linear.desc.x = sizeof(T) * 8;
+	resDesc.res.linear.desc.x = sizeof(T) * CHAR_BIT;
 	struct cudaTextureDesc texDesc;
 	memset(&texDesc, 0, sizeof(texDesc));
 	texDesc.normalizedCoords = true;
