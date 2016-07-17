@@ -19,8 +19,8 @@ CXX_FLAGS  := $(STD) -I../../
 HOST_ONLY_FLAGS := -DHEMI_CUDA_DISABLE
 
 # uncomment for debug
-#DEBUG_FLAGS := -g -DDEBUG
-#DEBUG_FLAGS_NVCC := -G
+DEBUG_FLAGS := -g -DDEBUG
+DEBUG_FLAGS_NVCC := -G
 
 # comment for debug
 CXX_FLAGS += -O3
@@ -32,7 +32,8 @@ NVCC_FLAGS := $(CXX_FLAGS) $(DEBUG_FLAGS_NVCC) --expt-extended-lambda
 EXES := hello_device hello_host_nvcc hello_host \
 		hello_lambda_device hello_lambda_host_nvcc hello_lambda_host \
         hello_global \
-        saxpy_host saxpy_device
+        saxpy_host saxpy_device \
+	lookup_table_host
 
 all: $(EXES)
 
