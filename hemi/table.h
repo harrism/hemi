@@ -32,9 +32,28 @@ namespace hemi {
 	//template <typename T> class Table2D; // forward decl
 	template <typename T> class Table3D; // forward decl
 
-	// move these typedefs to hemi.h maybe
+    // EDIT: this idea wont work!
+	// move these typedefs to hemi.h maybe.
 	// http://tipsandtricks.runicsoft.com/Cpp/MemberFunctionPointers.html
-	typedef float ( hemi::Table3D::*table ) (float, float, float);
+	//typedef float ( hemi::Table3D::*table ) (float, float, float);
+
+	template <typename T>
+	  struct table3D {
+
+	    HEMI_DEV_CALLABLE_INLINE_MEMBER T lookup(const T x, const T y, const T z) const
+	    {
+#ifdef HEMI_DEV_CODE
+	      return tex3D<T>(texture, x ,y ,z);
+#else
+	      return 1.0;
+#endif
+	    };
+
+	    #ifndef HEMI_CUDA_DISABLE
+	    cudaTextureObject_t texture;
+	    #endif
+	    mutable T *hPtr;
+	  };
 
 	enum Location {
         host   = 0,
@@ -59,16 +78,9 @@ namespace hemi {
             deallocateHost();
     	}
 
-    	table GetTable(T x, T y, T z)
+    	table getTable() const
     	{
-    		// notice the typedef
-    		table tbl;
-#ifdef HEMI_DEV_CODE
-    		tbl = &hemi::Table3D::dEval;
-#else
-    		tbl = &hemi::Table3D::hEval;
-#endif
-    		return tbl;
+	  return _table;
     	}
 
     private:
@@ -77,12 +89,11 @@ namespace hemi {
     	size_t nSizeY;
     	size_t nSizeZ;
 
-    	mutable T *hPtr;
     	cudaArray *dPtr;
         
-		cudaMemcpy3DParms copyParams;
-		cudaExtent volumeSize;
-		cudaTextureObject_t tex;
+	cudaMemcpy3DParms copyParams;
+	cudaExtent volumeSize;
+	table _table;
 
         mutable bool    isHostAlloced;
         mutable bool    isDeviceAlloced;        
@@ -94,7 +105,7 @@ namespace hemi {
         void allocateHost() const
         {
             assert(!isHostAlloced);
-            hPtr = new T[nSize];    
+            _table.hPtr = new T[nSize];    
                 
             isHostAlloced = true;
             isHostValid = false;
@@ -117,7 +128,7 @@ namespace hemi {
         void deallocateHost()
         {
             if (isHostAlloced) {
-                delete [] hPtr;
+                delete [] _table.hPtr;
                 nSize = 0;
                 nSizeX = 0;
                 nSizeY = 0;
@@ -132,7 +143,7 @@ namespace hemi {
 #ifndef HEMI_CUDA_DISABLE
             if (isDeviceAlloced) {
                 checkCuda( cudaFreeArray(dPtr) );
-                checkCuda( cudaDestroyTextureObject(tex) );
+                checkCuda( cudaDestroyTextureObject(_table.texture) );
                 isDeviceAlloced = false;
                 isDeviceValid   = false;
             }
@@ -144,33 +155,31 @@ namespace hemi {
 #ifndef HEMI_CUDA_DISABLE
             assert(isHostAlloced);
             if (!isDeviceAlloced) allocateDevice();
-            copyParams.srcPtr = make_cudaPitchedPtr((void*)hPtr, volumeSize.width * sizeof(float), volumeSize.width, volumeSize.height);                                                                                                                                        
-  			copyParams.extent   = volumeSize;
-  			copyParams.kind     = cudaMemcpyHostToDevice;
-  			cudaMemcpy3D(&copyParams);
-
-  			// bind to texture
-  			struct cudaResourceDesc resDesc;
-  			memset(&resDesc, 0, sizeof(resDesc));
-  			resDesc.resType =  cudaResourceTypeArray;
-  			resDesc.res.linear.devPtr = dPtr;
-  			resDesc.res.linear.sizeInBytes = volumeSize.width * volumeSize.height * volumeSize.depth * sizeof(T);
-			resDesc.res.linear.desc.f = cudaChannelFormatKindFloat;
- 			resDesc.res.linear.desc.x = sizeof(T) * 8;
-  			struct cudaTextureDesc texDesc;
- 			memset(&texDesc, 0, sizeof(texDesc));
- 			//texDesc.normalizedCoords = false;                                                                                                                                     
- 			texDesc.normalizedCoords = true;
- 			texDesc.readMode = cudaReadModeElementType;
-  			//texDesc.filterMode = cudaFilterModePoint;                                                                                                                             
-  			texDesc.filterMode = cudaFilterModeLinear;
-
-  			texDesc.addressMode[0] = cudaAddressModeClamp;
- 			texDesc.addressMode[1] = cudaAddressModeClamp;
- 			texDesc.addressMode[2] = cudaAddressModeClamp;
-
- 			cudaCreateTextureObject(&tex, &resDesc, &texDesc, NULL);
-
+            copyParams.srcPtr = make_cudaPitchedPtr((void*)_table.hPtr, volumeSize.width * sizeof(float), volumeSize.width, volumeSize.height);
+	    copyParams.extent   = volumeSize;
+	    copyParams.kind     = cudaMemcpyHostToDevice;
+	    cudaMemcpy3D(&copyParams);
+	    
+	    // bind to texture
+	    struct cudaResourceDesc resDesc;
+	    memset(&resDesc, 0, sizeof(resDesc));
+	    resDesc.resType =  cudaResourceTypeArray;
+	    resDesc.res.linear.devPtr = dPtr;
+	    resDesc.res.linear.sizeInBytes = volumeSize.width * volumeSize.height * volumeSize.depth * sizeof(T);
+	    resDesc.res.linear.desc.f = cudaChannelFormatKindFloat;
+	    resDesc.res.linear.desc.x = sizeof(T) * 8;
+	    struct cudaTextureDesc texDesc;
+	    memset(&texDesc, 0, sizeof(texDesc));
+	    texDesc.normalizedCoords = true;
+	    texDesc.readMode = cudaReadModeElementType;
+	    texDesc.filterMode = cudaFilterModeLinear;
+	    
+	    texDesc.addressMode[0] = cudaAddressModeClamp;
+	    texDesc.addressMode[1] = cudaAddressModeClamp;
+	    texDesc.addressMode[2] = cudaAddressModeClamp;
+	    
+	    cudaCreateTextureObject(&_table.texture, &resDesc, &texDesc, NULL);
+	    
             isDeviceValid = true;
 #endif
         }
