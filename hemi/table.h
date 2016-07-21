@@ -15,6 +15,7 @@
 #pragma once
 
 #include "hemi/hemi.h"
+#include <iostream>
 #include <cstring>
 #include <climits>
 #include <type_traits> 
@@ -118,6 +119,15 @@ namespace hemi {
 	  _table.sizeZ = nz;
 
 	  isHostAlloced = true;
+	  isHostValid = true;
+	  isDeviceAlloced = false;
+	  isDeviceValid = false;
+	  
+#ifndef HEMI_CUDA_DISABLE
+	  allocateDevice();
+	  isDeviceAlloced = true;
+	  copyHostToDevice();
+#endif
 	}
       
       ~Table3D()
@@ -138,9 +148,8 @@ namespace hemi {
       size_t nSizeZ;
       
 #ifndef HEMI_CUDA_DISABLE
-      cudaArray *dPtr;
-      
-      cudaMemcpy3DParms copyParams;
+      cudaArray_t dPtr;
+      //cudaMemcpy3DParms copyParams;
       cudaExtent volumeSize;
 #endif
       table3D<T> _table;
@@ -161,14 +170,15 @@ namespace hemi {
 	isHostValid = false;
       }
       
-      void allocateDevice() const
+      void allocateDevice()
       {
 #ifndef HEMI_CUDA_DISABLE
 	assert(!isDeviceAlloced);
 	volumeSize = make_cudaExtent(nSizeX, nSizeY, nSizeZ);
 	cudaChannelFormatDesc channelDesc = cudaCreateChannelDesc<T>();
-	cudaMalloc3DArray(dPtr, &channelDesc, volumeSize);
-	copyParams.dstArray = dPtr;
+	checkCuda( cudaMalloc3DArray(&dPtr, &channelDesc, volumeSize) );
+	//copyParams = {0};
+	//copyParams.dstArray = dPtr;
 	
 	isDeviceAlloced = true;
 	isDeviceValid = false;
@@ -178,8 +188,8 @@ namespace hemi {
       void deallocateHost()
       {
 	if (isHostAlloced) {
-	  delete [] _table.hPtr;
-	  nSize = 0;
+	  //delete [] _table.hPtr;
+	  nSize  = 0;
 	  nSizeX = 0;
 	  nSizeY = 0;
 	  nSizeZ = 0;
@@ -200,23 +210,39 @@ namespace hemi {
 #endif
       }
       
-      void copyHostToDevice() const
+      void copyHostToDevice()
       {
 #ifndef HEMI_CUDA_DISABLE
 	assert(isHostAlloced);
 	if (!isDeviceAlloced) allocateDevice();
-	copyParams.srcPtr = make_cudaPitchedPtr((void*)_table.hPtr, volumeSize.width * sizeof(float), volumeSize.width, volumeSize.height);
+	//copyParams = {0};
+	cudaMemcpy3DParms copyParams = {0};
+        copyParams.dstArray = dPtr;
+	copyParams.srcPtr   = make_cudaPitchedPtr((void*)_table.hPtr, volumeSize.width * sizeof(T), volumeSize.width, volumeSize.height);
 	copyParams.extent   = volumeSize;
 	copyParams.kind     = cudaMemcpyHostToDevice;
-	cudaMemcpy3D(&copyParams);
+	checkCuda( cudaMemcpy3D(&copyParams) );
 	
 	// bind to texture
 	struct cudaResourceDesc resDesc;
 	memset(&resDesc, 0, sizeof(resDesc));
-	resDesc.resType =  cudaResourceTypeArray;
+	resDesc.resType = cudaResourceTypeArray;
 	resDesc.res.linear.devPtr = dPtr;
 	resDesc.res.linear.sizeInBytes = volumeSize.width * volumeSize.height * volumeSize.depth * sizeof(T);
-	resDesc.res.linear.desc.f = cudaChannelFormatKindFloat;
+	
+	// I hpoe there is a more elegant way to do this
+	if (std::is_same<T, float>::value || std::is_same<T, double>::value)
+	  resDesc.res.linear.desc.f = cudaChannelFormatKindFloat;
+	else if (std::is_same<T, int>::value)
+	  resDesc.res.linear.desc.f = cudaChannelFormatKindSigned;
+	else if (std::is_same<T, unsigned int>::value)
+	  resDesc.res.linear.desc.f = cudaChannelFormatKindUnsigned;
+	else
+	  {
+	    std::cerr << "Warning, template typename doesn't match any acceptable formats for cudaResourceDesc. Setting to \"cudaChannelFormatKindNone\"" << std::endl;
+	    resDesc.res.linear.desc.f = cudaChannelFormatKindNone;
+	  }
+
 	resDesc.res.linear.desc.x = sizeof(T) * CHAR_BIT;
 	struct cudaTextureDesc texDesc;
 	memset(&texDesc, 0, sizeof(texDesc));
@@ -228,8 +254,8 @@ namespace hemi {
 	texDesc.addressMode[1] = cudaAddressModeClamp;
 	texDesc.addressMode[2] = cudaAddressModeClamp;
 	
-	cudaCreateTextureObject(&_table.texture, &resDesc, &texDesc, NULL);
-	
+	checkCuda( cudaCreateTextureObject(&_table.texture, &resDesc, &texDesc, NULL) );
+
 	isDeviceValid = true;
 #endif
       }

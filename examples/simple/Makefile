@@ -67,6 +67,9 @@ saxpy_device: saxpy.cpp
 lookup_table_host: lookup_table.cpp
 	$(CXX) $? $(CXX_FLAGS) $(HOST_ONLY_FLAGS) -o $@
 
+lookup_table_device: lookup_table.cpp
+	$(NVCC) $? $(NVCC_FLAGS) -x cu -o $@
+
 clean:
 	rm -f $(EXES) *.o
 	rm -rf *.dSYM
