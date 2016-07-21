@@ -30,33 +30,27 @@
 
 namespace hemi {
 
-  inline int index(int x, int y, int z, int dx, int dy)
+  inline int index(const int x, const int y, const int z, const int dx, const int dy)
   {
-    return x + dx * (y + dy*z);
+    return x + dx * (y + dy * z);
   }
 
-  
   //template <typename T> class Table1D; // forward decl
   //template <typename T> class Table2D; // forward decl
   template <typename T> class Table3D; // forward decl
   
-  // EDIT: this idea wont work!
-  // move these typedefs to hemi.h maybe.
-  // http://tipsandtricks.runicsoft.com/Cpp/MemberFunctionPointers.html
-  //typedef float ( hemi::Table3D::*table ) (float, float, float);
-  
   template <typename T>
-    struct table3D {
-      
+    struct table3 {      
       HEMI_DEV_CALLABLE_INLINE_MEMBER T lookup(const T x, const T y, const T z) const
       {
-#ifdef HEMI_DEV_CODE
-	return tex3D<T>(texture, x, y, z);
-#else
-	T xd = x;//(x - xbound[0]) * inv_cell_size[0];
-	T yd = y;// (y - ybound[0]) * inv_cell_size[1];
-	T zd = z;//(z - zbound[0]) * inv_cell_size[2];
+	T xd = (x - low_edge[0]) * inv_cell_size[0];
+        T yd = (y - low_edge[1]) * inv_cell_size[1];
+        T zd = (z - low_edge[2]) * inv_cell_size[2];
 
+#ifdef HEMI_DEV_CODE
+	//printf("%f %f %f\n", xd, yd, zd);
+	return tex3D<T>(texture, xd + 0.5f, yd + 0.5f, zd + 0.5f);
+#else
 	int ubx = static_cast<int>(xd);
 	int uby = static_cast<int>(yd);
 	int ubz = static_cast<int>(zd);
@@ -65,14 +59,14 @@ namespace hemi {
 	int oby = uby + 1;
 	int obz = ubz + 1;
 
-	const T v[] = { hPtr[hemi::index(ubx, uby, ubz, sizeX, sizeY)], hPtr[hemi::index(ubx, uby, obz, sizeX, sizeY)],
-			hPtr[hemi::index(ubx, oby, ubz, sizeX, sizeY)], hPtr[hemi::index(ubx, oby, obz, sizeX, sizeY)],
-			hPtr[hemi::index(obx, uby, ubz, sizeX, sizeY)], hPtr[hemi::index(obx, uby, obz, sizeX, sizeY)],
-			hPtr[hemi::index(obx, oby, ubz, sizeX, sizeY)], hPtr[hemi::index(obx, oby, obz, sizeX, sizeY)] };
+	const T v[] = { hPtr[hemi::index(ubx, uby, ubz, size[0], size[1])], hPtr[hemi::index(ubx, uby, obz, size[0], size[1])],
+			hPtr[hemi::index(ubx, oby, ubz, size[0], size[1])], hPtr[hemi::index(ubx, oby, obz, size[0], size[1])],
+			hPtr[hemi::index(obx, uby, ubz, size[0], size[1])], hPtr[hemi::index(obx, uby, obz, size[0], size[1])],
+			hPtr[hemi::index(obx, oby, ubz, size[0], size[1])], hPtr[hemi::index(obx, oby, obz, size[0], size[1])] };
 	
-	xd -= (float)ubx;
-	yd -= (float)uby;
-	zd -= (float)ubz;
+	xd -= static_cast<float>(ubx);
+	yd -= static_cast<float>(uby);
+	zd -= static_cast<float>(ubz);
   
 	float i1 = v[0] * (1 - zd) + v[1] * zd;
 	float i2 = v[2] * (1 - zd) + v[3] * zd;
@@ -91,22 +85,20 @@ namespace hemi {
       cudaTextureObject_t texture;
 #endif
       mutable T *hPtr;
-      int sizeX;
-      int sizeY; 
-      int sizeZ;
+      
+      int size[3];
+      float low_edge[3];
+      float inv_cell_size[3];
     };
-  
-  // already declared in array.h
-  /*enum Location {
-    host   = 0,
-    device = 1
-    };*/
   
   template <typename T>
     class Table3D 
     {
     public:
-    Table3D(size_t nx, size_t ny, size_t nz, T *data) :
+    Table3D(T *data,
+	    size_t nx, size_t ny, size_t nz,
+	    float low_edge_x, float low_edge_y, float low_edge_z,
+	    float up_edge_x, float up_edge_y, float up_edge_z) :
       nSize(nx * ny * nz),
 	nSizeX(nx),
 	nSizeY(ny),
@@ -114,9 +106,19 @@ namespace hemi {
 	{	
 	  // this is unsafe!
 	  _table.hPtr = data;
-	  _table.sizeX = nx;
-	  _table.sizeY = ny;
-	  _table.sizeZ = nz;
+	  _table.size[0] = nx;
+	  _table.size[1] = ny;
+	  _table.size[2] = nz;
+
+	  // set the table range
+	  _table.low_edge[0] = low_edge_x;
+	  _table.low_edge[1] = low_edge_y;
+	  _table.low_edge[2] = low_edge_z;
+
+	  // width of each cell
+	  _table.inv_cell_size[0] = (nx-1) / static_cast<float>(up_edge_x - low_edge_x);
+	  _table.inv_cell_size[1] = (ny-1) / static_cast<float>(up_edge_y - low_edge_y);
+          _table.inv_cell_size[2] = (nz-1) / static_cast<float>(up_edge_z - low_edge_z);
 
 	  isHostAlloced = true;
 	  isHostValid = true;
@@ -128,6 +130,7 @@ namespace hemi {
 	  isDeviceAlloced = true;
 	  copyHostToDevice();
 #endif
+	  normalized_coords = false;
 	}
       
       ~Table3D()
@@ -136,7 +139,7 @@ namespace hemi {
 	  deallocateHost();
 	}
       
-      const table3D<T> readOnlyTable() const
+      const table3<T> readOnlyTable() const
 	{
 	  return _table;
 	}
@@ -152,13 +155,15 @@ namespace hemi {
       //cudaMemcpy3DParms copyParams;
       cudaExtent volumeSize;
 #endif
-      table3D<T> _table;
+      table3<T> _table;
       
       mutable bool    isHostAlloced;
       mutable bool    isDeviceAlloced;        
       
       mutable bool    isHostValid;
       mutable bool    isDeviceValid;
+
+      bool normalized_coords;
       
     protected:
       void allocateHost() const
@@ -177,8 +182,6 @@ namespace hemi {
 	volumeSize = make_cudaExtent(nSizeX, nSizeY, nSizeZ);
 	cudaChannelFormatDesc channelDesc = cudaCreateChannelDesc<T>();
 	checkCuda( cudaMalloc3DArray(&dPtr, &channelDesc, volumeSize) );
-	//copyParams = {0};
-	//copyParams.dstArray = dPtr;
 	
 	isDeviceAlloced = true;
 	isDeviceValid = false;
@@ -215,7 +218,7 @@ namespace hemi {
 #ifndef HEMI_CUDA_DISABLE
 	assert(isHostAlloced);
 	if (!isDeviceAlloced) allocateDevice();
-	//copyParams = {0};
+
 	cudaMemcpy3DParms copyParams = {0};
         copyParams.dstArray = dPtr;
 	copyParams.srcPtr   = make_cudaPitchedPtr((void*)_table.hPtr, volumeSize.width * sizeof(T), volumeSize.width, volumeSize.height);
@@ -246,7 +249,7 @@ namespace hemi {
 	resDesc.res.linear.desc.x = sizeof(T) * CHAR_BIT;
 	struct cudaTextureDesc texDesc;
 	memset(&texDesc, 0, sizeof(texDesc));
-	texDesc.normalizedCoords = true;
+	texDesc.normalizedCoords = normalized_coords;
 	texDesc.readMode = cudaReadModeElementType;
 	texDesc.filterMode = cudaFilterModeLinear;
 	
@@ -258,19 +261,6 @@ namespace hemi {
 
 	isDeviceValid = true;
 #endif
-      }
-      
-      void copyDeviceToHost() const
-      {
-	/*#ifndef HEMI_CUDA_DISABLE
-	  assert(isDeviceAlloced);
-	  if (!isHostAlloced) allocateHost();
-	  checkCuda( cudaMemcpy(hPtr, 
-	  dPtr, 
-	  nSize * sizeof(T), 
-	  cudaMemcpyDeviceToHost) );
-	  isHostValid = true;
-	  #endif*/
       }
     };
 }

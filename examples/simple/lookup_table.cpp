@@ -6,7 +6,7 @@
 #include "hemi/parallel_for.h"
 #include "hemi/device_api.h"
 
-void lookup(const int n, float *val, const hemi::table3D<float> lookupTable, const float x, const float y, const float z)
+void lookup(const int n, float *val, const hemi::table3<float> lookupTable, const float x, const float y, const float z)
 {
   hemi::parallel_for(0, n, [=] HEMI_LAMBDA (int i) {
       val[i] = lookupTable.lookup(x, y, z);
@@ -19,9 +19,8 @@ inline int index(int x, int y, int z, int dx, int dy)
 }
 
 int main(void) {
-
   const int n = 1000;
-  const int nx = 5, ny = 5, nz = 5;
+  const int nx = 10, ny = 10, nz = 10;
 
   float *table_array = new float[nx*ny*nz];
 
@@ -29,12 +28,22 @@ int main(void) {
   for (int z = 0; z < nz; ++z)
     for (int y = 0; y < ny; ++y)
       for (int x = 0; x < nx; ++x)
-	table_array[hemi::index(x, y, z, nx, ny)] = 0.5f;
+	table_array[hemi::index(x, y, z, nx, ny)] = 0.5f * x * y * z;
 
   hemi::Array<float> output(n);
-  hemi::Table3D<float> lookup_table(nx, ny, nz, table_array);
+  hemi::Table3D<float> lookup_table(table_array, 
+				    nx, ny, nz, 
+				    0.0, 0.0, 0.0,
+				    10000.0, 10000.0, 10000.0);
   
-  lookup(n, output.devicePtr(), lookup_table.readOnlyTable(), 2.5, 2.5, 2.5);
+  float *pointer;
+#ifndef HEMI_CUDA_DISABLE
+  pointer = output.devicePtr();
+#else
+  pointer = output.hostPtr();
+#endif
+  
+  lookup(n, pointer, lookup_table.readOnlyTable(), 1530.35, 1000.23, 5010.0);
   
   printf("element 0 = %f\n", output.hostPtr()[0]);
 
