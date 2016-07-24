@@ -30,8 +30,7 @@
 
 namespace hemi {
 
-  inline int index(const int x, const int y, const int z, const int dx, const int dy)
-  {
+  HEMI_DEV_CALLABLE_INLINE int index(const int x, const int y, const int z, const int dx, const int dy) {
     return x + dx * (y + dy * z);
   }
 
@@ -41,43 +40,56 @@ namespace hemi {
   
   template <typename T>
     struct table3 {      
+      HEMI_DEV_CALLABLE_INLINE_MEMBER T getElement(const int i, const int j, const int k) const
+      {
+#ifdef HEMI_DEV_CODE
+        return tex3D<T>(texture, (T)i + 0.5f, (T)j + 0.5f, (T)k + 0.5f);
+#else
+	return hPtr[hemi::index(i, j, k, size[0], size[1])];
+#endif
+	
+      };
+      
       HEMI_DEV_CALLABLE_INLINE_MEMBER T lookup(const T x, const T y, const T z) const
       {
+#ifdef HEMI_DEV_CODE
+
+	T xd = 0.5 + (x - low_edge[0]) * ((size[0]-1) / (up_edge[0] - low_edge[0]));//inv_cell_size[0];
+	T yd = 0.5 + (y - low_edge[1]) * ((size[1]-1) / (up_edge[1] - low_edge[1]));//inv_cell_size[1];
+	T zd = 0.5 + (z - low_edge[2]) * ((size[2]-1) / (up_edge[2] - low_edge[2]));//inv_cell_size[2];
+
+	return tex3D<T>(texture, xd, yd, zd);
+#else
 	T xd = (x - low_edge[0]) * inv_cell_size[0];
         T yd = (y - low_edge[1]) * inv_cell_size[1];
         T zd = (z - low_edge[2]) * inv_cell_size[2];
-
-#ifdef HEMI_DEV_CODE
-	//printf("%f %f %f\n", xd, yd, zd);
-	return tex3D<T>(texture, xd + 0.5f, yd + 0.5f, zd + 0.5f);
-#else
-	int ubx = static_cast<int>(xd);
-	int uby = static_cast<int>(yd);
-	int ubz = static_cast<int>(zd);
-
+	
+	int ubx = (int)xd;//static_cast<int>(xd);
+	int uby = (int)yd;//static_cast<int>(yd);
+	int ubz = (int)zd;//static_cast<int>(zd);
+	
 	int obx = ubx + 1;
 	int oby = uby + 1;
 	int obz = ubz + 1;
-
-	const T v[] = { hPtr[hemi::index(ubx, uby, ubz, size[0], size[1])], hPtr[hemi::index(ubx, uby, obz, size[0], size[1])],
-			hPtr[hemi::index(ubx, oby, ubz, size[0], size[1])], hPtr[hemi::index(ubx, oby, obz, size[0], size[1])],
-			hPtr[hemi::index(obx, uby, ubz, size[0], size[1])], hPtr[hemi::index(obx, uby, obz, size[0], size[1])],
-			hPtr[hemi::index(obx, oby, ubz, size[0], size[1])], hPtr[hemi::index(obx, oby, obz, size[0], size[1])] };
+	
+	const float v[] = { hPtr[hemi::index(ubx, uby, ubz, size[0], size[1])], hPtr[hemi::index(ubx, uby, obz, size[0], size[1])],
+			    hPtr[hemi::index(ubx, oby, ubz, size[0], size[1])], hPtr[hemi::index(ubx, oby, obz, size[0], size[1])],
+			    hPtr[hemi::index(obx, uby, ubz, size[0], size[1])], hPtr[hemi::index(obx, uby, obz, size[0], size[1])],
+			    hPtr[hemi::index(obx, oby, ubz, size[0], size[1])], hPtr[hemi::index(obx, oby, obz, size[0], size[1])] };
 	
 	xd -= static_cast<float>(ubx);
 	yd -= static_cast<float>(uby);
 	zd -= static_cast<float>(ubz);
   
-	float i1 = v[0] * (1 - zd) + v[1] * zd;
-	float i2 = v[2] * (1 - zd) + v[3] * zd;
-	float j1 = v[4] * (1 - zd) + v[5] * zd;
-	float j2 = v[6] * (1 - zd) + v[7] * zd;
+	float i1 = v[0] * (1.0f - zd) + v[1] * zd;
+	float i2 = v[2] * (1.0f - zd) + v[3] * zd;
+	float j1 = v[4] * (1.0f - zd) + v[5] * zd;
+	float j2 = v[6] * (1.0f - zd) + v[7] * zd;
   
-	float w1 = i1 * (1 - yd) + i2 * yd;
-	float w2 = j1 * (1 - yd) + j2 * yd;
+	float w1 = i1 * (1.0f - yd) + i2 * yd;
+	float w2 = j1 * (1.0f - yd) + j2 * yd;
 
-	float result = w1 * (1 - xd) + w2 * xd;
-	return result;
+	return w1 * (1.0f - xd) + w2 * xd;
 #endif
       };
       
@@ -88,6 +100,7 @@ namespace hemi {
       
       int size[3];
       float low_edge[3];
+      float up_edge[3];
       float inv_cell_size[3];
     };
   
@@ -114,6 +127,9 @@ namespace hemi {
 	  _table.low_edge[0] = low_edge_x;
 	  _table.low_edge[1] = low_edge_y;
 	  _table.low_edge[2] = low_edge_z;
+	  _table.up_edge[0] = up_edge_x;
+	  _table.up_edge[1] = up_edge_y;
+          _table.up_edge[2] = up_edge_z;
 
 	  // width of each cell
 	  _table.inv_cell_size[0] = (nx-1) / static_cast<float>(up_edge_x - low_edge_x);
@@ -152,7 +168,6 @@ namespace hemi {
       
 #ifndef HEMI_CUDA_DISABLE
       cudaArray_t dPtr;
-      //cudaMemcpy3DParms copyParams;
       cudaExtent volumeSize;
 #endif
       table3<T> _table;
