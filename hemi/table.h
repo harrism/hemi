@@ -94,15 +94,13 @@ namespace hemi {
 	return w1 * (1.0f - xd) + w2 * xd;
 #endif
       };
-      
+      float low_edge[3];
+      float reciprocal_cell_size[3];
+      int size[3];
 #ifndef HEMI_CUDA_DISABLE
       cudaTextureObject_t texture;
 #endif
       mutable T *hPtr;
-      
-      int size[3];
-      float low_edge[3];
-      float reciprocal_cell_size[3];
     };
   
   template <typename T>
@@ -113,19 +111,19 @@ namespace hemi {
 	      float low_edge_x, float low_edge_y, float low_edge_z,
 	      float up_edge_x, float up_edge_y, float up_edge_z) 
 	{
-	  _table.size[0] = nx;
-	  _table.size[1] = ny;
-	  _table.size[2] = nz;
+	  h_table.size[0] = nx;
+	  h_table.size[1] = ny;
+	  h_table.size[2] = nz;
 	  
 	  // set the table range                                                                                                                                        
-          _table.low_edge[0] = low_edge_x;
-          _table.low_edge[1] = low_edge_y;
-          _table.low_edge[2] = low_edge_z;
+          h_table.low_edge[0] = low_edge_x;
+          h_table.low_edge[1] = low_edge_y;
+          h_table.low_edge[2] = low_edge_z;
 
 	  // width of each cell                                                                                                   
-          _table.reciprocal_cell_size[0] = (nx-1) / static_cast<float>(up_edge_x - low_edge_x);
-          _table.reciprocal_cell_size[1] = (ny-1) / static_cast<float>(up_edge_y - low_edge_y);
-          _table.reciprocal_cell_size[2] = (nz-1) / static_cast<float>(up_edge_z - low_edge_z);
+          h_table.reciprocal_cell_size[0] = (nx-1) / static_cast<float>(up_edge_x - low_edge_x);
+          h_table.reciprocal_cell_size[1] = (ny-1) / static_cast<float>(up_edge_y - low_edge_y);
+          h_table.reciprocal_cell_size[2] = (nz-1) / static_cast<float>(up_edge_z - low_edge_z);
 
 	  normalized_coords = false;
 	  isHostAlloced = false;
@@ -151,23 +149,23 @@ namespace hemi {
 	nSizeZ(nz)*/
 	{	
 	  // this is unsafe!
-	  _table.hPtr = data;
-	  _table.size[0] = nx;
-	  _table.size[1] = ny;
-	  _table.size[2] = nz;
+	  h_table.hPtr = data;
+	  h_table.size[0] = nx;
+	  h_table.size[1] = ny;
+	  h_table.size[2] = nz;
 
 	  // set the table range
-	  _table.low_edge[0] = low_edge_x;
-	  _table.low_edge[1] = low_edge_y;
-	  _table.low_edge[2] = low_edge_z;
+	  h_table.low_edge[0] = low_edge_x;
+	  h_table.low_edge[1] = low_edge_y;
+	  h_table.low_edge[2] = low_edge_z;
 	  /*_table.up_edge[0] = up_edge_x;
 	  _table.up_edge[1] = up_edge_y;
           _table.up_edge[2] = up_edge_z;*/
 
 	  // width of each cell
-	  _table.reciprocal_cell_size[0] = (nx-1) / static_cast<float>(up_edge_x - low_edge_x);
-	  _table.reciprocal_cell_size[1] = (ny-1) / static_cast<float>(up_edge_y - low_edge_y);
-          _table.reciprocal_cell_size[2] = (nz-1) / static_cast<float>(up_edge_z - low_edge_z);
+	  h_table.reciprocal_cell_size[0] = (nx-1) / static_cast<float>(up_edge_x - low_edge_x);
+	  h_table.reciprocal_cell_size[1] = (ny-1) / static_cast<float>(up_edge_y - low_edge_y);
+          h_table.reciprocal_cell_size[2] = (nz-1) / static_cast<float>(up_edge_z - low_edge_z);
 
 	  isForeignHostPtr = true;
 	  isHostAlloced = true;
@@ -191,7 +189,7 @@ namespace hemi {
 	  deallocateHost();
 	}
       
-      const table3<T> readOnlyTable()
+      const hemi::table3<T>* readOnlyDevicePtr()
       {
 	/* try copying the struct to device too */
 #ifndef HEMI_CUDA_DISABLE
@@ -200,7 +198,12 @@ namespace hemi {
 	  copyHostToDevice();
 #endif
 	
-	return _table;
+	return d_table;
+      }
+
+      const hemi::table3<T>* readOnlyHostPtr()
+      {
+	return &h_table;
       }
 
       T* writeOnlyHostPtr()
@@ -208,21 +211,18 @@ namespace hemi {
 	if (!isHostAlloced) allocateHost();
 	isDeviceValid = false;
 	isHostValid   = true;
-	return _table.hPtr;
+	return h_table.hPtr;
       }
       
     private:
-      /*size_t nSize;
-      size_t nSizeX;
-      size_t nSizeY;
-      size_t nSizeZ;*/
       
 #ifndef HEMI_CUDA_DISABLE
       cudaArray_t dPtr;
       cudaExtent volumeSize;
 #endif
-      table3<T> _table;
-      
+      table3<T> h_table;
+      table3<T> *d_table;
+
       bool            isForeignHostPtr;
 
       mutable bool    isHostAlloced;
@@ -238,7 +238,7 @@ namespace hemi {
       {
 	assert(!isHostAlloced);
 	
-	_table.hPtr = new T[_table.size[0] * _table.size[1] * _table.size[2]];    
+	h_table.hPtr = new T[h_table.size[0] * h_table.size[1] * h_table.size[2]];    
 	
 	isHostAlloced = true;
 	isHostValid = false;
@@ -248,10 +248,13 @@ namespace hemi {
       {
 #ifndef HEMI_CUDA_DISABLE
 	assert(!isDeviceAlloced);
-	volumeSize = make_cudaExtent(_table.size[0], _table.size[1], _table.size[2]);
+	volumeSize = make_cudaExtent(h_table.size[0], h_table.size[1], h_table.size[2]);
 	cudaChannelFormatDesc channelDesc = cudaCreateChannelDesc<T>();
 	checkCuda( cudaMalloc3DArray(&dPtr, &channelDesc, volumeSize) );
-	
+
+	// allocate a table struct
+	checkCuda( cudaMalloc((void**)&d_table, sizeof(hemi::table3<T>)) );
+
 	isDeviceAlloced = true;
 	isDeviceValid = false;
 #endif
@@ -261,7 +264,7 @@ namespace hemi {
       {
 	if (isHostAlloced) {
 	  if (!isForeignHostPtr)
-	    delete [] _table.hPtr;
+	    delete [] h_table.hPtr;
 
 	  isHostAlloced = false;
 	  isHostValid   = false;
@@ -273,7 +276,9 @@ namespace hemi {
 #ifndef HEMI_CUDA_DISABLE
 	if (isDeviceAlloced) {
 	  checkCuda( cudaFreeArray(dPtr) );
-	  checkCuda( cudaDestroyTextureObject(_table.texture) );
+	  checkCuda( cudaDestroyTextureObject(h_table.texture) );
+	  checkCuda( cudaFree(d_table) );
+
 	  isDeviceAlloced = false;
 	  isDeviceValid   = false;
 	}
@@ -288,7 +293,7 @@ namespace hemi {
 
 	cudaMemcpy3DParms copyParams = {0};
         copyParams.dstArray = dPtr;
-	copyParams.srcPtr   = make_cudaPitchedPtr((void*)_table.hPtr, volumeSize.width * sizeof(T), volumeSize.width, volumeSize.height);
+	copyParams.srcPtr   = make_cudaPitchedPtr((void*)h_table.hPtr, volumeSize.width * sizeof(T), volumeSize.width, volumeSize.height);
 	copyParams.extent   = volumeSize;
 	copyParams.kind     = cudaMemcpyHostToDevice;
 	checkCuda( cudaMemcpy3D(&copyParams) );
@@ -300,7 +305,7 @@ namespace hemi {
 	resDesc.res.linear.devPtr = dPtr;
 	resDesc.res.linear.sizeInBytes = volumeSize.width * volumeSize.height * volumeSize.depth * sizeof(T);
 	
-	// I hpoe there is a more elegant way to do this
+	// I hope there is a more elegant way to do this
 	if (std::is_same<T, float>::value || std::is_same<T, double>::value)
 	  resDesc.res.linear.desc.f = cudaChannelFormatKindFloat;
 	else if (std::is_same<T, int>::value)
@@ -324,9 +329,12 @@ namespace hemi {
 	texDesc.addressMode[1] = cudaAddressModeClamp;
 	texDesc.addressMode[2] = cudaAddressModeClamp;
 	
-	checkCuda( cudaCreateTextureObject(&_table.texture, &resDesc, &texDesc, NULL) );
+	checkCuda( cudaCreateTextureObject(&h_table.texture, &resDesc, &texDesc, NULL) );
 
 	isDeviceValid = true;
+	
+	// copy the struct to device
+	checkCuda( cudaMemcpy(d_table, &h_table, sizeof(hemi::table3<T>), cudaMemcpyHostToDevice) );
 #endif
       }
     };

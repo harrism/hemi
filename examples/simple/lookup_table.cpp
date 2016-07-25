@@ -15,14 +15,14 @@ void lookup(const int n, float *val, const hemi::table3<float> lookupTable, cons
     });
 }
 
-HEMI_LAUNCHABLE void lookup_kernel(const int n, float *output, const hemi::table3<float> lookupTable, const float *x, const float *y, const float *z)
+HEMI_LAUNCHABLE void lookup_kernel(const int n, float *output, const hemi::table3<float> *lookupTable, const float *x, const float *y, const float *z)
 {
   for (auto i : hemi::grid_stride_range(0, n)) {
-    output[i] = lookupTable.lookup(x[i], y[i], z[i]);
+    output[i] = lookupTable->lookup(x[i], y[i], z[i]);
   }
 }
 
-float lookup_validate(const int n, const hemi::table3<float> lookupTable) 
+float lookup_validate(const int n, const hemi::table3<float> *lookupTable_cpu, const hemi::table3<float> *lookupTable_gpu) 
 {
   hemi::Array<float> output_gpu(n);
   hemi::Array<float> output_cpu(n);
@@ -32,9 +32,9 @@ float lookup_validate(const int n, const hemi::table3<float> lookupTable)
   hemi::Array<float> z_val(n);
   
   for (int i = 0; i < n; ++i) {
-    x_val.writeOnlyHostPtr()[i] = (std::rand() / (float)RAND_MAX) * ( (lookupTable.size[0]-1) / (float)(lookupTable.reciprocal_cell_size[0]));
-    y_val.writeOnlyHostPtr()[i] = (std::rand() / (float)RAND_MAX) * ( (lookupTable.size[1]-1) / (float)(lookupTable.reciprocal_cell_size[1]));
-    z_val.writeOnlyHostPtr()[i] = (std::rand() / (float)RAND_MAX) * ( (lookupTable.size[2]-1) / (float)(lookupTable.reciprocal_cell_size[2]));
+    x_val.writeOnlyHostPtr()[i] = (std::rand() / (float)RAND_MAX) * ( (lookupTable_cpu->size[0]-1) / (float)(lookupTable_cpu->reciprocal_cell_size[0]));
+    y_val.writeOnlyHostPtr()[i] = (std::rand() / (float)RAND_MAX) * ( (lookupTable_cpu->size[1]-1) / (float)(lookupTable_cpu->reciprocal_cell_size[1]));
+    z_val.writeOnlyHostPtr()[i] = (std::rand() / (float)RAND_MAX) * ( (lookupTable_cpu->size[2]-1) / (float)(lookupTable_cpu->reciprocal_cell_size[2]));
   }
 
   float *dev_ptr = output_gpu.writeOnlyDevicePtr();
@@ -51,13 +51,13 @@ float lookup_validate(const int n, const hemi::table3<float> lookupTable)
   /*hemi::parallel_for(0, n, [lookupTable, x_ptr, y_ptr, z_ptr, dev_ptr] HEMI_LAMBDA (int i) {
       dev_ptr[i] = lookupTable.lookup(x_ptr[i], y_ptr[i], z_ptr[i]);
       });*/
-  hemi::cudaLaunch(lookup_kernel, n, output_gpu.writeOnlyDevicePtr(), lookupTable, x_ptr, y_ptr, z_ptr);
+  hemi::cudaLaunch(lookup_kernel, n, output_gpu.writeOnlyDevicePtr(), lookupTable_gpu, x_ptr, y_ptr, z_ptr);
 
   cudaEventRecord(stop);
   cudaEventSynchronize(stop);
-  float milliseconds = 0;
-  cudaEventElapsedTime(&milliseconds, start, stop);
-  printf("Time for %i lookups on GPU was %f ms\n", n, milliseconds);
+  float milliseconds_gpu = 0;
+  cudaEventElapsedTime(&milliseconds_gpu, start, stop);
+  printf("Time for %i lookups on GPU was %f ms\n", n, milliseconds_gpu);
 
   
   // compare to CPU result
@@ -67,17 +67,19 @@ float lookup_validate(const int n, const hemi::table3<float> lookupTable)
   cudaEventRecord(start2);
   
   for (int i = 0; i < n; ++i) {
-    output_cpu.hostPtr()[i] = lookupTable.lookup(x_val.readOnlyHostPtr()[i],
-						 y_val.readOnlyHostPtr()[i],
-						 z_val.readOnlyHostPtr()[i]);
+    output_cpu.hostPtr()[i] = lookupTable_cpu->lookup(x_val.readOnlyHostPtr()[i],
+						      y_val.readOnlyHostPtr()[i],
+						      z_val.readOnlyHostPtr()[i]);
   }
 
   cudaEventRecord(stop2);
   cudaEventSynchronize(stop2);
-  milliseconds = 0;
-  cudaEventElapsedTime(&milliseconds, start2, stop2);
-  printf("Time for %i lookups on CPU was %f ms\n", n, milliseconds);
+  float milliseconds_cpu = 0;
+  cudaEventElapsedTime(&milliseconds_cpu, start2, stop2);
+  printf("Time for %i lookups on CPU was %f ms\n", n, milliseconds_cpu);
   
+  printf("GPU was %f times faster\n", milliseconds_cpu / milliseconds_gpu);
+
   float average = 0;
   for (int i = 0; i < n; ++i) {
     average += (output_gpu.hostPtr()[i] - output_cpu.hostPtr()[i]) / output_cpu.hostPtr()[i];
@@ -115,7 +117,9 @@ int main(void) {
   
   //printf("element 0 = %f\n", output.hostPtr()[0]);
 
-  float precision = lookup_validate(n, lookup_table.readOnlyTable());
+  float precision = lookup_validate(1, lookup_table.readOnlyHostPtr(), lookup_table.readOnlyDevicePtr());
+
+  precision = lookup_validate(n, lookup_table.readOnlyHostPtr(), lookup_table.readOnlyDevicePtr());
   printf("precision %f\n", precision);
   //delete [] table_array;
 
