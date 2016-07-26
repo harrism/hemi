@@ -3,17 +3,8 @@
 #include "hemi/hemi.h"
 #include "hemi/array.h"
 #include "hemi/table.h"
-//#include "hemi/launch.h"
 #include "hemi/grid_stride_range.h"
 #include "hemi/parallel_for.h"
-#include "hemi/device_api.h"
-
-void lookup(const int n, float *val, const hemi::table3<float> lookupTable, const float x, const float y, const float z)
-{
-  hemi::parallel_for(0, n, [=] HEMI_LAMBDA (int i) {
-      val[i] = lookupTable.lookup(x, y, z);
-    });
-}
 
 HEMI_LAUNCHABLE void lookup_kernel(const int n, float *output, const hemi::table3<float> *lookupTable, const float *x, const float *y, const float *z)
 {
@@ -22,7 +13,7 @@ HEMI_LAUNCHABLE void lookup_kernel(const int n, float *output, const hemi::table
   }
 }
 
-float lookup_validate(const int n, const hemi::table3<float> *lookupTable_cpu, const hemi::table3<float> *lookupTable_gpu) 
+float lookup_validate(const int n, const hemi::table3<float> *lookupTable_cpu, const hemi::table3<float> *lookupTable_gpu, const bool print_info = true) 
 {
   hemi::Array<float> output_gpu(n);
   hemi::Array<float> output_cpu(n);
@@ -49,15 +40,16 @@ float lookup_validate(const int n, const hemi::table3<float> *lookupTable_cpu, c
   cudaEventRecord(start);
 
   /*hemi::parallel_for(0, n, [lookupTable, x_ptr, y_ptr, z_ptr, dev_ptr] HEMI_LAMBDA (int i) {
-      dev_ptr[i] = lookupTable.lookup(x_ptr[i], y_ptr[i], z_ptr[i]);
-      });*/
+    dev_ptr[i] = lookupTable.lookup(x_ptr[i], y_ptr[i], z_ptr[i]);
+    });*/
+  // not using parallel_for is slightly faster
   hemi::cudaLaunch(lookup_kernel, n, output_gpu.writeOnlyDevicePtr(), lookupTable_gpu, x_ptr, y_ptr, z_ptr);
 
   cudaEventRecord(stop);
   cudaEventSynchronize(stop);
   float milliseconds_gpu = 0;
   cudaEventElapsedTime(&milliseconds_gpu, start, stop);
-  printf("Time for %i lookups on GPU was %f ms\n", n, milliseconds_gpu);
+  if (print_info) printf("Time for %i lookups on GPU was %f ms\n", n, milliseconds_gpu);
 
   
   // compare to CPU result
@@ -76,9 +68,9 @@ float lookup_validate(const int n, const hemi::table3<float> *lookupTable_cpu, c
   cudaEventSynchronize(stop2);
   float milliseconds_cpu = 0;
   cudaEventElapsedTime(&milliseconds_cpu, start2, stop2);
-  printf("Time for %i lookups on CPU was %f ms\n", n, milliseconds_cpu);
+  if (print_info) printf("Time for %i lookups on CPU was %f ms\n", n, milliseconds_cpu);
   
-  printf("GPU was %f times faster\n", milliseconds_cpu / milliseconds_gpu);
+  if (print_info) printf("GPU was %f times faster\n", milliseconds_cpu / milliseconds_gpu);
 
   float average = 0;
   for (int i = 0; i < n; ++i) {
@@ -106,22 +98,11 @@ int main(void) {
       for (int x = 0; x < nx; ++x)
         lookup_table.writeOnlyHostPtr()[hemi::index(x, y, z, nx, ny)] = std::rand() / (float)RAND_MAX;
 
-  /*  float *pointer;
-#ifndef HEMI_CUDA_DISABLE
-  pointer = output.devicePtr();
-#else
-  pointer = output.hostPtr();
-  #endif*/
+  // run once to init the device
+  float precision = lookup_validate(1, lookup_table.readOnlyHostPtr(), lookup_table.readOnlyDevicePtr(), false);
   
-  //lookup(n, pointer, lookup_table.readOnlyTable(), 1530.35, 1000.23, 5010.0);
-  
-  //printf("element 0 = %f\n", output.hostPtr()[0]);
-
-  float precision = lookup_validate(1, lookup_table.readOnlyHostPtr(), lookup_table.readOnlyDevicePtr());
-
   precision = lookup_validate(n, lookup_table.readOnlyHostPtr(), lookup_table.readOnlyDevicePtr());
-  printf("precision %f\n", precision);
-  //delete [] table_array;
+  printf("Average fractional error between CPU and GPU versions: %.3e\n", precision);
 
   return 0;
 }

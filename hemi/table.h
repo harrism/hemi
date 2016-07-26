@@ -67,6 +67,7 @@ namespace hemi {
 #ifdef HEMI_DEV_CODE
 	return tex3D<T>(texture, xd + 0.5f, yd + 0.5f, zd + 0.5f);
 #else
+	// Implementation of: https://en.wikipedia.org/wiki/Trilinear_interpolation
 	int ubx = (int)xd;
 	int uby = (int)yd;
 	int ubz = (int)zd;
@@ -75,9 +76,9 @@ namespace hemi {
 	int oby = uby + 1;
 	int obz = ubz + 1;
 
-	xd -= std::floor(ubx);
-	yd -= std::floor(uby);
-	zd -= std::floor(ubz);
+	xd -= (float)(ubx);
+	yd -= (float)(uby);
+	zd -= (float)(ubz);
 
 	float i1 = hPtr[hemi::index(ubx, uby, ubz, size[0], size[1])] * (1.0f - zd) 
 	  + hPtr[hemi::index(ubx, uby, obz, size[0], size[1])] * zd;

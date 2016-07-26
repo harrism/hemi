@@ -33,7 +33,7 @@ EXES := hello_device hello_host_nvcc hello_host \
 		hello_lambda_device hello_lambda_host_nvcc hello_lambda_host \
         hello_global \
         saxpy_host saxpy_device \
-	lookup_table_host
+	lookup_table_host lookup_table_device lookup_table_validate \
 
 all: $(EXES)
 
@@ -64,10 +64,13 @@ saxpy_host: saxpy.cpp
 saxpy_device: saxpy.cpp
 	$(NVCC) $? $(NVCC_FLAGS) -x cu -o $@
 
-lookup_table_host: lookup_table.cpp
+lookup_table_host: hello_lookup.cpp
 	$(CXX) $? $(CXX_FLAGS) $(HOST_ONLY_FLAGS) -o $@
 
-lookup_table_device: lookup_table.cpp
+lookup_table_device: hello_lookup.cpp
+	$(NVCC) $? $(NVCC_FLAGS) -x cu -o $@
+
+lookup_table_validate: lookup_table_validate.cpp
 	$(NVCC) $? $(NVCC_FLAGS) -x cu -o $@
 
 clean:
