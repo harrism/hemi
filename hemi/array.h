@@ -29,11 +29,6 @@ namespace hemi {
 
     template <typename T> class Array; // forward decl
 
-    enum Location {
-        host   = 0,
-        device = 1
-    };
-
     template <typename T>
     class Array 
     {

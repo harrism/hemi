@@ -59,6 +59,8 @@
 
   // Memory specifiers
   #define HEMI_MEM_DEVICE                 __device__
+  #define HEMI_MEM_SHARED                 __shared__
+  #define HEMI_MEM_CONSTANT			      __constant__
 
   // Stream type
   typedef cudaStream_t hemiStream_t;
@@ -108,6 +110,8 @@
 
   // memory specifiers
   #define HEMI_MEM_DEVICE
+  #define HEMI_MEM_SHARED
+  #define HEMI_MEM_CONSTANT
 
   // Stream type
   typedef int hemiStream_t;
@@ -141,9 +145,23 @@
   HEMI_DEV_CALLABLE_MEMBER void name::operator()(__VA_ARGS__) const
 ;
 
+// Convenience macros for declaring shared memory
+#ifdef HEMI_DEV_CODE
+#define HEMI_SHARED_VARIABLE HEMI_MEM_SHARED
+#define HEMI_DYNAMIC_SHARED_VARIABLE(name, type) extern HEMI_MEM_SHARED type name[]
+#else
+#define HEMI_SHARED_VARIABLE
+#define HEMI_DYNAMIC_SHARED_VARIABLE(name, type) type* name
+#endif
+
 #include "hemi_error.h"
 
 namespace hemi {
+
+	enum Location {
+		host = 0,
+		device = 1
+	};
 
     inline hemi::Error_t deviceSynchronize() 
     {
@@ -153,5 +171,14 @@ namespace hemi {
 #endif
         return hemi::success;
     }
+
+	inline hemi::Error_t deviceReset()
+	{
+#ifdef HEMI_CUDA_COMPILER
+		if (cudaSuccess != checkCuda(cudaDeviceReset()))
+			return hemi::cudaError;
+#endif
+		return hemi::success;
+	}
 
 } // namespace hemi

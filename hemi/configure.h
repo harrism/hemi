@@ -69,6 +69,47 @@ size_t availableSharedBytesPerBlock(size_t sharedMemPerMultiprocessor,
     return bytes - sharedSizeBytesStatic;    
 }
 
+template <typename Function, typename... Arguments>
+cudaError_t getMaxBlocksForDevice(unsigned int& NumBlocks, ExecutionPolicy &p)
+{
+	cudaDeviceProp *props;
+	try
+	{
+		props = &DevicePropertiesCache::get();
+	}
+	catch (cudaError_t status)
+	{
+		return status;
+	}
+
+	cudaFuncAttributes attribs;
+	cudaOccDeviceProp occProp(*props);
+
+	cudaError_t status = cudaFuncGetAttributes(&attribs, Kernel<Function, Arguments...>);
+	if (status != cudaSuccess) return status;
+	cudaOccFuncAttributes occAttrib(attribs);
+
+	cudaFuncCache cacheConfig;
+	status = cudaDeviceGetCacheConfig(&cacheConfig);
+	if (status != cudaSuccess) return status;
+	cudaOccDeviceState occState;
+	occState.cacheConfig = (cudaOccCacheConfig)cacheConfig;
+
+	int numSMs = props->multiProcessorCount;
+
+	cudaOccResult result;
+	cudaOccError occErr = cudaOccMaxActiveBlocksPerMultiprocessor(&result,
+		&occProp,
+		&occAttrib,
+		&occState,
+		p.getBlockSize(),
+		p.getSharedMemBytes());
+	if (occErr != CUDA_OCC_SUCCESS) return cudaErrorInvalidConfiguration;
+	NumBlocks = (result.activeBlocksPerMultiprocessor * numSMs);
+
+	return cudaSuccess;
+}
+
 template <typename KernelFunc>
 cudaError_t configureGrid(ExecutionPolicy &p, KernelFunc k)
 {

@@ -15,6 +15,8 @@
 #pragma once
 
 #include "kernel.h"
+#include "device_runtime.h"
+#include "execution_policy.h"
 
 #ifdef HEMI_CUDA_COMPILER
 #include "configure.h"
@@ -36,18 +38,35 @@ void launch(Function f, Arguments... args)
 }
 
 //
+// Automatic parallel launch
+//
+template <typename Function, typename... Arguments>
+void launch(Arguments... args)
+{
+	Function f;
+	launch(f, args...);
+}
+
+//
 // Launch with explicit (or partial) configuration
 //
 template <typename Function, typename... Arguments>
 #ifdef HEMI_CUDA_COMPILER
 void launch(const ExecutionPolicy &policy, Function f, Arguments... args)
 {
-    ExecutionPolicy p = policy;
-    checkCuda(configureGrid(p, Kernel<Function, Arguments...>));
-    Kernel<<<p.getGridSize(), 
-             p.getBlockSize(), 
-             p.getSharedMemBytes(), 
-             p.getStream()>>>(f, args...);
+	ExecutionPolicy p = policy;
+	if (p.getLocation() == hemi::device && queryForDevice())
+	{
+		checkCuda(configureGrid(p, Kernel<Function, Arguments...>));
+		Kernel << <p.getExecutionGrid(),
+			p.getExecutionBlock(),
+			p.getSharedMemBytes(),
+			p.getStream() >> >(f, args...);
+	}
+	else
+	{
+		f(args...);
+	}
 }
 #else
 void launch(const ExecutionPolicy&, Function f, Arguments... args)
@@ -55,6 +74,16 @@ void launch(const ExecutionPolicy&, Function f, Arguments... args)
     Kernel(f, args...);
 }
 #endif
+
+//
+// Launch function with an explicit execution policy / configuration
+//
+template <typename Function, typename... Arguments>
+void launch(const ExecutionPolicy &p, Arguments... args)
+{
+	Function f;
+	launch(p, f, args...);
+}
 
 //
 // Automatic launch functions for __global__ kernel function pointers: CUDA only
