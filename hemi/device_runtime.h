@@ -105,14 +105,14 @@ namespace hemi {
 	}
 
 	///////Device Properties///////////////////////////////////////////////////
-	void setDevice(int deviceID) {
+	static void setDevice(int deviceID) {
 #ifdef HEMI_CUDA_COMPILER
 		if(queryForDevice())
 			cudaSetDevice(deviceID);
 #endif
 	}
 
-	int getDevice() {
+	static int getDevice() {
 		int deviceID = -1;
 #ifdef HEMI_CUDA_COMPILER
 		if(queryForDevice())
@@ -121,7 +121,7 @@ namespace hemi {
 		return deviceID;
 	}
 
-	void setSharedMemConfig(bool ShouldBeEightByteBankSize) {
+	static void setSharedMemConfig(bool ShouldBeEightByteBankSize) {
 #ifdef HEMI_CUDA_COMPILER
 		if(queryForDevice()) {
 			if(ShouldBeEightByteBankSize)
@@ -144,7 +144,7 @@ namespace hemi {
 	 * 2  - prefer shared
 	 * 3+ - prefer L1 cache
 	 */
-	void setCacheConfig(int PreferenceFlag) {
+	static void setCacheConfig(int PreferenceFlag) {
 #ifdef HEMI_CUDA_COMPILER
 		if(queryForDevice()) {
 			switch(PreferenceFlag)
@@ -166,7 +166,7 @@ namespace hemi {
 #endif
 	}
 
-	void getMemInfo(size_t *free_mem, size_t *total_mem) {
+	static void getMemInfo(size_t *free_mem, size_t *total_mem) {
 #ifdef HEMI_CUDA_COMPILER
 		if(queryForDevice())
 			cudaMemGetInfo(free_mem, total_mem);

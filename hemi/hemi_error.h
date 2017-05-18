@@ -26,7 +26,7 @@ namespace hemi {
     };
 }
 
-#ifndef HEMI_CUDA_DISABLE
+#ifdef HEMI_CUDA_COMPILER
 
     #include "cuda_runtime_api.h"
 
