@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
-// 
+//
 // "Hemi" CUDA Portable C/C++ Utilities
-// 
+//
 // Extended by Brandon Wilson
 //
 // License: BSD License, see LICENSE file in Hemi home directory
@@ -9,19 +9,21 @@
 // The home for Hemi is https://github.com/harrism/hemi
 //
 ///////////////////////////////////////////////////////////////////////////////
-// Please see the file README.md (https://github.com/harrism/hemi/README.md) 
+// Please see the file README.md (https://github.com/harrism/hemi/README.md)
 // for full documentation and discussion.
 ///////////////////////////////////////////////////////////////////////////////
 #pragma once
 
-/////////////////////////////////////////////////////////////////
-// Some utility code to easily loop in a grid-stride pattern on the device, or iteratively on the host
+///////////////////////////////////////////////////////////////////
+// Some utility code to easily loop in a grid-stride pattern on
+// the device, or iteratively on the host
+///////////////////////////////////////////////////////////////////
+
 #include "hemi.h"
 #include "device_api.h"
 
 namespace hemi {
-	
-	///////Grid Stride Loops///////////////////////////////////////////////////
+
 #define GRID_STRIDE_LOOP(name, start, size) \
 	for (int name = hemi::globalThreadIndex() + (start); \
 		 name < size; \

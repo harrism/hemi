@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
-// 
+//
 // "Hemi" CUDA Portable C/C++ Utilities
-// 
+//
 // Copyright 2012-2015 NVIDIA Corporation
 //
 // License: BSD License, see LICENSE file in Hemi home directory
@@ -9,7 +9,7 @@
 // The home for Hemi is https://github.com/harrism/hemi
 //
 ///////////////////////////////////////////////////////////////////////////////
-// Please see the file README.md (https://github.com/harrism/hemi/README.md) 
+// Please see the file README.md (https://github.com/harrism/hemi/README.md)
 // for full documentation and discussion.
 ///////////////////////////////////////////////////////////////////////////////
 #pragma once
@@ -76,6 +76,82 @@ void launch(const ExecutionPolicy&, Function f, Arguments... args)
 #endif
 
 //
+// Launch with explicit (or partial) configuration and one launch bounds
+//
+template <int MaxThreadsPerBlock, typename Function, typename... Arguments>
+#ifdef HEMI_CUDA_COMPILER
+void launch(const ExecutionPolicy &policy, Function f, Arguments... args)
+{
+	ExecutionPolicy p = policy;
+	if (p.getLocation() == hemi::device && queryForDevice())
+	{
+		checkCuda(configureGrid(p, Kernel<MaxThreadsPerBlock, Function, Arguments...>));
+		Kernel<MaxThreadsPerBlock> << <p.getExecutionGrid(),
+			p.getExecutionBlock(),
+			p.getSharedMemBytes(),
+			p.getStream() >> >(f, args...);
+	}
+	else
+	{
+		f(args...);
+	}
+}
+#else
+void launch(const ExecutionPolicy&, Function f, Arguments... args)
+{
+    Kernel(f, args...);
+}
+#endif
+
+//
+// Launch with explicit (or partial) configuration and two launch bounds
+//
+template <int MaxThreadsPerBlock, int MinBlocksPerMultiprocessor, typename Function, typename... Arguments>
+#ifdef HEMI_CUDA_COMPILER
+void launch(const ExecutionPolicy &policy, Function f, Arguments... args)
+{
+	ExecutionPolicy p = policy;
+	if (p.getLocation() == hemi::device && queryForDevice())
+	{
+		checkCuda(configureGrid(p, Kernel<MaxThreadsPerBlock, MinBlocksPerMultiprocessor, Function, Arguments...>));
+		Kernel<MaxThreadsPerBlock, MinBlocksPerMultiprocessor> << <p.getExecutionGrid(),
+			p.getExecutionBlock(),
+			p.getSharedMemBytes(),
+			p.getStream() >> >(f, args...);
+	}
+	else
+	{
+		f(args...);
+	}
+}
+#else
+void launch(const ExecutionPolicy&, Function f, Arguments... args)
+{
+    Kernel(f, args...);
+}
+#endif
+
+//
+// Launch function with an explicit execution policy / configuration with one launch bounds
+//
+template <int MaxThreadsPerBlock, typename Function, typename... Arguments>
+void launch(const ExecutionPolicy &p, Arguments... args)
+{
+	Function f;
+	launch<MaxThreadsPerBlock>(p, f, args...);
+}
+
+//
+// Launch function with an explicit execution policy / configuration with two launch bounds
+//
+template <int MaxThreadsPerBlock, int MinBlocksPerMultiprocessor, typename Function, typename... Arguments>
+void launch(const ExecutionPolicy &p, Arguments... args)
+{
+	Function f;
+  launch<MaxThreadsPerBlock, MinBlocksPerMultiprocessor>(p, f, args...);
+}
+
+//
 // Launch function with an explicit execution policy / configuration
 //
 template <typename Function, typename... Arguments>
@@ -109,8 +185,8 @@ void cudaLaunch(const ExecutionPolicy &policy, void (*f)(Arguments...), Argument
 {
     ExecutionPolicy p = policy;
     checkCuda(configureGrid(p, f));
-    f<<<p.getGridSize(), 
-        p.getBlockSize(), 
+    f<<<p.getGridSize(),
+        p.getBlockSize(),
         p.getSharedMemBytes(),
         p.getStream()>>>(args...);
 }

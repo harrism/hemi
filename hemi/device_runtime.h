@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
-// 
+//
 // "Hemi" CUDA Portable C/C++ Utilities
-// 
+//
 // Extended by Brandon Wilson
 //
 // License: BSD License, see LICENSE file in Hemi home directory
@@ -9,17 +9,17 @@
 // The home for Hemi is https://github.com/harrism/hemi
 //
 ///////////////////////////////////////////////////////////////////////////////
-// Please see the file README.md (https://github.com/harrism/hemi/README.md) 
+// Please see the file README.md (https://github.com/harrism/hemi/README.md)
 // for full documentation and discussion.
 ///////////////////////////////////////////////////////////////////////////////
-#pragma once 
+#pragma once
 
 // Functions available in host code to query for gpu devices and set properties
 
 #include "hemi.h"
 
 namespace hemi {
-	
+
 	///////Device Runtime Cache///////////////////////////////////////////
 	class DeviceRuntimeCache
 	{
@@ -35,13 +35,13 @@ namespace hemi {
 			static DeviceRuntimeCache instance;
 			return instance;
 		}
-		
+
 		inline void flush()
 		{
 			bHasGPUCached = false;
 			bNumGPUsCached = false;
 		}
-		
+
 		bool bHasGPUCached;
 		bool bHasGPU;
 		bool bNumGPUsCached;
@@ -149,16 +149,16 @@ namespace hemi {
 		if(queryForDevice()) {
 			switch(PreferenceFlag)
 			{
-			case 0 :
+			case prefer_none :
 				cudaDeviceSetCacheConfig(cudaFuncCachePreferNone);
 				break;
-			case 1 :
+			case prefer_equal :
 				cudaDeviceSetCacheConfig(cudaFuncCachePreferEqual);
 				break;
-			case 2 :
+			case prefer_shared :
 				cudaDeviceSetCacheConfig(cudaFuncCachePreferShared);
 				break;
-			case 3 :
+			case prefer_L1 :
 				cudaDeviceSetCacheConfig(cudaFuncCachePreferL1);
 				break;
 			}

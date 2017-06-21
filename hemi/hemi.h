@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
-// 
+//
 // "Hemi" CUDA Portable C/C++ Utilities
-// 
+//
 // Copyright 2012-2015 NVIDIA Corporation
 //
 // License: BSD License, see LICENSE file in Hemi home directory
@@ -9,7 +9,7 @@
 // The home for Hemi is https://github.com/harrism/hemi
 //
 ///////////////////////////////////////////////////////////////////////////////
-// Please see the file README.md (https://github.com/harrism/hemi/README.md) 
+// Please see the file README.md (https://github.com/harrism/hemi/README.md)
 // for full documentation and discussion.
 ///////////////////////////////////////////////////////////////////////////////
 #pragma once
@@ -22,7 +22,7 @@
 #define HEMI_VERSION 200000
 
 // Note: when compiling on a system without CUDA installed
-// be sure to define this macro. Can also be used to disable CUDA 
+// be sure to define this macro. Can also be used to disable CUDA
 // device execution on systems with CUDA installed.
 // #define HEMI_CUDA_DISABLE
 
@@ -34,10 +34,10 @@
   #ifdef __CUDA_ARCH__
     #define HEMI_DEV_CODE                 // to detect device compilation
   #endif
-  
+
   #define HEMI_KERNEL(name)               __global__ void name ## _kernel
   #define HEMI_KERNEL_NAME(name)          name ## _kernel
-  
+
   #if defined(DEBUG) || defined(_DEBUG)
     #define HEMI_KERNEL_LAUNCH(name, gridDim, blockDim, sharedBytes, streamId, ...) \
     do {                                                                     \
@@ -50,12 +50,16 @@
         name ## _kernel<<< (gridDim) , (blockDim), (sharedBytes), (streamId) >>>(__VA_ARGS__)
   #endif
 
-  #define HEMI_LAUNCHABLE                 __global__
-  #define HEMI_LAMBDA                     __device__
-  #define HEMI_DEV_CALLABLE               __host__ __device__
-  #define HEMI_DEV_CALLABLE_INLINE        __host__ __device__ inline
-  #define HEMI_DEV_CALLABLE_MEMBER        __host__ __device__
-  #define HEMI_DEV_CALLABLE_INLINE_MEMBER __host__ __device__ inline
+  #define HEMI_LAUNCHABLE                           __global__
+  #define HEMI_LAMBDA                               __device__
+  #define HEMI_DEV_CALLABLE                         __host__ __device__
+  #define HEMI_DEV_CALLABLE_INLINE                  __host__ __device__ inline
+  #define HEMI_DEV_CALLABLE_MEMBER                  __host__ __device__
+  #define HEMI_DEV_CALLABLE_INLINE_MEMBER           __host__ __device__ inline
+  #define HEMI_LAUNCH_BOUNDS(maxThreadsPerBlock)    __launch_bounds__(maxThreadsPerBlock)
+  #define HEMI_LAUNCH_BOUNDS_FULL(maxThreadsPerBlock, minBlocksPerMultiprocessor)  \
+                                                    __launch_bounds__(maxThreadsPerBlock, \
+                                                                      minBlocksPerMultiprocessor)
 
   // Memory specifiers
   #define HEMI_MEM_DEVICE                 __device__
@@ -103,10 +107,12 @@
 
   #define HEMI_LAUNCHABLE
   #define HEMI_LAMBDA
-  #define HEMI_DEV_CALLABLE               
+  #define HEMI_DEV_CALLABLE
   #define HEMI_DEV_CALLABLE_INLINE        inline
   #define HEMI_DEV_CALLABLE_MEMBER
   #define HEMI_DEV_CALLABLE_INLINE_MEMBER inline
+  #define HEMI_LAUNCH_BOUNDS(maxThreadsPerBlock)
+  #define HEMI_LAUNCH_BOUNDS_FULL(maxThreadsPerBlock, minBlocksPerMultiprocessor)
 
   // memory specifiers
   #define HEMI_MEM_DEVICE
@@ -121,8 +127,8 @@
   #define HEMI_DEFINE_EXTERN_CONSTANT(def) extern def ## _hostconst
 
   #undef HEMI_DEV_CONSTANT // requires NVCC, so undefined here!
-  #define HEMI_CONSTANT(name) name ## _hostconst      
-  
+  #define HEMI_CONSTANT(name) name ## _hostconst
+
   #if !defined(HEMI_ALIGN)
 
     #if defined(__GNUC__)
@@ -132,7 +138,7 @@
     #else
       #error "Please provide a definition of HEMI_ALIGN for your host compiler!"
     #endif
-  
+
   #endif
 
 #endif
@@ -163,11 +169,11 @@ namespace hemi {
 		device = 1
 	};
 
-    inline hemi::Error_t deviceSynchronize() 
+    inline hemi::Error_t deviceSynchronize()
     {
 #ifdef HEMI_CUDA_COMPILER
         if (cudaSuccess != checkCuda(cudaDeviceSynchronize()))
-            return hemi::cudaError; 
+            return hemi::cudaError;
 #endif
         return hemi::success;
     }
