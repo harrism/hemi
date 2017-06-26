@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
-// 
+//
 // "Hemi" CUDA Portable C/C++ Utilities
-// 
+//
 // Copyright 2012-2015 NVIDIA Corporation
 //
 // License: BSD License, see LICENSE file in Hemi home directory
@@ -9,10 +9,10 @@
 // The home for Hemi is https://github.com/harrism/hemi
 //
 ///////////////////////////////////////////////////////////////////////////////
-// Please see the file README.md (https://github.com/harrism/hemi/README.md) 
+// Please see the file README.md (https://github.com/harrism/hemi/README.md)
 // for full documentation and discussion.
 ///////////////////////////////////////////////////////////////////////////////
-#pragma once 
+#pragma once
 
 #include <assert.h>
 #include <stdlib.h>
@@ -20,11 +20,27 @@
 
 namespace hemi {
 
-template <typename Function, typename... Arguments>
-HEMI_LAUNCHABLE
-void Kernel(Function f, Arguments... args)
-{
-    f(args...);
-}
+  template <typename Function, typename... Arguments>
+  HEMI_LAUNCHABLE
+  void Kernel(Function f, Arguments... args)
+  {
+      f(args...);
+  }
+
+  template <int MaxThreadsPerBlock, typename Function, typename... Arguments>
+  HEMI_LAUNCHABLE void
+  HEMI_LAUNCH_BOUNDS(MaxThreadsPerBlock)
+  Kernel(Function f, Arguments... args)
+  {
+      f(args...);
+  }
+
+  template <int MaxThreadsPerBlock, int MinBlocksPerMultiprocessor, typename Function, typename... Arguments>
+  HEMI_LAUNCHABLE void
+  HEMI_LAUNCH_BOUNDS_FULL(MaxThreadsPerBlock, MinBlocksPerMultiprocessor)
+  Kernel(Function f, Arguments... args)
+  {
+      f(args...);
+  }
 
 }

@@ -29,11 +29,6 @@ namespace hemi {
 
     template <typename T> class Array; // forward decl
 
-    enum Location {
-        host   = 0,
-        device = 1
-    };
-
     template <typename T>
     class Array 
     {
@@ -93,7 +88,7 @@ namespace hemi {
             memcpy(other, readOnlyHostPtr(), n * sizeof(T));
         }            
 
-#ifndef HEMI_CUDA_DISABLE
+#ifdef HEMI_CUDA_COMPILER
         void copyFromDevice(const T *other, size_t n)
         {
             if ((isHostAlloced || isDeviceAlloced) && nSize != n) {
@@ -207,7 +202,7 @@ namespace hemi {
         void allocateHost() const
         {
             assert(!isHostAlloced);
-#ifndef HEMI_CUDA_DISABLE
+#ifdef HEMI_CUDA_COMPILER
             if (isPinned)
                 checkCuda( cudaHostAlloc((void**)&hPtr, nSize * sizeof(T), 0));
             else
@@ -221,7 +216,7 @@ namespace hemi {
         
         void allocateDevice() const
         {
-#ifndef HEMI_CUDA_DISABLE
+#ifdef HEMI_CUDA_COMPILER
             assert(!isDeviceAlloced);
             checkCuda( cudaMalloc((void**)&dPtr, nSize * sizeof(T)) );
             isDeviceAlloced = true;
@@ -233,7 +228,7 @@ namespace hemi {
         {
             assert(!isForeignHostPtr);
             if (isHostAlloced) {
-#ifndef HEMI_CUDA_DISABLE
+#ifdef HEMI_CUDA_COMPILER
                 if (isPinned)
                     checkCuda( cudaFreeHost(hPtr) );
                 else
@@ -247,7 +242,7 @@ namespace hemi {
 
         void deallocateDevice()
         {
-#ifndef HEMI_CUDA_DISABLE
+#ifdef HEMI_CUDA_COMPILER
             if (isDeviceAlloced) {
                 checkCuda( cudaFree(dPtr) );
                 isDeviceAlloced = false;
@@ -258,7 +253,7 @@ namespace hemi {
 
         void copyHostToDevice() const
         {
-#ifndef HEMI_CUDA_DISABLE
+#ifdef HEMI_CUDA_COMPILER
             assert(isHostAlloced);
             if (!isDeviceAlloced) allocateDevice();
             checkCuda( cudaMemcpy(dPtr, 
@@ -271,7 +266,7 @@ namespace hemi {
 
         void copyDeviceToHost() const
         {
-#ifndef HEMI_CUDA_DISABLE
+#ifdef HEMI_CUDA_COMPILER
             assert(isDeviceAlloced);
             if (!isHostAlloced) allocateHost();
             checkCuda( cudaMemcpy(hPtr, 
