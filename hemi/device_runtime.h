@@ -53,6 +53,9 @@ namespace hemi {
 		DeviceRuntimeCache::get().flush();
 	}
 
+  /*
+   * Returns true if a physical device (GPU) is available on this machine
+   */
 	static bool queryForDevice()
 	{
 #ifdef HEMI_CUDA_COMPILER
@@ -78,6 +81,9 @@ namespace hemi {
 		return false; /* failure */
 	}
 
+  /*
+   * Gets the number of physical devices (GPUs) available on this machine
+   */
 	static int getNumDevices()
 	{
 #ifdef HEMI_CUDA_COMPILER
@@ -105,6 +111,10 @@ namespace hemi {
 	}
 
 	///////Device Properties///////////////////////////////////////////////////
+
+  /*
+   * Sets the current device for this thread
+   */
 	static void setDevice(int deviceID) {
 #ifdef HEMI_CUDA_COMPILER
 		if(queryForDevice())
@@ -112,6 +122,9 @@ namespace hemi {
 #endif
 	}
 
+  /*
+   * Gets the current device ID for this thread
+   */
 	static int getDevice() {
 		int deviceID = -1;
 #ifdef HEMI_CUDA_COMPILER
@@ -121,6 +134,11 @@ namespace hemi {
 		return deviceID;
 	}
 
+  /*
+   * Sets the shared memory bank size as follows:
+   * true - sets the bank size to 8 bytes
+   * false - sets the bank size to 4 bytes
+   */
 	static void setSharedMemConfig(bool ShouldBeEightByteBankSize) {
 #ifdef HEMI_CUDA_COMPILER
 		if(queryForDevice()) {
@@ -132,6 +150,11 @@ namespace hemi {
 #endif
 	}
 
+  /* 0  - prefer none
+	 * 1  - prefer equal (CC 3.x or higher)
+	 * 2  - prefer shared
+	 * 3  - prefer L1 cache
+	 */
 	enum CachePreference {
 	        prefer_none     = 0,
 	        prefer_equal	= 1,
@@ -139,7 +162,8 @@ namespace hemi {
 	        prefer_L1		= 3
 	};
 
-	/* 0  - prefer none
+  /* Set the device CachePreference flag, as shown below:
+   * 0  - prefer none
 	 * 1  - prefer equal (CC 3.x or higher)
 	 * 2  - prefer shared
 	 * 3+ - prefer L1 cache
@@ -166,6 +190,23 @@ namespace hemi {
 #endif
 	}
 
+  /* Set the device CachePreference flag, as shown below:
+   * 0  - prefer none
+	 * 1  - prefer equal (CC 3.x or higher)
+	 * 2  - prefer shared
+	 * 3+ - prefer L1 cache
+	 */
+	static void setHeapSize(size_t HeapSize) {
+#ifdef HEMI_CUDA_COMPILER
+		if(queryForDevice()) {
+			cudaDeviceSetLimit(cudaLimitMallocHeapSize, HeapSize);
+		}
+#endif
+	}
+
+  /*
+   * Get the available and total memory for the current device
+   */
 	static void getMemInfo(size_t *free_mem, size_t *total_mem) {
 #ifdef HEMI_CUDA_COMPILER
 		if(queryForDevice())
@@ -177,4 +218,5 @@ namespace hemi {
 			*total_mem = 0;
 		}
 	}
+
 }
