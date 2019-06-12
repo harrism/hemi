@@ -14,7 +14,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 #pragma once
 
-#include "hemi/hemi.h"
+#include "hemi.h"
 #include <cstring>
 
 #ifndef HEMI_ARRAY_DEFAULT_LOCATION
