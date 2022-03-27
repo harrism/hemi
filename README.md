@@ -49,6 +49,27 @@ Once you clone Hemi from Github, you need to sync its submodules in order to use
 
 Hemi is a header-only library, so there is no further installation required. Simply include the hemi headers for the features you need. See the examples for demonstration.
 
+### Optional CMake Installation
+
+If you would like to use cmake to manage the installation
+of this code, you can install with:
+
+    > mkdir build && cd build
+    > cmake -DCMAKE_INSTALL_PREFIX=/usr/local ..
+
+This will export `Hemi::cpu`, `Hemi::cuda`, and `Hemi::hemi` targets.
+The last target selects `Hemi::cuda` if `CMAKE_CUDA_ARCHITECTURES` is set,
+but falls back to `Hemi::cpu` otherwise.
+Both targets setup the required flags for successfully compiling code
+that relies on hemi.
+
+An example using this setup is included in `examples/simple`.
+Compile it for GPU by setting your CUDA architecture:
+
+    > mkdir build && cd build
+    > cmake -DCMAKE_PREFIX_PATH=/usr/local -DCMAKE_CUDA_ARCHITECTURES=52 ..
+
+
 Features
 ========
 
