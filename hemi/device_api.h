@@ -19,6 +19,12 @@
 
 #include "hemi.h"
 
+#ifdef HEMI_DEV_CODE
+  #define HEMI_SHARED __shared__
+#else
+  #define HEMI_SHARED
+#endif
+
 namespace hemi
 {
 	HEMI_DEV_CALLABLE_INLINE
