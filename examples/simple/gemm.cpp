@@ -8,6 +8,31 @@
 
 #define BLOCK_SIZE 16
 
+namespace hemi {
+    HEMI_DEV_CALLABLE_INLINE
+    constexpr unsigned int linSize() {
+    #ifdef HEMI_DEV_CODE
+        return 1;
+    #else
+        return BLOCK_SIZE*BLOCK_SIZE;
+    #endif
+    }
+};
+
+// This runs the function on all threads for which
+// the current executing context needs to do some work.
+template <typename F>
+HEMI_DEV_CALLABLE_INLINE
+void foreach_thread(F function) {
+#ifdef HEMI_DEV_CODE
+    const unsigned int idx = hemi::localThreadIndex();
+    function(idx, 0);
+#else
+    for(unsigned int idx=0; idx < hemi::linSize(); idx++)
+        function(idx, idx);
+#endif
+}
+
 // compute one sub-matrix Csub of C
 template <typename T>
 HEMI_DEV_CALLABLE_INLINE
@@ -17,11 +42,10 @@ void MatMulBlk(GPUMat<T> &A, GPUMat<T> &B, GPUMat<T> &C,
 
     // Each thread computes one element of Csub
     // by accumulating results into Cvalue
-    T Cvalue = 0;
-
-    // Thread row and column within Csub
-    int row = hemi::localThreadIndex() / BLOCK_SIZE;
-    int col = hemi::localThreadIndex() % BLOCK_SIZE;
+    T Cvalue[hemi::linSize()];
+    foreach_thread([&](unsigned int idx, unsigned int lin) {
+        Cvalue[lin] = 0;
+    });
 
     for (int m = 0; m < (A.cols+BLOCK_SIZE-1) / BLOCK_SIZE; ++m) {
         GPUMat<T> Asub = A.submat(blockRow, m, BLOCK_SIZE);
@@ -30,21 +54,33 @@ void MatMulBlk(GPUMat<T> &A, GPUMat<T> &B, GPUMat<T> &C,
         HEMI_SHARED T As[BLOCK_SIZE][BLOCK_SIZE];
         HEMI_SHARED T Bs[BLOCK_SIZE][BLOCK_SIZE];
 
-        if(row < Asub.rows && col < Asub.cols)
-            As[row][col] = Asub(row, col);
-        if(row < Bsub.rows && col < Bsub.cols)
-            Bs[row][col] = Bsub(row, col);
+        foreach_thread([&](unsigned int idx, unsigned int lin) {
+            const int row = idx / BLOCK_SIZE;
+            const int col = idx % BLOCK_SIZE;
 
+            if(row < Asub.rows && col < Asub.cols)
+                As[row][col] = Asub(row, col);
+            if(row < Bsub.rows && col < Bsub.cols)
+                Bs[row][col] = Bsub(row, col);
+        });
         hemi::synchronize();
 
-        for (int e = 0; e < Asub.cols; ++e)
-            Cvalue += As[row][e] * Bs[e][col];
+        foreach_thread([&](unsigned int idx, unsigned int lin) {
+            const int row = idx / BLOCK_SIZE;
+            const int col = idx % BLOCK_SIZE;
+            for (int e = 0; e < Asub.cols; ++e)
+                Cvalue[lin] += As[row][e] * Bs[e][col];
+        });
 
         hemi::synchronize();
     }
 
-    if(row < Csub.rows && col < Csub.cols)
-        Csub(row, col) = Cvalue;
+    foreach_thread([&](unsigned int idx, unsigned int lin) {
+        const int row = idx / BLOCK_SIZE;
+        const int col = idx % BLOCK_SIZE;
+        if(row < Csub.rows && col < Csub.cols)
+            Csub(row, col) = Cvalue[lin];
+    });
 }
 
 // GPUMat<T> multiplication kernel called by MatMul()
