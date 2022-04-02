@@ -1,31 +1,4 @@
 @PACKAGE_INIT@
 
 include ( "${CMAKE_CURRENT_LIST_DIR}/HemiTargets.cmake" )
-
-if(CMAKE_CUDA_ARCHITECTURES)
-    set(ENABLE_GPU TRUE)
-    if(${CMAKE_VERSION} VERSION_LESS "3.17")
-        message(FATAL_ERROR "Compilation for CUDA requires CMake 3.17 or later.")
-    endif()
-    enable_language(CUDA)
-    message(STATUS "Setting up CUDA")
-elseif(CMAKE_HIP_ARCHITECTURES)
-    set(ENABLE_GPU TRUE)
-    if(${CMAKE_VERSION} VERSION_LESS "3.21.3")
-        message(FATAL_ERROR "Compilation for HIP requires CMake 3.21.3 or later.")
-    endif()
-    enable_language(HIP)
-    message(STATUS "Setting up HIP using ROCM_ROOT = ${ROCM_ROOT}")
-    set(CMAKE_MODULE_PATH "${ROCM_ROOT}/hip/cmake" ${CMAKE_MODULE_PATH})
-else()
-    set(ENABLE_GPU FALSE)
-endif()
-
-check_required_components(Hemi)
-
-add_library(Hemi::hemi INTERFACE IMPORTED)
-if(ENABLE_GPU)
-    target_link_libraries(Hemi::hemi INTERFACE Hemi::cuda)
-else()
-    target_link_libraries(Hemi::hemi INTERFACE Hemi::cpu)
-endif()
+include ( "${CMAKE_CURRENT_LIST_DIR}/Hemi.cmake" )

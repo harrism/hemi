@@ -52,20 +52,47 @@ Hemi is a header-only library, so there is no further installation required. Sim
 ### Optional CMake Installation
 
 If you would like to use cmake to manage the installation
-of this code, you can install with:
+of this code, you have two options -- in-source installation
+with [cmake package manager (CPM)](https://github.com/cpm-cmake/CPM.cmake),
+or normal, stand-alone installation.
+
+To use CPM, add the following to your CMakeLists.txt:
+
+    > include(cmake/CPM.cmake)
+    > CPMAddPackage("gh:harrism/Hemi@2.0.1")
+    > include("${Hemi_SOURCE_DIR}/Hemi.cmake")
+    > HemiLink(<your target>)
+
+If, instead, you want to use cmake to permanently install Hemi
+(for example in `/usr/local/include/hemi`), then do so with:
 
     > mkdir build && cd build
     > cmake -DCMAKE_INSTALL_PREFIX=/usr/local ..
 
-This will export `Hemi::cpu`, `Hemi::cuda`, and `Hemi::hemi` targets.
-The last target selects `Hemi::cuda` if `CMAKE_CUDA_ARCHITECTURES` is set,
-but falls back to `Hemi::cpu` otherwise.
-Both targets setup the required flags for successfully compiling code
-that relies on hemi.
+And then add the usual `find_package(Hemi 2.0 REQUIRED)` command
+to your package's `CMakeLists.txt` to load Hemi's targets.
 
-An example using this setup is included in `examples/simple`.
-Compile it for GPU by setting your CUDA architecture:
+Both installation methods will provide the same, modern cmake that
+exports `HemiCPU`, `HemiCUDA`, and `Hemi` targets.
+The last target selects `HemiCUDA` if `CMAKE_CUDA_ARCHITECTURES` is set,
+but falls back to `HemiCPU` otherwise.
+The `HemiCPU` and `HemiCUDA` targets setup the required target attributes
+(compiler flags) for successfully compiling code that relies on hemi.
 
+Note, however, that cmake won't use `nvcc` to compile `.cc` files
+unless you set the right source attribute.  So, we provide
+a `HemiLink(<target>)` function that will first do
+`target_link_libraries(<target> PUBLIC Hemi)` and then mark every
+source file belonging to the target as CUDA source language.
+
+An example using the first setup is included in `examples/blackscholes`,
+and using the second is included in `examples/simple`.
+
+The compilation instructions for both are the same.
+To enable compiling your package for Hemi with GPU,
+you must set your CUDA architecture at configure time:
+
+    > cd examples/blackscholes
     > mkdir build && cd build
     > cmake -DCMAKE_PREFIX_PATH=/usr/local -DCMAKE_CUDA_ARCHITECTURES=52 ..
 
