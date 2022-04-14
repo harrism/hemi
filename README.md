@@ -58,7 +58,7 @@ or normal, stand-alone installation.
 
 To use CPM, add the following to your CMakeLists.txt:
 
-    > include(cmake/CPM.cmake)
+    > include(cmake/CPM.cmake) # or download CPM.cmake, see example
     > CPMAddPackage("gh:harrism/Hemi@2.0.1")
     > include("${Hemi_SOURCE_DIR}/Hemi.cmake")
     > HemiLink(<your target>)
@@ -85,7 +85,7 @@ a `HemiLink(<target>)` function that will first do
 `target_link_libraries(<target> PUBLIC Hemi)` and then mark every
 source file belonging to the target as CUDA source language.
 
-An example using the first setup is included in `examples/blackscholes`,
+An example using the first, CPM, setup is included in `examples/blackscholes`,
 and using the second is included in `examples/simple`.
 
 The compilation instructions for both are the same.
